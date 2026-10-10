@@ -1,0 +1,225 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Sucursales";
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>L'Avielle - Nuestras Sucursales</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/vistageneral.css" asp-append-version="true" />
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header-sitio">
+        <div class="contenedor-header">
+
+            <a asp-controller="Home" asp-action="Index" class="logo-header">L'Avielle</a>
+
+            <nav class="menu-navegacion">
+                <a asp-controller="Home" asp-action="Index" class="nav-link">Inicio</a>
+                <a asp-controller="Servicios" asp-action="Especialistas" class="nav-link">Especialistas</a>
+                <a asp-controller="Servicios" asp-action="Index" class="nav-link">Servicios</a>
+                <a asp-controller="Servicios" asp-action="Sucursales" class="nav-link active">Sucursales</a>
+            </nav>
+
+            <div class="acciones-header">
+                <a asp-controller="Login" asp-action="Index" class="btn-header-login">Iniciar Sesión</a>
+                <a asp-controller="Login" asp-action="Registro" class="btn-header-reserva">REGISTRARSE</a>
+            </div>
+
+        </div>
+    </header>
+
+
+    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+    <main class="contenido-principal">
+
+        <!-- BANNER HERO -->
+        <section class="hero-sucursales">
+            <div class="hero-overlay"></div>
+            <div class="hero-contenido">
+                <span class="subtitulo-caps">UBICACIONES EXCLUSIVAS</span>
+                <h1 class="titulo-hero">Nuestras Sucursales</h1>
+                <p class="descripcion-hero">
+                    Encuentra el santuario L'Avielle más cercano a ti. Espacios diseñados para ofrecerte una experiencia de lujo, relajación y estética de primer nivel.
+                </p>
+            </div>
+        </section>
+
+
+        <!-- SECCIÓN GRID DE SUCURSALES -->
+        <section class="seccion-sucursales">
+            <div class="contenedor-sucursales">
+
+                <div class="encabezado-seccion">
+                    <span class="subtitulo-caps-dorado">ENCUÉNTRANOS</span>
+                    <h2 class="titulo-seccion">Sedes &amp; Espacios de Experiencia</h2>
+                </div>
+
+                <div class="grid-sucursales">
+
+                    <!-- 1. Sucursal San Benito -->
+                    <article class="card-sucursal">
+                        <div class="card-imagen-wrapper">
+                            <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop" alt="Sucursal San Benito" class="card-img" />
+                            <span class="badge-sucursal">Flagship</span>
+                        </div>
+                        <div class="card-cuerpo">
+                            <h3 class="card-titulo">San Benito</h3>
+                            <ul class="info-sucursal">
+                                <li class="info-item">
+                                    <span class="info-icono">&#10145;</span>
+                                    <span>Calle La Mascota #312, Col. San Benito, San Salvador</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-icono">&#9742;</span>
+                                    <span>+503 2222-8881</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-icono">&#128336;</span>
+                                    <span>Lun - Sáb: 8:00 AM - 7:00 PM<br />Dom: 9:00 AM - 4:00 PM</span>
+                                </li>
+                            </ul>
+                            <div class="acciones-sucursal">
+                                <a asp-controller="Reservar" asp-action="Index" asp-route-sucursal="san-benito" class="btn-sucursal-reserva">
+                                    Reservar Cita Aquí
+                                </a>
+                                <a href="https://maps.google.com" target="_blank" class="btn-sucursal-mapa">
+                                    Ver en Google Maps
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- 2. Sucursal Santa Elena -->
+                    <article class="card-sucursal">
+                        <div class="card-imagen-wrapper">
+                            <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?q=80&w=800&auto=format&fit=crop" alt="Sucursal Santa Elena" class="card-img" />
+                            <span class="badge-sucursal">Exclusiva</span>
+                        </div>
+                        <div class="card-cuerpo">
+                            <h3 class="card-titulo">Santa Elena</h3>
+                            <ul class="info-sucursal">
+                                <li class="info-item">
+                                    <span class="info-icono">&#10145;</span>
+                                    <span>Bulevar Santa Elena, Plaza Avante, Nivel 2, Antiguo Cuscatlán</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-icono">&#9742;</span>
+                                    <span>+503 2222-8882</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-icono">&#128336;</span>
+                                    <span>Lun - Sáb: 8:00 AM - 7:00 PM<br />Dom: Cerrado</span>
+                                </li>
+                            </ul>
+                            <div class="acciones-sucursal">
+                                <a asp-controller="Reservar" asp-action="Index" asp-route-sucursal="santa-elena" class="btn-sucursal-reserva">
+                                    Reservar Cita Aquí
+                                </a>
+                                <a href="https://maps.google.com" target="_blank" class="btn-sucursal-mapa">
+                                    Ver en Google Maps
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- 3. Sucursal Escalón -->
+                    <article class="card-sucursal">
+                        <div class="card-imagen-wrapper">
+                            <img src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?q=80&w=800&auto=format&fit=crop" alt="Sucursal Escalón" class="card-img" />
+                            <span class="badge-sucursal">Spa &amp; Beauty</span>
+                        </div>
+                        <div class="card-cuerpo">
+                            <h3 class="card-titulo">Paseo Escalón</h3>
+                            <ul class="info-sucursal">
+                                <li class="info-item">
+                                    <span class="info-icono">&#10145;</span>
+                                    <span>Paseo General Escalón #4520, Frente a Plaza Galerías</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-icono">&#9742;</span>
+                                    <span>+503 2222-8883</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-icono">&#128336;</span>
+                                    <span>Lun - Sáb: 8:00 AM - 8:00 PM<br />Dom: 9:00 AM - 5:00 PM</span>
+                                </li>
+                            </ul>
+                            <div class="acciones-sucursal">
+                                <a asp-controller="Reservar" asp-action="Index" asp-route-sucursal="escalon" class="btn-sucursal-reserva">
+                                    Reservar Cita Aquí
+                                </a>
+                                <a href="https://maps.google.com" target="_blank" class="btn-sucursal-mapa">
+                                    Ver en Google Maps
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer-sitio">
+        <div class="contenedor-footer">
+
+            <div class="col-footer brand-col">
+                <span class="logo-footer">L'Avielle</span>
+                <p class="desc-footer">
+                    Experiencia premium de bienestar, belleza y reencuentro personal en un ambiente exclusivo diseñado para tu máximo cuidado.
+                </p>
+            </div>
+
+            <div class="col-footer">
+                <h4 class="titulo-footer">Navegación</h4>
+                <ul class="lista-footer">
+                    <li><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+                    <li><a asp-controller="Home" asp-action="Privacy">Nosotros</a></li>
+                    <li><a asp-controller="Servicios" asp-action="Index">Servicios</a></li>
+                    <li><a asp-controller="Servicios" asp-action="Sucursales">Sucursales</a></li>
+                    <li><a asp-controller="Reservar" asp-action="Index">Reservar Cita</a></li>
+                </ul>
+            </div>
+
+            <div class="col-footer">
+                <h4 class="titulo-footer">Horarios</h4>
+                <p class="texto-footer"><strong>Lunes - Viernes:</strong><br />8:00 AM - 7:00 PM</p>
+                <p class="texto-footer"><strong>Sábados:</strong><br />8:00 AM - 6:00 PM</p>
+                <p class="texto-footer"><strong>Domingos:</strong><br />Cerrado</p>
+            </div>
+
+            <div class="col-footer">
+                <h4 class="titulo-footer">Contacto</h4>
+                <p class="texto-footer">info@lavielle.com</p>
+                <p class="texto-footer">+503 2222-8888</p>
+                <p class="texto-footer">San Salvador, El Salvador</p>
+            </div>
+
+        </div>
+
+        <div class="subfooter">
+            <div class="contenedor-subfooter">
+                <p>&copy; @DateTime.Now.Year L'Avielle. Todos los derechos reservados.</p>
+                <div class="links-legales">
+                    <a href="#">Políticas de Privacidad</a>
+                    <span>|</span>
+                    <a href="#">Términos del Servicio</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

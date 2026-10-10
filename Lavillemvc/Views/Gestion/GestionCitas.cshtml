@@ -1,0 +1,342 @@
+﻿@{
+    Layout = null;
+
+    // --- DATOS DE EJEMPLO DE CITAS EN EL CALENDARIO ---
+    var citasSemana = new[] {
+        new { Cliente = "Maria G.", Servicio = "Balayage", Especialista = "Valentina...", Hora = "09:00", Dia = "Lun 22", Estado = "Confirmada", CssDot = "dot-confirmada" },
+        new { Cliente = "Laura P.", Servicio = "Corte", Especialista = "Isabella M.", Hora = "11:00", Dia = "Lun 22", Estado = "Confirmada", CssDot = "dot-confirmada" },
+        new { Cliente = "Carme...", Servicio = "Tinte", Especialista = "Valentina...", Hora = "08:00", Dia = "Mar 23", Estado = "Pendiente", CssDot = "dot-pendiente" },
+        new { Cliente = "Isabel...", Servicio = "Keratina", Especialista = "Camila H.", Hora = "08:00", Dia = "Mié 24", Estado = "Confirmada", CssDot = "dot-confirmada" },
+        new { Cliente = "Andre...", Servicio = "Manicura", Especialista = "Lucía M.", Hora = "14:00", Dia = "Jue 25", Estado = "Confirmada", CssDot = "dot-confirmada" },
+        new { Cliente = "Maria G.", Servicio = "Balayag...", Especialista = "Valentina...", Hora = "08:00", Dia = "Vie 26", Estado = "Confirmada", CssDot = "dot-confirmada" },
+        new { Cliente = "Sofía M.", Servicio = "Pedicura", Especialista = "Lucía M.", Hora = "08:00", Dia = "Sáb 27", Estado = "Pendiente", CssDot = "dot-pendiente" }
+    };
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Citas - L'Avielle</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">L'Avielle</div>
+                <div class="role-badge">Recepcionista – Las Mercedes</div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li><a href="@Url.Action("PanelPrinciRecepcionista", "Home")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Panel Principal</a></li>
+                <li><a href="@Url.Action("GestionCitas", "Home")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>Gestión de Citas</a></li>
+                <li><a href="@Url.Action("GestionClientes", "Home")" class="menu-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Gestión de Clientes</a></li>
+                <li><a href="@Url.Action("GestionPagos", "Home")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>Registro de Pagos</a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="#" class="logout-link"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>Cerrar Sesión</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- HEADER VISTA -->
+            <header class="page-header">
+                <div class="header-title-area">
+                    <div class="page-title">
+                        <h1>Gestión de Citas</h1>
+                    </div>
+                    <div class="month-selector">
+                        <button class="btn-arrow">&lt;</button>
+                        <span>Septiembre 2026</span>
+                        <button class="btn-arrow">&gt;</button>
+                    </div>
+                </div>
+
+                <div class="header-controls">
+                    <div class="view-switcher">
+                        <button class="view-btn">Día</button>
+                        <button class="view-btn active">Semana</button>
+                        <button class="view-btn">Mes</button>
+                        <button class="view-btn">Lista</button>
+                    </div>
+                    <button class="btn-primary-gold"><span>+</span> Nueva Cita</button>
+                </div>
+            </header>
+
+            <!-- CONTENIDO PRINCIPAL EN GRID -->
+            <div class="citas-layout">
+                <!-- CALENDARIO DE CITAS -->
+                <section class="calendar-card">
+                    <div class="calendar-grid">
+                        <!-- Cabecera de Días -->
+                        <div class="col-header"></div>
+                        <div class="col-header">Lun 22</div>
+                        <div class="col-header">Mar 23</div>
+                        <div class="col-header">Mié 24</div>
+                        <div class="col-header">Jue 25</div>
+                        <div class="col-header active-day"><span>Vie 26</span></div>
+                        <div class="col-header">Sáb 27</div>
+
+                        <!-- Horas y Celdas -->
+                        <!-- 8:00 AM -->
+                        <div class="time-label">8:00 AM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell">
+                            <div class="cita-item">
+                                <div class="cita-header"><span>Carme...</span> <span class="cita-status-dot dot-pendiente"></span></div>
+                                <div class="cita-sub">Tinte</div>
+                                <div class="cita-staff">Valentina...</div>
+                            </div>
+                        </div>
+                        <div class="time-cell">
+                            <div class="cita-item">
+                                <div class="cita-header"><span>Isabel...</span> <span class="cita-status-dot dot-confirmada"></span></div>
+                                <div class="cita-sub">Keratina</div>
+                                <div class="cita-staff">Camila H.</div>
+                            </div>
+                        </div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell">
+                            <div class="cita-item active-selected">
+                                <div class="cita-header"><span>Maria G.</span> <span class="cita-status-dot dot-confirmada"></span></div>
+                                <div class="cita-sub">Balayag...</div>
+                                <div class="cita-staff">Valentina...</div>
+                            </div>
+                        </div>
+                        <div class="time-cell">
+                            <div class="cita-item">
+                                <div class="cita-header"><span>Sofía M.</span> <span class="cita-status-dot dot-pendiente"></span></div>
+                                <div class="cita-sub">Pedicura</div>
+                                <div class="cita-staff">Lucía M.</div>
+                            </div>
+                        </div>
+
+                        <!-- 9:00 AM -->
+                        <div class="time-label">9:00 AM</div>
+                        <div class="time-cell">
+                            <div class="cita-item">
+                                <div class="cita-header"><span>Maria G.</span> <span class="cita-status-dot dot-confirmada"></span></div>
+                                <div class="cita-sub">Balayage</div>
+                                <div class="cita-staff">Valentina...</div>
+                            </div>
+                        </div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 10:00 AM -->
+                        <div class="time-label">10:00 AM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 11:00 AM -->
+                        <div class="time-label">11:00 AM</div>
+                        <div class="time-cell">
+                            <div class="cita-item">
+                                <div class="cita-header"><span>Laura P.</span> <span class="cita-status-dot dot-confirmada"></span></div>
+                                <div class="cita-sub">Corte</div>
+                                <div class="cita-staff">Isabella M.</div>
+                            </div>
+                        </div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 12:00 PM -->
+                        <div class="time-label">12:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 1:00 PM -->
+                        <div class="time-label">1:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 2:00 PM -->
+                        <div class="time-label">2:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell">
+                            <div class="cita-item">
+                                <div class="cita-header"><span>Andre...</span> <span class="cita-status-dot dot-confirmada"></span></div>
+                                <div class="cita-sub">Manicura</div>
+                                <div class="cita-staff">Lucía M.</div>
+                            </div>
+                        </div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 3:00 PM -->
+                        <div class="time-label">3:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 4:00 PM -->
+                        <div class="time-label">4:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 5:00 PM -->
+                        <div class="time-label">5:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+
+                        <!-- 6:00 PM -->
+                        <div class="time-label">6:00 PM</div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                        <div class="time-cell"></div>
+                    </div>
+
+                    <!-- Leyenda -->
+                    <div class="calendar-legend">
+                        <div class="legend-item"><span class="cita-status-dot dot-confirmada"></span> Confirmada</div>
+                        <div class="legend-item"><span class="cita-status-dot dot-pendiente"></span> Pendiente</div>
+                        <div class="legend-item"><span class="cita-status-dot dot-cancelada"></span> Cancelada</div>
+                        <div class="legend-item"><span class="cita-status-dot dot-completada"></span> Completada</div>
+                    </div>
+                </section>
+
+                <!-- DETALLE DE CITA (PANEL DERECHO) -->
+                <aside class="detail-card">
+                    <h2>Detalle de Cita</h2>
+
+                    <div class="client-profile-box">
+                        <div class="avatar-placeholder">MG</div>
+                        <div class="client-profile-info">
+                            <h3>María García</h3>
+                            <span class="client-vip-badge">Socio VIP Gold</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Servicio</div>
+                        <div class="detail-value">Balayage + Corte Integral</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Especialista</div>
+                        <div class="detail-value">Valentina Rojas</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Horario</div>
+                        <div class="detail-value">Viernes, 26 Sep 2026 — 10:00 AM</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Estado</div>
+                        <div><span class="status-pill-green">Confirmada</span></div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Notas de Recepción</div>
+                        <div class="notes-box">
+                            Cliente solicitó café expreso de cortesía al llegar. Viene por cambio de look para sesión fotográfica.
+                        </div>
+                    </div>
+
+                    <div style="margin-top: auto;">
+                        <div class="action-buttons-row">
+                            <button class="btn-outline">Modificar</button>
+                            <button class="btn-outline btn-outline-red">Cancelar</button>
+                        </div>
+                        <button class="btn-gold-full">Confirmar Cita</button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <!-- FOOTER OSCURO COMPARTIDO -->
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>L'Avielle</h2>
+                <p>Un concepto exclusivo de salón de belleza y spa de bienestar, donde el lujo se traduce en calma, elegancia y atención de nivel internacional.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg></a>
+                    <a href="#" class="social-icon"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></a>
+                    <a href="#" class="social-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Navegación</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Inicio</a></li>
+                    <li><a href="#">Servicios</a></li>
+                    <li><a href="#">Especialistas</a></li>
+                    <li><a href="#">Perfil</a></li>
+                    <li><a href="#">Iniciar Sesión</a></li>
+                    <li><a href="#">Registrarse</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Contacto & Ubicación</h3>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                        <span>Paseo de la Reforma<br />402, Juárez, CDMX</span>
+                    </div>
+                    <div class="contact-item">
+                        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                        <span>+52 55 1234 5678</span>
+                    </div>
+                    <div class="contact-item">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                        <span>contacto@lavielle.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.</span>
+            <div class="footer-legal">
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos del Servicio</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,890 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Gestión de Sucursales - L'Avielle</title>
+
+    <!-- conexion con css -->
+    <link href="~/css/gestionsucursales.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <div class="page">
+
+        <div class="content-wrapper">
+
+            <!-- sidebar -->
+            <aside class="sidebar">
+
+                <div class="sidebar-top">
+
+                    <div class="logo-group">
+
+                        <div class="brand-logo">
+                            L'Avielle
+                        </div>
+
+                        <div class="role-badge">
+                            Administrador General
+                        </div>
+
+                    </div>
+
+                    <!-- conexion entre frames -->
+                    <nav class="nav-list">
+
+                        <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Dashboard General
+                            </span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionUsuarios", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="9" cy="8" r="3"></circle>
+                                    <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
+                                    <path d="M16 11c2.8 0 5 1.5 5 4"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Usuarios
+                            </span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionSucursales", "Admin")" class="sidebar-link active">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+                                    <path d="M8 7h1M12 7h1M16 7h1"></path>
+                                    <path d="M8 11h1M12 11h1M16 11h1"></path>
+                                    <path d="M8 15h1M12 15h1M16 15h1"></path>
+                                    <path d="M10 21v-3h4v3"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Sucursales
+                            </span>
+
+                            <span class="active-indicator"></span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionServicios", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 3l1.3 4.7L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-1.3z"></path>
+                                    <path d="m19 14 .7 2.3L22 17l-.7-2.3L19 20l-.7-2.3L16 17l2.3-.7z"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Servicios
+                            </span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("ReportesGenerales", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 19V9"></path>
+                                    <path d="M10 19V5"></path>
+                                    <path d="M16 19v-7"></path>
+                                    <path d="M22 19V3"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Reportes
+                            </span>
+
+                        </a>
+
+                    </nav>
+
+                </div>
+
+                <!-- cerrar sesion -->
+                <div class="sidebar-bottom">
+
+                    <div class="divider"></div>
+
+                    <a href="#" class="sidebar-link logout-link">
+
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
+                                <path d="M14 8l4 4-4 4"></path>
+                                <path d="M10 12h8"></path>
+                            </svg>
+                        </span>
+
+                        <span class="tab-text">
+                            Cerrar Sesión
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </aside>
+
+
+            <!-- contenido -->
+            <main class="main-content">
+
+                <!-- encabezado -->
+                <section class="header-row">
+
+                    <div class="header-text">
+
+                        <h1>
+                            Gestión de Sucursales
+                        </h1>
+
+                        <p>
+                            Panel de administración centralizada de sedes L'Avielle
+                        </p>
+
+                    </div>
+
+
+                    <div class="header-actions">
+
+                        <!-- busqueda -->
+                        <div class="search-bar">
+
+                            <span class="search-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="10.5" cy="10.5" r="6"></circle>
+                                    <path d="m15 15 5 5"></path>
+                                </svg>
+                            </span>
+
+                            <span class="search-text">
+                                Buscar sucursal...
+                            </span>
+
+                        </div>
+
+
+                        <a href="#" class="add-button">
+                            + Agregar Sucursal
+                        </a>
+
+                    </div>
+
+                </section>
+
+
+                <!-- resumen -->
+                <section class="summary-row">
+
+                    <div class="summary-card">
+
+                        <div class="card-header">
+                            <span class="card-title">Total Sucursales</span>
+
+                            <span class="icon-wrap">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+                                    <path d="M8 7h1M12 7h1M16 7h1"></path>
+                                    <path d="M8 11h1M12 11h1M16 11h1"></path>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="summary-value">
+                            4 Sedes
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <div class="card-header">
+                            <span class="card-title">Sedes Activas</span>
+
+                            <span class="icon-wrap green-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 12l5 5L20 6"></path>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="summary-value">
+                            3 Activas
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <div class="card-header">
+                            <span class="card-title">En Mantenimiento</span>
+
+                            <span class="icon-wrap orange-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="summary-value">
+                            1 Sede
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <div class="card-header">
+                            <span class="card-title">Empleados Totales</span>
+
+                            <span class="icon-wrap">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="9" cy="8" r="3"></circle>
+                                    <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
+                                    <path d="M16 11c2.8 0 5 1.5 5 4"></path>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="summary-value">
+                            36 Profesionales
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- sucursales -->
+                <section class="branches-grid-section">
+
+                    <div class="grid-row">
+
+                        <div class="branch-card">
+
+                            <div class="branch-header">
+
+                                <h2>
+                                    L'Avielle Centro
+                                </h2>
+
+                                <span class="status active-status">
+                                    Activo
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-details">
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
+                                            <circle cx="12" cy="9" r="2.5"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Av. Urdaneta, Centro Comercial City Market, Piso 2, Local 12, Caracas
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M6 3h3l2 5-2 2c1 2.2 2.8 4 5 5l2-2 5 2v3c0 1.1-.9 2-2 2C10.8 20 4 13.2 4 5c0-1.1.9-2 2-2z"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        +58 212-555-0101
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="8"></circle>
+                                            <path d="M12 7v5l3 2"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Lun-Sáb 8:00 - 19:00
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="8" r="3"></circle>
+                                            <path d="M5 21c0-3.5 3.1-6 7-6s7 2.5 7 6"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Gerente: Carlos Mendoza
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="9" cy="8" r="3"></circle>
+                                            <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        12 Empleados en nómina
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="branch-divider"></div>
+
+
+                            <div class="branch-actions">
+
+                                <a href="#">Ver Detalles</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Editar</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Gestionar Empleados</a>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="branch-card">
+
+                            <div class="branch-header">
+
+                                <h2>
+                                    L'Avielle Las Mercedes
+                                </h2>
+
+                                <span class="status active-status">
+                                    Activo
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-details">
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Calle Madrid, C.C. Paseo Las Mercedes, Nivel 1, Local 45, Caracas
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M6 3h3l2 5-2 2c1 2.2 2.8 4 5 5l2-2 5 2v3c0 1.1-.9 2-2 2"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        +58 212-555-0202
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="8"></circle>
+                                            <path d="M12 7v5l3 2"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Lun-Sáb 9:00 - 20:00
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="8" r="3"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Gerente: Ana Martínez
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="9" cy="8" r="3"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        10 Empleados en nómina
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="branch-divider"></div>
+
+
+                            <div class="branch-actions">
+
+                                <a href="#">Ver Detalles</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Editar</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Gestionar Empleados</a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid-row">
+
+                        <div class="branch-card">
+
+                            <div class="branch-header">
+
+                                <h2>
+                                    L'Avielle Altamira
+                                </h2>
+
+                                <span class="status active-status">
+                                    Activo
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-details">
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Av. San Juan Bosco, Centro Altamira, PB, Local 3, Caracas
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M6 3h3l2 5-2 2"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        +58 212-555-0303
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="8"></circle>
+                                            <path d="M12 7v5l3 2"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Lun-Vie 9:00 - 18:00
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="8" r="3"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Gerente: Valentina Rojas
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="9" cy="8" r="3"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        8 Empleados en nómina
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="branch-divider"></div>
+
+
+                            <div class="branch-actions">
+
+                                <a href="#">Ver Detalles</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Editar</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Gestionar Empleados</a>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="branch-card">
+
+                            <div class="branch-header">
+
+                                <h2>
+                                    L'Avielle La Castellana
+                                </h2>
+
+                                <span class="status maintenance-status">
+                                    En Mantenimiento
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-details">
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Av. Principal La Castellana, Torre Millennium, PB, Caracas
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M6 3h3l2 5-2 2"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        +58 212-555-0444
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="8"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Horario no asignado
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="12" cy="8" r="3"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        Gerente: Por asignar
+                                    </span>
+                                </div>
+
+
+                                <div class="detail-row">
+                                    <span class="detail-icon">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="9" cy="8" r="3"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        6 Empleados en nómina
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="branch-divider"></div>
+
+
+                            <div class="branch-actions">
+
+                                <a href="#">Ver Detalles</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Editar</a>
+                                <span class="action-dot"></span>
+                                <a href="#">Gestionar Empleados</a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- comparativa -->
+                    <div class="comparison-card">
+
+                        <div class="comparison-header">
+
+                            <h2>
+                                Comparativa de Rendimiento (Mes Actual)
+                            </h2>
+
+                            <span class="month-badge">
+                                Septiembre 2026
+                            </span>
+
+                        </div>
+
+
+                        <div class="comparison-table">
+
+                            <div class="comparison-row comparison-head">
+                                <div>Sucursal</div>
+                                <div>Reservas del Mes</div>
+                                <div>Ingresos Estimados</div>
+                                <div>Personal Activo</div>
+                                <div>Valoración</div>
+                            </div>
+
+
+                            <div class="comparison-row">
+
+                                <div class="branch-name">L'Avielle Centro</div>
+                                <div>412 citas</div>
+                                <div class="income">Bs. 145,000</div>
+                                <div>12 estilistas</div>
+                                <div class="rating">☆ 4.8</div>
+
+                            </div>
+
+
+                            <div class="comparison-row">
+
+                                <div class="branch-name">L'Avielle Las Mercedes</div>
+                                <div>380 citas</div>
+                                <div class="income">Bs. 138,500</div>
+                                <div>10 estilistas</div>
+                                <div class="rating">☆ 4.9</div>
+
+                            </div>
+
+
+                            <div class="comparison-row">
+
+                                <div class="branch-name">L'Avielle Altamira</div>
+                                <div>298 citas</div>
+                                <div class="income">Bs. 112,700</div>
+                                <div>8 estilistas</div>
+                                <div class="rating">☆ 4.7</div>
+
+                            </div>
+
+
+                            <div class="comparison-row">
+
+                                <div class="branch-name">L'Avielle La Castellana</div>
+                                <div>155 citas</div>
+                                <div class="income">Bs. 89,000</div>
+                                <div>6 estilistas</div>
+                                <div class="rating">☆ 4.5</div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+
+        <!-- footer -->
+        <footer class="footer">
+
+            <!-- informacion del footer -->
+            <div class="footer-upper">
+
+                <div class="footer-about">
+
+                    <div class="footer-logo">
+                        L'Avielle
+                    </div>
+
+                    <p>
+                        Un concepto exclusivo de salón de belleza y spa de bienestar,
+                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                    </p>
+
+                    <!-- redes sociales -->
+                    <div class="social-row">
+
+                        <a href="#" class="social-button">Instagram</a>
+                        <a href="#" class="social-button">Facebook</a>
+                        <a href="#" class="social-button">Web</a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- navegacion del footer -->
+                <div class="footer-column">
+
+                    <h3>Navegación</h3>
+
+                    <div class="footer-links">
+
+                        <a href="@Url.Action("Dashboard", "Admin")">Inicio</a>
+                        <a href="#">Servicios</a>
+                        <a href="#">Especialistas</a>
+                        <a href="#">Perfil</a>
+                        <a href="#">Iniciar Sesión</a>
+                        <a href="#">Registrarse</a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- contacto -->
+                <div class="footer-column">
+
+                    <h3>Contacto &amp; Ubicación</h3>
+
+                    <div class="contact-list">
+
+                        <div class="contact-item">
+                            Paseo de la Reforma 402, Juárez, CDMX
+                        </div>
+
+                        <div class="contact-item">
+                            +52 55 1234 5678
+                        </div>
+
+                        <div class="contact-item">
+                            contacto&#64;lavielle.com
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-divider"></div>
+
+
+            <!-- parte final del footer -->
+            <div class="footer-bottom">
+
+                <span>
+                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                </span>
+
+                <div class="footer-legal">
+
+                    <a href="#">Política de Privacidad</a>
+                    <a href="#">Términos del Servicio</a>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,592 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Gestión de Usuarios - L'Avielle</title>
+
+    <!-- conexion con css -->
+    <link href="~/css/gestionusuarios.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <div class="page">
+
+        <div class="content-wrapper">
+
+            <!-- sidebar -->
+            <aside class="sidebar">
+
+                <div class="sidebar-top">
+
+                    <div class="brand-group">
+
+                        <div class="brand-logo">
+                            L'Avielle
+                        </div>
+
+                        <div class="admin-badge">
+                            Administrador General
+                        </div>
+
+                    </div>
+
+                    <!-- conexion entre frames -->
+                    <nav class="nav-list">
+
+                        <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Dashboard General
+                            </span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionUsuarios", "Admin")" class="sidebar-link active">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="9" cy="8" r="3"></circle>
+                                    <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
+                                    <path d="M16 11c2.8 0 5 1.5 5 4"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Usuarios
+                            </span>
+
+                            <span class="active-indicator"></span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionSucursales", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+                                    <path d="M8 7h1M12 7h1M16 7h1"></path>
+                                    <path d="M8 11h1M12 11h1M16 11h1"></path>
+                                    <path d="M8 15h1M12 15h1M16 15h1"></path>
+                                    <path d="M10 21v-3h4v3"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Sucursales
+                            </span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionServicios", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 3l1.3 4.7L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-1.3z"></path>
+                                    <path d="m19 14 .7 2.3L22 17l-.7-2.3L19 20l-.7-2.3L16 17l2.3-.7z"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Servicios
+                            </span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("ReportesGenerales", "Admin")" class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 19V9"></path>
+                                    <path d="M10 19V5"></path>
+                                    <path d="M16 19v-7"></path>
+                                    <path d="M22 19V3"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Reportes
+                            </span>
+
+                        </a>
+
+                    </nav>
+
+                </div>
+
+                <!-- cerrar sesion -->
+                <div class="sidebar-bottom">
+
+                    <div class="divider"></div>
+
+                    <a href="#" class="sidebar-link logout-link">
+
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
+                                <path d="M14 8l4 4-4 4"></path>
+                                <path d="M10 12h8"></path>
+                            </svg>
+                        </span>
+
+                        <span class="tab-text">
+                            Cerrar Sesión
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </aside>
+
+
+            <!-- contenido -->
+            <main class="main-content">
+
+                <!-- encabezado -->
+                <section class="section-header">
+
+                    <div class="title-wrapper">
+
+                        <h1>
+                            Gestión de Usuarios
+                        </h1>
+
+                        <p>
+                            Administra cuentas de clientes, especialistas, recepcionistas y gerentes
+                        </p>
+
+                    </div>
+
+
+                    <div class="header-actions">
+
+                        <!-- busqueda -->
+                        <div class="search-bar">
+
+                            <span class="search-icon">
+
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="10.5" cy="10.5" r="6"></circle>
+                                    <path d="m15 15 5 5"></path>
+                                </svg>
+
+                            </span>
+
+                            <span class="search-text">
+                                Buscar por nombre, email o rol...
+                            </span>
+
+                        </div>
+
+                        <!-- crear usuario -->
+                        <a href="#" class="create-button">
+                            + Crear Usuario
+                        </a>
+
+                    </div>
+
+                </section>
+
+
+                <!-- resumen -->
+                <section class="role-summary-row">
+
+                    <div class="summary-card">
+                        <div class="sum-header">
+                            <span class="sum-dot clientes"></span>
+                            <span>Clientes</span>
+                        </div>
+                        <div class="sum-value">2,842</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="sum-header">
+                            <span class="sum-dot especialistas"></span>
+                            <span>Especialistas</span>
+                        </div>
+                        <div class="sum-value">24</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="sum-header">
+                            <span class="sum-dot recepcionistas"></span>
+                            <span>Recepcionistas</span>
+                        </div>
+                        <div class="sum-value">8</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="sum-header">
+                            <span class="sum-dot gerentes"></span>
+                            <span>Gerentes</span>
+                        </div>
+                        <div class="sum-value">4</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="sum-header">
+                            <span class="sum-dot inventario"></span>
+                            <span>Inventario</span>
+                        </div>
+                        <div class="sum-value">4</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="sum-header">
+                            <span class="sum-dot admins"></span>
+                            <span>Admins</span>
+                        </div>
+                        <div class="sum-value">2</div>
+                    </div>
+
+                </section>
+
+
+                <!-- filtros -->
+                <section class="filter-bar">
+
+                    <div class="filter-options">
+
+                        <a href="#" class="filter-chip selected">Todos</a>
+                        <a href="#" class="filter-chip">Clientes</a>
+                        <a href="#" class="filter-chip">Especialistas</a>
+                        <a href="#" class="filter-chip">Recepcionistas</a>
+                        <a href="#" class="filter-chip">Gerentes</a>
+                        <a href="#" class="filter-chip">Inventario</a>
+                        <a href="#" class="filter-chip">Administradores</a>
+
+                    </div>
+
+
+                    <div class="sort-dropdown">
+
+                        <span>
+                            Ordenar por:
+                        </span>
+
+                        <strong>
+                            Nombre
+                        </strong>
+
+                        <span>
+                            ▼
+                        </span>
+
+                    </div>
+
+                </section>
+
+
+                <!-- tabla -->
+                <section class="users-table-container">
+
+                    <div class="table-header">
+
+                        <div>NOMBRE</div>
+                        <div>EMAIL</div>
+                        <div>ROL</div>
+                        <div>SUCURSAL</div>
+                        <div>ESTADO</div>
+                        <div>ÚLTIMO ACCESO</div>
+                        <div>ACCIONES</div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">María García</div>
+                        <div class="user-email">maria.garcia@email.com</div>
+                        <div class="user-role">Cliente</div>
+                        <div class="user-branch">—</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">26 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Ana Martínez</div>
+                        <div class="user-email">ana.martinez@lavielle.com</div>
+                        <div class="user-role">Recepcionista</div>
+                        <div class="user-branch">Las Mercedes</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">26 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                            <a href="#">Permisos</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Valentina Rojas</div>
+                        <div class="user-email">valentina.rojas@lavielle.com</div>
+                        <div class="user-role">Especialista</div>
+                        <div class="user-branch">Las Mercedes</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">26 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                            <a href="#">Permisos</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Isabella Marchetti</div>
+                        <div class="user-email">isabella.m@lavielle.com</div>
+                        <div class="user-role">Especialista</div>
+                        <div class="user-branch">Centro</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">25 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                            <a href="#">Permisos</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Carlos Mendoza</div>
+                        <div class="user-email">carlos.m@lavielle.com</div>
+                        <div class="user-role">Gerente</div>
+                        <div class="user-branch">Las Mercedes</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">26 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                            <a href="#">Permisos</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Laura Pérez</div>
+                        <div class="user-email">laura.perez@email.com</div>
+                        <div class="user-role">Cliente</div>
+                        <div class="user-branch">—</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">25 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Roberto Silva</div>
+                        <div class="user-email">roberto.s@lavielle.com</div>
+                        <div class="user-role">Inventario</div>
+                        <div class="user-branch">Altamira</div>
+                        <div><span class="status active-status">Activo</span></div>
+                        <div class="last-access">24 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                            <a href="#">Permisos</a>
+                        </div>
+
+                    </div>
+
+
+                    <div class="user-row">
+
+                        <div class="user-name">Daniela Fuentes</div>
+                        <div class="user-email">daniela.f@lavielle.com</div>
+                        <div class="user-role">Especialista</div>
+                        <div class="user-branch">Centro</div>
+                        <div><span class="status partial-status">Parcial</span></div>
+                        <div class="last-access">22 Sep 2026</div>
+
+                        <div class="actions">
+                            <a href="#">Ver</a>
+                            <a href="#">Editar</a>
+                            <a href="#">Permisos</a>
+                        </div>
+
+                    </div>
+
+
+                    <!-- paginacion -->
+                    <div class="table-pagination">
+
+                        <span class="pagination-info">
+                            Mostrando 1-8 de 2,890 usuarios
+                        </span>
+
+                        <div class="pagination-controls">
+
+                            <a href="#" class="page-button">
+                                ←
+                            </a>
+
+                            <a href="#" class="page-button active-page">
+                                1
+                            </a>
+
+                            <a href="#" class="page-button">
+                                2
+                            </a>
+
+                            <a href="#" class="page-button">
+                                →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+
+        <!-- footer -->
+        <footer class="footer">
+
+            <!-- informacion del footer -->
+            <div class="footer-upper">
+
+                <div class="footer-about">
+
+                    <div class="footer-logo">
+                        L'Avielle
+                    </div>
+
+                    <p>
+                        Un concepto exclusivo de salón de belleza y spa de bienestar,
+                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                    </p>
+
+                    <!-- redes sociales -->
+                    <div class="social-row">
+
+                        <a href="#" class="social-button">Instagram</a>
+                        <a href="#" class="social-button">Facebook</a>
+                        <a href="#" class="social-button">Web</a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- navegacion del footer -->
+                <div class="footer-column">
+
+                    <h3>Navegación</h3>
+
+                    <div class="footer-links">
+
+                        <a href="@Url.Action("Dashboard", "Admin")">Inicio</a>
+                        <a href="#">Servicios</a>
+                        <a href="#">Especialistas</a>
+                        <a href="#">Perfil</a>
+                        <a href="#">Iniciar Sesión</a>
+                        <a href="#">Registrarse</a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- contacto -->
+                <div class="footer-column">
+
+                    <h3>Contacto &amp; Ubicación</h3>
+
+                    <div class="contact-list">
+
+                        <div class="contact-item">
+                            Paseo de la Reforma 402, Juárez, CDMX
+                        </div>
+
+                        <div class="contact-item">
+                            +52 55 1234 5678
+                        </div>
+
+                        <div class="contact-item">
+                            contacto&#64;lavielle.com
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-divider"></div>
+
+
+            <!-- parte final del footer -->
+            <div class="footer-bottom">
+
+                <span>
+                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                </span>
+
+                <div class="footer-legal">
+
+                    <a href="#">Política de Privacidad</a>
+                    <a href="#">Términos del Servicio</a>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>

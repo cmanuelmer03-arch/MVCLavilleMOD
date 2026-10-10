@@ -1,0 +1,745 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Panel de Inventario - L'Avielle</title>
+
+    <link rel="stylesheet" href="~/css/inventario.css" />
+
+</head>
+
+<body>
+
+    <div class="page">
+
+        <div class="content-wrapper">
+
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
+
+                <div class="sidebar-top">
+
+                    <div class="brand-group">
+
+                        <div class="brand-logo">
+                            L'Avielle
+                        </div>
+
+                        <div class="role-badge">
+                            Encargado de Inventario — Las Mercedes
+                        </div>
+
+                    </div>
+
+                    <nav class="nav-list">
+
+                        <a href="@Url.Action("PanelInventario", "Inventario")"
+                           class="sidebar-link active">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                                    <path d="M8 8h8"></path>
+                                    <path d="M8 12h5"></path>
+                                    <path d="M8 16h4"></path>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Panel de Inventario
+                            </span>
+
+                            <span class="active-indicator"></span>
+
+                        </a>
+
+
+                        <a href="@Url.Action("GestionProductos", "Inventario")"
+                           class="sidebar-link">
+
+                            <span class="nav-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 7h14"></path>
+                                    <path d="M5 12h14"></path>
+                                    <path d="M5 17h14"></path>
+                                    <circle cx="8" cy="7" r="1"></circle>
+                                    <circle cx="8" cy="12" r="1"></circle>
+                                    <circle cx="8" cy="17" r="1"></circle>
+                                </svg>
+                            </span>
+
+                            <span class="tab-text">
+                                Gestión de Productos
+                            </span>
+
+                        </a>
+
+                    </nav>
+
+                </div>
+
+
+                <!-- CERRAR SESIÓN -->
+                <div class="sidebar-bottom">
+
+                    <div class="divider"></div>
+
+                    <a href="#" class="sidebar-link logout-link">
+
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
+                                <path d="M14 8l4 4-4 4"></path>
+                                <path d="M10 12h8"></path>
+                            </svg>
+                        </span>
+
+                        <span class="tab-text">
+                            Cerrar Sesión
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </aside>
+
+
+            <!-- CONTENIDO -->
+            <main class="main-content">
+
+                <!-- HEADER -->
+                <section class="inventory-header">
+
+                    <div class="header-text">
+
+                        <h1>
+                            Panel de Inventario
+                        </h1>
+
+                        <p>
+                            L'Avielle Las Mercedes • Viernes, 26 de Septiembre 2026
+                        </p>
+
+                    </div>
+
+
+                    <div class="profile-area">
+
+                        <div class="profile-avatar">
+                            CM
+                        </div>
+
+                        <div class="profile-info">
+
+                            <strong>
+                                Carlos Mendoza
+                            </strong>
+
+                            <span>
+                                Gerente de Inventario
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- KPI -->
+                <section class="kpi-row">
+
+                    <div class="kpi-card">
+
+                        <div class="kpi-title">
+                            TOTAL PRODUCTOS
+                        </div>
+
+                        <div class="kpi-bottom">
+
+                            <strong>
+                                156
+                            </strong>
+
+                            <span class="kpi-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 8h14"></path>
+                                    <path d="M7 5h10l2 3v11H5V8l2-3z"></path>
+                                </svg>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-card">
+
+                        <div class="kpi-title">
+                            STOCK BAJO
+                        </div>
+
+                        <div class="kpi-bottom">
+
+                            <strong class="orange-number">
+                                12
+                            </strong>
+
+                            <span class="kpi-icon warning">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 4l8 15H4L12 4z"></path>
+                                    <path d="M12 9v5"></path>
+                                    <circle cx="12" cy="17" r=".8"></circle>
+                                </svg>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-card">
+
+                        <div class="kpi-title">
+                            SIN STOCK
+                        </div>
+
+                        <div class="kpi-bottom">
+
+                            <strong class="red-number">
+                                3
+                            </strong>
+
+                            <span class="kpi-icon danger">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="8"></circle>
+                                    <path d="M9 9l6 6"></path>
+                                    <path d="M15 9l-6 6"></path>
+                                </svg>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-card">
+
+                        <div class="kpi-title">
+                            VALOR TOTAL
+                        </div>
+
+                        <div class="kpi-bottom">
+
+                            <strong class="money">
+                                Bs. 45,800
+                            </strong>
+
+                            <span class="kpi-icon green">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+                                    <path d="M8 12h8"></path>
+                                </svg>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CONTENIDO CENTRAL -->
+                <section class="middle-row">
+
+                    <!-- MOVIMIENTOS -->
+                    <div class="movements-card">
+
+                        <div class="card-title-row">
+
+                            <h2>
+                                Movimientos Recientes
+                            </h2>
+
+                            <a href="#" class="small-button">
+                                Ver Todos
+                            </a>
+
+                        </div>
+
+
+                        <div class="movement-table">
+
+                            <div class="movement-header">
+                                <div>FECHA</div>
+                                <div>PRODUCTO</div>
+                                <div>TIPO</div>
+                                <div>CANTIDAD</div>
+                                <div>RESPONSABLE</div>
+                            </div>
+
+
+                            <div class="movement-row">
+
+                                <div>26 Sep</div>
+
+                                <div class="product-name">
+                                    Tinte L'Oréal Rubio 7.0
+                                </div>
+
+                                <div class="entry">
+                                    Entrada
+                                </div>
+
+                                <div class="entry">
+                                    +20 unid.
+                                </div>
+
+                                <div>
+                                    Ana Martínez
+                                </div>
+
+                            </div>
+
+
+                            <div class="movement-row">
+
+                                <div>26 Sep</div>
+
+                                <div class="product-name">
+                                    Decolorante Premium
+                                </div>
+
+                                <div class="exit">
+                                    Salida
+                                </div>
+
+                                <div class="exit">
+                                    -5 unid.
+                                </div>
+
+                                <div>
+                                    Valentina Rojas
+                                </div>
+
+                            </div>
+
+
+                            <div class="movement-row">
+
+                                <div>26 Sep</div>
+
+                                <div class="product-name">
+                                    Shampoo Kerastase 500ml
+                                </div>
+
+                                <div class="entry">
+                                    Entrada
+                                </div>
+
+                                <div class="entry">
+                                    +15 unid.
+                                </div>
+
+                                <div>
+                                    Ana Martínez
+                                </div>
+
+                            </div>
+
+
+                            <div class="movement-row">
+
+                                <div>25 Sep</div>
+
+                                <div class="product-name">
+                                    Guantes Látex M
+                                </div>
+
+                                <div class="exit">
+                                    Salida
+                                </div>
+
+                                <div class="exit">
+                                    -50 unid.
+                                </div>
+
+                                <div>
+                                    Recepción
+                                </div>
+
+                            </div>
+
+
+                            <div class="movement-row">
+
+                                <div>24 Sep</div>
+
+                                <div class="product-name">
+                                    Tratamiento Botox Capilar
+                                </div>
+
+                                <div class="exit">
+                                    Salida
+                                </div>
+
+                                <div class="exit">
+                                    -3 unid.
+                                </div>
+
+                                <div>
+                                    Camila Hernández
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ALERTAS -->
+                    <div class="alerts-card">
+
+                        <h2>
+                            <span class="warning-symbol">⚠</span>
+                            Alertas de Stock
+                        </h2>
+
+
+                        <div class="alert-item">
+
+                            <div>
+                                <strong>
+                                    Decolorante Premium
+                                </strong>
+
+                                <span>
+                                    Stock: 3 unid. (Mínimo: 10)
+                                </span>
+                            </div>
+
+                            <b class="critical">
+                                Crítico
+                            </b>
+
+                        </div>
+
+
+                        <div class="alert-item">
+
+                            <div>
+                                <strong>
+                                    Tóner Rubio Cenizo
+                                </strong>
+
+                                <span>
+                                    Stock: 4 unid. (Mínimo: 8)
+                                </span>
+                            </div>
+
+                            <b class="low">
+                                Bajo
+                            </b>
+
+                        </div>
+
+
+                        <div class="alert-item">
+
+                            <div>
+                                <strong>
+                                    Papel Aluminio Rollo
+                                </strong>
+
+                                <span>
+                                    Stock: 2 unid. (Mínimo: 5)
+                                </span>
+                            </div>
+
+                            <b class="critical">
+                                Crítico
+                            </b>
+
+                        </div>
+
+
+                        <div class="alert-item">
+
+                            <div>
+                                <strong>
+                                    Aceite de Argán 100ml
+                                </strong>
+
+                                <span>
+                                    Stock: 5 unid. (Mínimo: 10)
+                                </span>
+                            </div>
+
+                            <b class="low">
+                                Bajo
+                            </b>
+
+                        </div>
+
+
+                        <div class="alert-item">
+
+                            <div>
+                                <strong>
+                                    Mascarilla Reparadora
+                                </strong>
+
+                                <span>
+                                    Stock: 6 unid. (Mínimo: 12)
+                                </span>
+                            </div>
+
+                            <b class="low">
+                                Bajo
+                            </b>
+
+                        </div>
+
+
+                        <a href="#" class="purchase-button">
+                            + &nbsp; Generar Orden de Compra
+                        </a>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CATEGORIAS -->
+                <section class="categories-section">
+
+                    <h2>
+                        Inventario por Categoría
+                    </h2>
+
+
+                    <div class="categories-row">
+
+                        <div class="category-card">
+
+                            <span class="category-icon">
+                                ◉
+                            </span>
+
+                            <div>
+                                <strong>
+                                    Coloración
+                                </strong>
+
+                                <small>
+                                    45 productos
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="category-card">
+
+                            <span class="category-icon">
+                                ✣
+                            </span>
+
+                            <div>
+                                <strong>
+                                    Cuidado Capilar
+                                </strong>
+
+                                <small>
+                                    38 productos
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="category-card">
+
+                            <span class="category-icon">
+                                ✂
+                            </span>
+
+                            <div>
+                                <strong>
+                                    Herramientas
+                                </strong>
+
+                                <small>
+                                    28 productos
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="category-card">
+
+                            <span class="category-icon">
+                                ◉
+                            </span>
+
+                            <div>
+                                <strong>
+                                    Consumibles
+                                </strong>
+
+                                <small>
+                                    45 productos
+                                </small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer class="footer">
+
+            <div class="footer-upper">
+
+                <div class="footer-about">
+
+                    <div class="footer-logo">
+                        L'Avielle
+                    </div>
+
+                    <p>
+                        Un concepto exclusivo de salón de belleza y spa de bienestar,
+                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                    </p>
+
+                    <div class="social-row">
+
+                        <a href="#" class="social-button">
+                            Instagram
+                        </a>
+
+                        <a href="#" class="social-button">
+                            Facebook
+                        </a>
+
+                        <a href="#" class="social-button">
+                            Web
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div class="footer-column">
+
+                    <h3>
+                        Navegación
+                    </h3>
+
+                    <div class="footer-links">
+
+                        <a href="@Url.Action("PanelInventario", "Inventario")">
+                            Inicio
+                        </a>
+
+                        <a href="#">
+                            Servicios
+                        </a>
+
+                        <a href="#">
+                            Especialistas
+                        </a>
+
+                        <a href="#">
+                            Perfil
+                        </a>
+
+                        <a href="#">
+                            Iniciar Sesión
+                        </a>
+
+                        <a href="#">
+                            Registrarse
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div class="footer-column">
+
+                    <h3>
+                        Contacto &amp; Ubicación
+                    </h3>
+
+                    <div class="contact-list">
+
+                        <div class="contact-item">
+                            Paseo de la Reforma 402, Juárez, CDMX
+                        </div>
+
+                        <div class="contact-item">
+                            +52 55 1234 5678
+                        </div>
+
+                        <div class="contact-item">
+                            contacto&#64;lavielle.com
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-divider"></div>
+
+
+            <div class="footer-bottom">
+
+                <span>
+                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                </span>
+
+                <div class="footer-legal">
+
+                    <a href="#">
+                        Política de Privacidad
+                    </a>
+
+                    <a href="#">
+                        Términos del Servicio
+                    </a>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>
