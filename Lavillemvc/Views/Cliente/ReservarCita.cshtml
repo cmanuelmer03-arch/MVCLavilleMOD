@@ -1,0 +1,1307 @@
+﻿@{
+    ViewData["Title"] = "Reservar Cita";
+}
+
+<div class="reserva">
+
+    <!-- PASOS -->
+
+    <div class="reserva-pasos">
+
+        <div class="paso activo">
+            <span>1</span>
+            Servicio
+        </div>
+
+        <div class="paso">
+            <span>2</span>
+            Sucursal
+        </div>
+
+        <div class="paso">
+            <span>3</span>
+            Especialista
+        </div>
+
+        <div class="paso">
+            <span>4</span>
+            Puntos
+        </div>
+
+        <div class="paso">
+            <span>5</span>
+            Horarios
+        </div>
+
+        <div class="paso">
+            <span>6</span>
+            Confirmación
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 1. SERVICIO -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span>1</span>
+                Selecciona tu Servicio
+            </h2>
+
+            <label class="estado-completado">
+                Completado
+            </label>
+
+        </div>
+
+
+        <div class="servicios-grid">
+
+            <div class="servicio-card seleccionado">
+
+                <img class="servicio-imagen"
+                     src="/Images/servicio1.jpeg"
+                     alt="Tintes y Decoloración" />
+
+                <div class="servicio-info">
+
+                    <h3>
+                        Tintes y Decoloración
+                    </h3>
+
+                    <p>
+                        Desde Bs. 850
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="servicio-card">
+
+                <img class="servicio-imagen"
+                     src="/Images/servicio2.jpeg"
+                     alt="Manicura Premium" />
+
+                <div class="servicio-info">
+
+                    <h3>
+                        Manicura Premium
+                    </h3>
+
+                    <p>
+                        Desde Bs. 350
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="servicio-card">
+
+                <img class="servicio-imagen"
+                     src="/Images/servicio3.jpeg"
+                     alt="Pedicura Spa" />
+
+                <div class="servicio-info">
+
+                    <h3>
+                        Pedicura Spa
+                    </h3>
+
+                    <p>
+                        Desde Bs. 400
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="servicio-card">
+
+                <img class="servicio-imagen"
+                     src="/Images/servicio4.jpeg"
+                     alt="Corte de Pelo" />
+
+                <div class="servicio-info">
+
+                    <h3>
+                        Cortes de Pelo
+                    </h3>
+
+                    <p>
+                        Desde Bs. 250
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="servicio-card">
+
+                <img class="servicio-imagen"
+                     src="/Images/servicio5.jpeg"
+                     alt="Tratamientos Capilares" />
+
+                <div class="servicio-info">
+
+                    <h3>
+                        Tratamientos Capilares
+                    </h3>
+
+                    <p>
+                        Desde Bs. 1,200
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="servicio-card">
+
+                <img class="servicio-imagen"
+                     src="/Images/servicio6.jpeg"
+                     alt="Servicios para Hombres" />
+
+                <div class="servicio-info">
+
+                    <h3>
+                        Servicios para Hombres
+                    </h3>
+
+                    <p>
+                        Desde Bs. 200
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- SERVICIO ESPECÍFICO -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion servicio-especifico">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span></span>
+                Tintes y Decoloración — Elige tu servicio específico
+            </h2>
+
+        </div>
+
+
+        <div class="servicios-especificos-grid">
+
+
+            <div class="servicio-especifico-card">
+
+                <div>
+
+                    <h3>
+                        Balayage Premium
+                    </h3>
+
+                    <p>
+                        Técnica de barrido a mano para un degradado natural y luminoso.
+                    </p>
+
+                    <small>
+                        ◷ 2h 30min &nbsp; Bs. 1,200
+                    </small>
+
+                </div>
+
+                <button type="button">
+                    Seleccionar
+                </button>
+
+            </div>
+
+
+            <div class="servicio-especifico-card">
+
+                <div>
+
+                    <h3>
+                        Mechas Tradicionales
+                    </h3>
+
+                    <p>
+                        Mechas clásicas con papel aluminio, cobertura parcial o completa.
+                    </p>
+
+                    <small>
+                        ◷ 2h &nbsp; Bs. 950
+                    </small>
+
+                </div>
+
+                <button type="button">
+                    Seleccionar
+                </button>
+
+            </div>
+
+
+            <div class="servicio-especifico-card seleccionado">
+
+                <div>
+
+                    <h3>
+                        Tinte Completo
+                    </h3>
+
+                    <p>
+                        Coloración completa raíz a puntas, incluye tratamiento post-color.
+                    </p>
+
+                    <small>
+                        ◷ 1h 30min &nbsp; Bs. 850
+                    </small>
+
+                </div>
+
+                <button type="button" class="seleccionado-btn">
+                    Seleccionado ✓
+                </button>
+
+            </div>
+
+
+            <div class="servicio-especifico-card">
+
+                <div>
+
+                    <h3>
+                        Decoloración + Matiz
+                    </h3>
+
+                    <p>
+                        Decoloración profesional con matizado para tonos fantasía o platinados.
+                    </p>
+
+                    <small>
+                        ◷ 3h &nbsp; Bs. 1,500
+                    </small>
+
+                </div>
+
+                <button type="button">
+                    Seleccionar
+                </button>
+
+            </div>
+
+
+            <div class="servicio-especifico-card">
+
+                <div>
+
+                    <h3>
+                        Retoque de Raíz
+                    </h3>
+
+                    <p>
+                        Retoque de crecimiento para mantener tu color.
+                    </p>
+
+                    <small>
+                        ◷ 1h &nbsp; Bs. 450
+                    </small>
+
+                </div>
+
+                <button type="button">
+                    Seleccionar
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- 2. SUCURSAL -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span>2</span>
+                Selecciona tu Sucursal
+            </h2>
+
+            <label class="estado-completado">
+                Completado
+            </label>
+
+        </div>
+
+
+        <div class="sucursales-grid">
+
+
+            <div class="sucursal-card">
+
+                <h3>
+                    L'Avielle Centro
+                </h3>
+
+                <p class="direccion">
+                    Av. Central, C.C. City Market, Piso 2
+                </p>
+
+                <p>
+                    Horario: Lun-Sáb 8:00 - 19:00
+                </p>
+
+                <p class="disponibles">
+                    12 especialistas disponibles
+                </p>
+
+                <button type="button" class="btn-sucursal">
+                    Seleccionar
+                </button>
+
+            </div>
+
+
+            <div class="sucursal-card seleccionado">
+
+                <h3>
+                    L'Avielle Las Mercedes
+                </h3>
+
+                <p class="direccion">
+                    Calle Madrid, C.C. Paseo Las Mercedes
+                </p>
+
+                <p>
+                    Horario: Lun-Sáb 9:00 - 20:00
+                </p>
+
+                <p class="disponibles">
+                    10 especialistas disponibles
+                </p>
+
+                <button type="button"
+                        class="btn-sucursal seleccionado-btn">
+
+                    Seleccionado
+
+                </button>
+
+            </div>
+
+
+            <div class="sucursal-card">
+
+                <h3>
+                    L'Avielle Altamira
+                </h3>
+
+                <p class="direccion">
+                    Av. San Juan Bosco
+                </p>
+
+                <p>
+                    Horario: Lun-Sáb 8:00 - 18:00
+                </p>
+
+                <p class="disponibles">
+                    8 especialistas disponibles
+                </p>
+
+                <button type="button" class="btn-sucursal">
+                    Seleccionar
+                </button>
+
+            </div>
+
+
+            <div class="sucursal-card no-disponible">
+
+                <h3>
+                    L'Avielle La Castellana
+                </h3>
+
+                <p class="direccion">
+                    Torre Millennium
+                </p>
+
+                <p>
+                    Próximamente
+                </p>
+
+                <button type="button"
+                        class="btn-sucursal"
+                        disabled>
+
+                    No Disponible
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- 3. ESPECIALISTA -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span>3</span>
+                Selecciona tu Especialista
+            </h2>
+
+            <label class="estado-completado">
+                Completado
+            </label>
+
+        </div>
+
+
+        <div class="especialistas-grid">
+
+
+            <div class="especialista-card seleccionado">
+
+                <img src="/Images/valentina.jpeg"
+                     alt="Valentina Rojas" />
+
+                <div class="especialista-info">
+
+                    <h3>
+                        Valentina Rojas
+                    </h3>
+
+                    <p class="cargo">
+                        Colorista Senior
+                    </p>
+
+                    <p>
+                        8 años de experiencia
+                    </p>
+
+                    <p class="rating">
+                        ★ 4.9 (23 reseñas)
+                    </p>
+
+                    <div class="especialista-tags">
+
+                        <span>
+                            Balayage
+                        </span>
+
+                        <span>
+                            Tintes
+                        </span>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-especialista seleccionado-btn">
+
+                        Seleccionada
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="especialista-card">
+
+                <img src="/Images/isabella.jpeg"
+                     alt="Isabella Marchetti" />
+
+                <div class="especialista-info">
+
+                    <h3>
+                        Isabella Marchetti
+                    </h3>
+
+                    <p class="cargo">
+                        Colorista
+                    </p>
+
+                    <p>
+                        5 años de experiencia
+                    </p>
+
+                    <p class="rating">
+                        ★ 4.8 (18 reseñas)
+                    </p>
+
+                    <div class="especialista-tags">
+
+                        <span>
+                            Mechas
+                        </span>
+
+                        <span>
+                            Decoloración
+                        </span>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-especialista">
+
+                        Seleccionar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="especialista-card">
+
+                <img src="/Images/sofia.jpeg"
+                     alt="Sofía Montenegro" />
+
+                <div class="especialista-info">
+
+                    <h3>
+                        Sofía Montenegro
+                    </h3>
+
+                    <p class="cargo">
+                        Estilista Integral
+                    </p>
+
+                    <p>
+                        6 años de experiencia
+                    </p>
+
+                    <p>
+                        ★ 4.7 (15 reseñas)
+                    </p>
+
+                    <div class="especialista-tags">
+
+                        <span>
+                            Cortes
+                        </span>
+
+                        <span>
+                            Color
+                        </span>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-especialista">
+
+                        Seleccionar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="especialista-card sin-preferencia">
+
+                <div class="sin-preferencia-icon">
+                    +
+                </div>
+
+                <h3>
+                    Sin Preferencia
+                </h3>
+
+                <p>
+                    Asignaremos el mejor
+                    especialista disponible.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- 4. PUNTOS -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span>4</span>
+                Tus Puntos L'Avielle
+            </h2>
+
+            <label class="estado-activo">
+                Activo
+            </label>
+
+        </div>
+
+
+        <div class="puntos-card">
+
+
+            <div class="puntos-superior">
+
+                <div>
+
+                    <h3>
+                        2,450 puntos disponibles
+                    </h3>
+
+                    <p>
+                        Puedes usar tus puntos para descuentos en esta reserva.
+                    </p>
+
+                </div>
+
+                <div class="porcentaje">
+                    100%
+                </div>
+
+            </div>
+
+
+            <div class="puntos-opcion">
+
+                <div>
+
+                    <strong>
+                        Usar puntos en esta reserva
+                    </strong>
+
+                </div>
+
+                <div class="switch activo">
+                    <div></div>
+                </div>
+
+            </div>
+
+
+            <div class="puntos-valores">
+
+                <span>
+                    0 puntos
+                </span>
+
+                <span>
+                    500 puntos
+                </span>
+
+                <span>
+                    2,450 puntos
+                </span>
+
+            </div>
+
+
+            <div class="puntos-barra">
+
+                <div class="puntos-progreso"></div>
+
+                <div class="punto-marcador"></div>
+
+            </div>
+
+
+            <div class="puntos-resumen">
+
+                <span>
+                    Usarás 500 puntos = Bs. 50 de descuento
+                </span>
+
+                <strong>
+                    Descuento aplicado: -Bs. 50
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- 5. FECHA Y HORA -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span>5</span>
+                Selecciona Fecha y Hora
+            </h2>
+
+            <label class="estado-pendiente">
+                Pendiente
+            </label>
+
+        </div>
+
+
+        <div class="fecha-hora-grid">
+
+
+            <!-- CALENDARIO -->
+
+            <div class="calendario-card">
+
+                <div class="calendario-header">
+
+                    <strong>
+                        Selecciona una fecha
+                    </strong>
+
+                </div>
+
+
+                <table class="calendario-real">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>L</th>
+                            <th>M</th>
+                            <th>M</th>
+                            <th>J</th>
+                            <th>V</th>
+                            <th>S</th>
+                            <th>D</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <tr>
+
+                            <td></td>
+
+                            <td>
+                                <a href="#">1</a>
+                            </td>
+
+                            <td>
+                                <a href="#">2</a>
+                            </td>
+
+                            <td>
+                                <a href="#">3</a>
+                            </td>
+
+                            <td>
+                                <a href="#">4</a>
+                            </td>
+
+                            <td>
+                                <a href="#">5</a>
+                            </td>
+
+                            <td>
+                                <a href="#">6</a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <a href="#">7</a>
+                            </td>
+
+                            <td>
+                                <a href="#">8</a>
+                            </td>
+
+                            <td>
+                                <a href="#">9</a>
+                            </td>
+
+                            <td>
+                                <a href="#">10</a>
+                            </td>
+
+                            <td>
+                                <a href="#">11</a>
+                            </td>
+
+                            <td>
+                                <a href="#">12</a>
+                            </td>
+
+                            <td>
+                                <a href="#">13</a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <a href="#">14</a>
+                            </td>
+
+                            <td>
+
+                                <a href="#"
+                                   style="
+                                    background:#cba45b !important;
+                                    color:white !important;
+                                    ">
+
+                                    15
+
+                                </a>
+
+                            </td>
+
+                            <td>
+                                <a href="#">16</a>
+                            </td>
+
+                            <td>
+                                <a href="#">17</a>
+                            </td>
+
+                            <td>
+                                <a href="#">18</a>
+                            </td>
+
+                            <td>
+                                <a href="#">19</a>
+                            </td>
+
+                            <td>
+                                <a href="#">20</a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <a href="#">21</a>
+                            </td>
+
+                            <td>
+                                <a href="#">22</a>
+                            </td>
+
+                            <td>
+                                <a href="#">23</a>
+                            </td>
+
+                            <td>
+                                <a href="#">24</a>
+                            </td>
+
+                            <td>
+                                <a href="#">25</a>
+                            </td>
+
+                            <td>
+                                <a href="#">26</a>
+                            </td>
+
+                            <td>
+                                <a href="#">27</a>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <a href="#">28</a>
+                            </td>
+
+                            <td>
+                                <a href="#">29</a>
+                            </td>
+
+                            <td>
+                                <a href="#">30</a>
+                            </td>
+
+                            <td>
+                                <a href="#">31</a>
+                            </td>
+
+                            <td>
+                                <a href="#"
+                                   style="color:#d8cec6 !important;">
+                                    1
+                                </a>
+                            </td>
+
+                            <td>
+                                <a href="#"
+                                   style="color:#d8cec6 !important;">
+                                    2
+                                </a>
+                            </td>
+
+                            <td>
+                                <a href="#"
+                                   style="color:#d8cec6 !important;">
+                                    3
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- HORARIOS -->
+
+            <div class="horarios-card">
+
+                <div class="horarios-header">
+
+                    <strong>
+                        Horarios Disponibles - Martes 15 Oct
+                    </strong>
+
+                    <span>
+                        15 Oct
+                    </span>
+
+                </div>
+
+
+                <div class="horarios-grid">
+
+                    <button type="button">
+                        8:00
+                    </button>
+
+                    <button type="button">
+                        8:30
+                    </button>
+
+                    <button type="button">
+                        9:00
+                    </button>
+
+                    <button type="button">
+                        9:30
+                    </button>
+
+                    <button type="button"
+                            class="hora-seleccionada">
+
+                        10:00
+
+                    </button>
+
+                    <button type="button">
+                        10:30
+                    </button>
+
+                    <button type="button">
+                        11:00
+                    </button>
+
+                    <button type="button">
+                        11:30
+                    </button>
+
+                    <button type="button">
+                        14:00
+                    </button>
+
+                    <button type="button">
+                        14:30
+                    </button>
+
+                    <button type="button">
+                        15:00
+                    </button>
+
+                    <button type="button">
+                        15:30
+                    </button>
+
+                    <button type="button">
+                        16:00
+                    </button>
+
+                    <button type="button">
+                        16:30
+                    </button>
+
+                    <button type="button">
+                        17:00
+                    </button>
+
+                    <button type="button">
+                        17:30
+                    </button>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- 6. CONFIRMACIÓN -->
+    <!-- ================================================= -->
+
+    <section class="reserva-seccion confirmacion-seccion">
+
+        <div class="seccion-titulo">
+
+            <h2>
+                <span>6</span>
+                Confirmación de tu Cita
+            </h2>
+
+            <label class="estado-pendiente">
+                Pendiente
+            </label>
+
+        </div>
+
+
+        <div class="confirmacion-card">
+
+
+            <div class="confirmacion-contenido">
+
+
+                <div class="resumen-cita">
+
+                    <h3>
+                        Resumen de tu reserva
+                    </h3>
+
+
+                    <div class="resumen-linea">
+
+                        <span>
+                            Servicio
+                        </span>
+
+                        <strong>
+                            Tintes y Decoloración
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resumen-linea">
+
+                        <span>
+                            Sucursal
+                        </span>
+
+                        <strong>
+                            L'Avielle Las Mercedes
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resumen-linea">
+
+                        <span>
+                            Especialista
+                        </span>
+
+                        <strong>
+                            Valentina Rojas
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resumen-linea">
+
+                        <span>
+                            Fecha
+                        </span>
+
+                        <strong>
+                            Martes 15 de Octubre
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resumen-linea">
+
+                        <span>
+                            Hora
+                        </span>
+
+                        <strong>
+                            10:00 AM
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="resumen-precio">
+
+                    <h3>
+                        Detalle de pago
+                    </h3>
+
+
+                    <div class="precio-linea">
+
+                        <span>
+                            Servicio
+                        </span>
+
+                        <strong>
+                            Bs. 850
+                        </strong>
+
+                    </div>
+
+
+                    <div class="precio-linea">
+
+                        <span>
+                            Descuento por puntos
+                        </span>
+
+                        <strong class="descuento">
+                            - Bs. 50
+                        </strong>
+
+                    </div>
+
+
+                    <div class="precio-total">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <strong>
+                            Bs. 800
+                        </strong>
+
+                    </div>
+
+
+                    <p>
+                        Los precios pueden variar según el servicio seleccionado.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="terminos">
+
+                <label>
+
+                    <input type="checkbox" />
+
+                    <span>
+                        He leído y acepto los términos y condiciones de reserva,
+                        políticas de cancelación y privacidad de L'Avielle.
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div class="botones-confirmacion">
+
+                <button type="button"
+                        class="btn-anterior">
+
+                    ← Anterior
+
+                </button>
+
+
+                <a href="/Cliente/Pago"
+                   class="btn-pago">
+
+                    Proceder al Pago →
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+</div>

@@ -1,0 +1,323 @@
+﻿@{
+    ViewData["Title"] = "Mis Reservas";
+}
+
+<div class="reservas-page">
+
+    <div class="reservas-header">
+
+        <div>
+            <h1>Mis Reservas</h1>
+
+            <p>
+                Administra tus próximas citas y revisa tu historial.
+            </p>
+        </div>
+
+        <div class="reservas-filtros">
+
+            <button type="button" class="filtro">
+                Todas
+            </button>
+
+            <button type="button" class="filtro activo">
+                Próximas
+            </button>
+
+            <button type="button" class="filtro">
+                Completadas
+            </button>
+
+            <button type="button" class="filtro">
+                Canceladas
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <section class="proximas-reservas">
+
+        <h2>Próximas Citas</h2>
+
+
+        <div class="reservas-grid">
+
+
+            <div class="reserva-card">
+
+                <div class="reserva-card-header">
+
+                    <div class="reserva-servicio">
+
+                        <span class="reserva-icono">
+                            ✂
+                        </span>
+
+                        <div>
+                            <h3>Balayage + Corte</h3>
+
+                            <p>
+                                Con Valentina Rojas
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <span class="estado confirmado">
+                        Confirmada
+                    </span>
+
+                </div>
+
+
+                <div class="reserva-info">
+
+                    <div>
+                        <small>FECHA Y HORA</small>
+
+                        <strong>
+                            Sábado 4 de Octubre, 10:00 AM
+                        </strong>
+                    </div>
+
+                    <div>
+                        <small>SUCURSAL</small>
+
+                        <strong>
+                            L'Avielle Las Mercedes
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="reserva-acciones">
+
+                    <button type="button">
+                        Ver Detalles
+                    </button>
+
+                    <button type="button">
+                        Modificar
+                    </button>
+
+                    <button type="button" class="btn-cancelar">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="reserva-card">
+
+                <div class="reserva-card-header">
+
+                    <div class="reserva-servicio">
+
+                        <span class="reserva-icono">
+                            ✂
+                        </span>
+
+                        <div>
+                            <h3>Manicura Semipermanente</h3>
+
+                            <p>
+                                Con Lucía Méndez
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <span class="estado pendiente">
+                        Pendiente
+                    </span>
+
+                </div>
+
+
+                <div class="reserva-info">
+
+                    <div>
+                        <small>FECHA Y HORA</small>
+
+                        <strong>
+                            Martes 7 de Octubre, 3:00 PM
+                        </strong>
+                    </div>
+
+                    <div>
+                        <small>SUCURSAL</small>
+
+                        <strong>
+                            L'Avielle Altamira
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="reserva-acciones">
+
+                    <button type="button">
+                        Ver Detalles
+                    </button>
+
+                    <button type="button">
+                        Modificar
+                    </button>
+
+                    <button type="button" class="btn-cancelar">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="historial-reservas">
+
+        <h2>Historial de Citas</h2>
+
+
+        <div class="historial-lista">
+
+
+            <div class="historial-fila">
+
+                <div class="historial-servicio">
+
+                    <strong>
+                        Corte + Peinado
+                    </strong>
+
+                    <span>
+                        Estilista Isabella Marchetti
+                    </span>
+
+                </div>
+
+                <div class="historial-fecha">
+                    15 de Septiembre, 2026
+                </div>
+
+                <span class="estado historial-completada">
+                    Completada
+                </span>
+
+                <a href="@Url.Action("ReservarCita", "Cliente")">
+                    Reservar de Nuevo
+                </a>
+
+            </div>
+
+
+            <div class="historial-fila">
+
+                <div class="historial-servicio">
+
+                    <strong>
+                        Tratamiento Keratina
+                    </strong>
+
+                    <span>
+                        Estilista Camila Hernández
+                    </span>
+
+                </div>
+
+                <div class="historial-fecha">
+                    1 de Septiembre, 2026
+                </div>
+
+                <span class="estado historial-completada">
+                    Completada
+                </span>
+
+                <a href="@Url.Action("ReservarCita", "Cliente")">
+                    Reservar de Nuevo
+                </a>
+
+            </div>
+
+
+            <div class="historial-fila">
+
+                <div class="historial-servicio">
+
+                    <strong>
+                        Tinte Raíz
+                    </strong>
+
+                    <span>
+                        Estilista Valentina Rojas
+                    </span>
+
+                </div>
+
+                <div class="historial-fecha">
+                    20 de Agosto, 2026
+                </div>
+
+                <span class="estado historial-completada">
+                    Completada
+                </span>
+
+                <a href="@Url.Action("ReservarCita", "Cliente")">
+                    Reservar de Nuevo
+                </a>
+
+            </div>
+
+
+            <div class="historial-fila">
+
+                <div class="historial-servicio">
+
+                    <strong>
+                        Pedicura Spa
+                    </strong>
+
+                    <span>
+                        Estilista Lucía Méndez
+                    </span>
+
+                </div>
+
+                <div class="historial-fecha">
+                    10 de Agosto, 2026
+                </div>
+
+                <span class="estado historial-cancelada">
+                    Cancelada
+                </span>
+
+                <a href="@Url.Action("ReservarCita", "Cliente")">
+                    Reservar de Nuevo
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <div class="reservar-nueva">
+
+        <a href="@Url.Action("ReservarCita", "Cliente")">
+            Reservar Nueva Cita
+        </a>
+
+    </div>
+
+</div>

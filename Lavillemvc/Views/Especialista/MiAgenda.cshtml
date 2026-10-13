@@ -1,0 +1,322 @@
+﻿@{
+    ViewData["Title"] = "Mi Agenda";
+    Layout = "~/Views/Shared/_LayoutEspecialista.cshtml";
+}
+
+
+<div class="especialista-page">
+
+    <div class="especialista-header">
+
+        <div>
+            <h1>Mi Agenda</h1>
+
+            <p>
+                Viernes, 26 de Septiembre 2026
+            </p>
+        </div>
+
+
+        <div class="agenda-resumen">
+
+            <div>
+                <strong>5 Citas</strong>
+                <small>PROGRAMADAS HOY</small>
+            </div>
+
+            <div>
+                <strong>2 Pendientes</strong>
+                <small>POR CONFIRMAR</small>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="agenda-filtros">
+
+        <button class="filtro-agenda activo">
+            Hoy
+        </button>
+
+        <button class="filtro-agenda">
+            Semana
+        </button>
+
+        <button class="filtro-agenda">
+            Mes
+        </button>
+
+    </div>
+
+
+    <div class="agenda-contenido">
+
+
+        <!-- CITAS -->
+
+        <div class="agenda-lista">
+
+
+            <div class="cita-card">
+
+                <div class="cita-hora">
+                    <strong>9:00 AM - 11:00 AM</strong>
+                    <small>2h</small>
+                </div>
+
+                <div class="cita-datos">
+
+                    <strong>
+                        María García
+                    </strong>
+
+                    <span>
+                        Balayage Completo · L'Avielle Las Mercedes
+                    </span>
+
+                    <small>
+                        Nota: Primera vez con balayage, cabello castaño oscuro
+                    </small>
+
+                </div>
+
+                <span class="estado-cita confirmada">
+                    Confirmada
+                </span>
+
+            </div>
+
+
+            <div class="cita-card">
+
+                <div class="cita-hora">
+                    <strong>11:30 AM - 12:30 PM</strong>
+                    <small>1h</small>
+                </div>
+
+                <div class="cita-datos">
+
+                    <strong>
+                        Laura Pérez
+                    </strong>
+
+                    <span>
+                        Retoque de Raíz · L'Avielle Las Mercedes
+                    </span>
+
+                </div>
+
+                <span class="estado-cita confirmada">
+                    Confirmada
+                </span>
+
+            </div>
+
+
+            <div class="cita-card descanso">
+
+                <div class="cita-hora">
+                    <strong>1:00 PM - 2:00 PM</strong>
+                </div>
+
+                <div class="cita-datos">
+
+                    <strong>
+                        ALMUERZO
+                    </strong>
+
+                    <span>
+                        No reservable
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="cita-card">
+
+                <div class="cita-hora">
+                    <strong>2:30 PM - 3:30 PM</strong>
+                    <small>1h</small>
+                </div>
+
+                <div class="cita-datos">
+
+                    <strong>
+                        Carmen Silva
+                    </strong>
+
+                    <span>
+                        Mechas Fantasía · L'Avielle Las Mercedes
+                    </span>
+
+                </div>
+
+                <span class="estado-cita pendiente">
+                    Pendiente
+                </span>
+
+            </div>
+
+
+            <div class="cita-card">
+
+                <div class="cita-hora">
+                    <strong>4:00 PM - 5:00 PM</strong>
+                    <small>1h</small>
+                </div>
+
+                <div class="cita-datos">
+
+                    <strong>
+                        Isabel Torres
+                    </strong>
+
+                    <span>
+                        Corrección de Color · L'Avielle Las Mercedes
+                    </span>
+
+                </div>
+
+                <span class="estado-cita confirmada">
+                    Confirmada
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- PRÓXIMA CITA -->
+
+        <aside class="proxima-cita">
+
+            <h2>
+                Próxima Cita
+            </h2>
+
+            <span class="estado-cita confirmada">
+                Confirmada
+            </span>
+
+
+            <div class="cliente-proxima">
+
+                <div class="cliente-foto">
+                    MG
+                </div>
+
+                <div>
+                    <strong>
+                        María García
+                    </strong>
+
+                    <small>
+                        Cliente VIP Gold
+                    </small>
+                </div>
+
+            </div>
+
+
+            <hr />
+
+
+            <div class="detalle-cita">
+
+                <small>
+                    SERVICIO
+                </small>
+
+                <strong>
+                    Balayage Completo
+                </strong>
+
+
+                <small>
+                    HORARIO
+                </small>
+
+                <strong>
+                    9:00 AM - 11:00 AM (2h)
+                </strong>
+
+
+                <small>
+                    FÓRMULA Y PRODUCTOS NECESARIOS
+                </small>
+
+                <div class="etiquetas-productos">
+
+                    <span>
+                        Decolorante
+                    </span>
+
+                    <span>
+                        Toner rubio cenizo
+                    </span>
+
+                    <span>
+                        Tratamiento post-color
+                    </span>
+
+                </div>
+
+
+                <small>
+                    NOTAS DE DIAGNÓSTICO
+                </small>
+
+                <p>
+                    Cabello virgen, primera decoloración.
+                    Realizar prueba de mechón antes de aplicar
+                    la mezcla completa.
+                </p>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- RESUMEN DEL DÍA -->
+
+    <div class="resumen-dia">
+
+        <h2>
+            Resumen del Día
+        </h2>
+
+
+        <div class="resumen-dia-grid">
+
+            <div>
+                <small>Citas Programadas</small>
+                <strong>5 servicios</strong>
+            </div>
+
+            <div>
+                <small>Horas de Atención</small>
+                <strong>7.0 horas</strong>
+            </div>
+
+            <div>
+                <small>Hora de Descanso</small>
+                <strong>1.0 hora (Almuerzo)</strong>
+            </div>
+
+            <div>
+                <small>Horas Disponibles</small>
+                <strong>1.5 horas libres</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,445 @@
+﻿@{
+    ViewData["Title"] = "Proceso de Pago";
+}
+
+<div class="pago">
+
+    <div class="pago-header">
+
+        <div>
+            <h1>Proceso de Pago</h1>
+
+            <p>
+                Completa el pago seguro para confirmar tu ritual exclusivo en L'Avielle.
+            </p>
+        </div>
+
+        <div class="pago-pasos">
+
+            <span>Servicio</span>
+
+            <b>→</b>
+
+            <span>Especialista</span>
+
+            <b>→</b>
+
+            <span>Fecha y Hora</span>
+
+            <b>→</b>
+
+            <strong>Pago</strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="pago-grid">
+
+
+
+        <div class="pago-izquierda">
+
+
+
+            <div class="pago-card resumen-pago">
+
+                <div class="pago-card-titulo">
+
+                    <h2>
+                        Resumen de la Cita
+                    </h2>
+
+                    <span>
+                        RESERVADO PROVISIONAL
+                    </span>
+
+                </div>
+
+
+                <div class="resumen-grid">
+
+
+                    <div>
+
+                        <small>
+                            SERVICIO
+                        </small>
+
+                        <strong>
+                            Balayage Premium
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            PRECIO BASE
+                        </small>
+
+                        <strong>
+                            Bs. 2,200.00
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            ESPECIALISTA
+                        </small>
+
+                        <strong>
+                            Valentina Rojas
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            SUCURSAL
+                        </small>
+
+                        <strong>
+                            L'Avielle Las Mercedes
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            FECHA Y HORA
+                        </small>
+
+                        <strong>
+                            Martes 4 de Octubre,<br>
+                            2026 · 10:00 AM
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            DURACIÓN ESTIMADA
+                        </small>
+
+                        <strong>
+                            3 horas
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <div class="pago-card metodo-pago">
+
+                <h2>
+                    Método de Pago
+                </h2>
+
+
+                <div class="metodos-grid">
+
+
+                    <label class="metodo seleccionado">
+
+                        <input type="radio"
+                               name="metodoPago"
+                               checked />
+
+                        <span>
+                            Tarjeta de Crédito/Débito
+                        </span>
+
+                    </label>
+
+
+                    <label class="metodo">
+
+                        <input type="radio"
+                               name="metodoPago" />
+
+                        <span>
+                            Pago Móvil
+                        </span>
+
+                    </label>
+
+
+                    <label class="metodo">
+
+                        <input type="radio"
+                               name="metodoPago" />
+
+                        <span>
+                            Transferencia Bancaria
+                        </span>
+
+                    </label>
+
+
+                    <label class="metodo">
+
+                        <input type="radio"
+                               name="metodoPago" />
+
+                        <span>
+                            Pagar en Sucursal
+                        </span>
+
+                    </label>
+
+
+                </div>
+
+
+                <div class="datos-tarjeta">
+
+
+                    <label>
+                        NÚMERO DE TARJETA
+                    </label>
+
+                    <input type="text"
+                           autocomplete="off"
+                           inputmode="numeric"
+                           placeholder="0000 0000 0000 0000" />
+
+
+                    <label>
+                        NOMBRE DEL TITULAR
+                    </label>
+
+                    <input type="text"
+                           autocomplete="off"
+                           placeholder="Como aparece en la tarjeta" />
+
+
+                    <div class="datos-tarjeta-fila">
+
+
+                        <div>
+
+                            <label>
+                                FECHA DE VENCIMIENTO
+                            </label>
+
+                            <input type="text"
+                                   autocomplete="off"
+                                   placeholder="MM/AA" />
+
+                        </div>
+
+
+                        <div>
+
+                            <label>
+                                CVV
+                            </label>
+
+                            <input type="password"
+                                   autocomplete="off"
+                                   inputmode="numeric"
+                                   placeholder="•••" />
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="pago-card promocion-pago">
+
+                <div>
+
+                    <span>
+                        ▱
+                    </span>
+
+                    <input type="text"
+                           placeholder="Ingresa tu código promocional" />
+
+                </div>
+
+
+                <button type="button">
+                    Aplicar
+                </button>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="pago-derecha">
+
+
+
+            <div class="pago-card detalle-pago">
+
+                <h2>
+                    Detalle del Pago
+                </h2>
+
+
+                <div class="detalle-linea">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <strong>
+                        Bs. 2,200.00
+                    </strong>
+
+                </div>
+
+
+                <div class="detalle-linea descuento-pago">
+
+                    <span>
+                        Membresía Gold (10%)
+                    </span>
+
+                    <strong>
+                        - Bs. 220.00
+                    </strong>
+
+                </div>
+
+
+                <div class="detalle-total">
+
+                    <span>
+                        Total a Pagar
+                    </span>
+
+                    <strong>
+                        Bs. 1,980.00
+                    </strong>
+
+                </div>
+
+
+                <div class="puntos-bono">
+
+                    Ganarás +198 puntos L'Avielle
+
+                </div>
+
+
+                <label class="check-pago">
+
+                    <input type="checkbox" />
+
+                    <span>
+                        Acepto los términos y condiciones del servicio
+                        y las políticas de cancelación.
+                    </span>
+
+                </label>
+
+
+                <label class="check-pago">
+
+                    <input type="checkbox" />
+
+                    <span>
+                        Autorizo el cargo al método de pago por el
+                        monto total indicado.
+                    </span>
+
+                </label>
+
+
+                <button type="button"
+                        class="btn-confirmar-pago">
+
+                    Confirmar y Pagar — Bs. 1,980.00
+
+                </button>
+
+
+                <a href="/Cliente/ReservarCita"
+                   class="cancelar-reserva">
+
+                    Cancelar Reserva
+
+                </a>
+
+
+            </div>
+
+
+
+            <div class="politicas-pago">
+
+                <h3>
+                    POLÍTICAS DE RESERVA
+                </h3>
+
+
+                <p>
+                    • Cancelación gratuita hasta 24 horas antes de la cita.
+                </p>
+
+
+                <p>
+                    • Reprogramación con costo hasta 12 horas antes.
+                </p>
+
+
+                <p>
+                    • No-show: se aplicará un cargo equivalente al 50% del servicio.
+                </p>
+
+
+            </div>
+
+
+      
+
+            <div class="seguridad-pago">
+
+                <span>
+                    Pago Seguro
+                </span>
+
+                <span>
+                    Datos Encriptados
+                </span>
+
+                <span>
+                    Garantía L'Avielle
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>

@@ -1,0 +1,422 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Cliente";
+}
+
+<div class="dashboard">
+
+    <div class="dashboard-header">
+
+        <div class="titulo-dashboard">
+            <h1>Bienvenida, María</h1>
+
+            <p>
+                Tu resumen de belleza
+                <span>•</span>
+                <strong>Sábado, 4 de Octubre 2026</strong>
+            </p>
+        </div>
+
+        <div class="usuario">
+            <div class="usuario-info">
+                <strong>María Silva</strong>
+                <small>Socio Gold</small>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-grid">
+
+        <div class="columna-izquierda">
+
+            <!-- PRÓXIMA CITA -->
+            <div class="card cita">
+
+                <div class="card-title">
+
+                    <span class="titulo-cita">
+                        TU PRÓXIMA CITA
+                    </span>
+
+                    <span class="estado-confirmada">
+                        Confirmada
+                    </span>
+
+                </div>
+
+                <div class="cita-contenido">
+
+                    <div>
+                        <h2>Balayage + Corte</h2>
+
+                        <p class="especialista">
+                            Especialista:
+                            <strong>Valentina Rojas</strong>
+                        </p>
+                    </div>
+
+                    <div class="datos-cita">
+
+                        <strong>
+                            Sábado 4 Oct, 10:00 AM
+                        </strong>
+
+                        <span>
+                            L'Avielle Las Mercedes
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <div class="botones-cita">
+
+                    <button type="button">
+                        Modificar Cita
+                    </button>
+
+                    <button type="button" class="btn-light">
+                        Cancelar Cita
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- HISTORIAL -->
+            <div class="card historial-card">
+
+                <h2>Historial Reciente</h2>
+
+                <div class="historial-lista">
+
+                    <div class="historial-item">
+
+                        <div class="historial-servicio">
+                            <strong>
+                                Tratamiento de Hidratación Profunda
+                            </strong>
+
+                            <span>
+                                Con Sofía Montenegro
+                            </span>
+                        </div>
+
+                        <span class="historial-fecha">
+                            12 de Septiembre, 2026
+                        </span>
+
+                        <strong class="historial-precio">
+                            $85.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="historial-item">
+
+                        <div class="historial-servicio">
+                            <strong>
+                                Maquillaje Social de Gala
+                            </strong>
+
+                            <span>
+                                Con Mateo Valenzuela
+                            </span>
+                        </div>
+
+                        <span class="historial-fecha">
+                            28 de Agosto, 2026
+                        </span>
+
+                        <strong class="historial-precio">
+                            $120.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="historial-item">
+
+                        <div class="historial-servicio">
+                            <strong>
+                                Manicura Spa & Gel
+                            </strong>
+
+                            <span>
+                                Con Isabella Conti
+                            </span>
+                        </div>
+
+                        <span class="historial-fecha">
+                            05 de Agosto, 2026
+                        </span>
+
+                        <strong class="historial-precio">
+                            $45.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PROMOCIONES -->
+            <h2 class="titulo-promociones">
+                Promociones Exclusivas para Ti
+            </h2>
+
+            <div class="promociones">
+
+                <div class="promo promo-1">
+
+                    <div class="promo-contenido">
+
+                        <span class="promo-descuento">
+                            15% DE DESCUENTO
+                        </span>
+
+                        <h3>
+                            Martes de<br />
+                            Nutrición<br />
+                            Capilar
+                        </h3>
+
+                        <button type="button" class="btn-promo">
+                            APROVECHAR →
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="promo promo-2">
+
+                    <div class="promo-contenido">
+
+                        <span class="promo-descuento">
+                            TRATAMIENTO VIP
+                        </span>
+
+                        <h3>
+                            Ritual de<br />
+                            Ácido<br />
+                            Hialurónico
+                        </h3>
+
+                        <button type="button" class="btn-promo">
+                            APROVECHAR →
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- COLUMNA DERECHA -->
+        <div class="columna-derecha">
+
+            <!-- MEMBRESÍA -->
+            <div class="membresia">
+
+                <div class="membresia-titulo">
+
+                    <h2>
+                        Membresía Gold
+                    </h2>
+
+                    <span class="icono-membresia">
+                        ◇
+                    </span>
+
+                </div>
+
+                <h1>
+                    2,450
+                </h1>
+
+                <p>
+                    PUNTOS ACUMULADOS
+                </p>
+
+                <div class="barra">
+                    <div></div>
+                </div>
+
+                <div class="membresia-abajo">
+
+                    <small>
+                        Faltan 550 pts para Platinum
+                    </small>
+
+                    <strong>
+                        80%
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACCIONES RÁPIDAS -->
+            <h2 class="titulo-acciones">
+                Acciones Rápidas
+            </h2>
+
+
+            <a asp-controller="Cliente"
+               asp-action="ReservarCita"
+               class="accion">
+
+                <div class="accion-icono">
+                    +
+                </div>
+
+                <div class="accion-texto">
+
+                    <h3>
+                        Reservar Nueva Cita
+                    </h3>
+
+                    <p>
+                        Elige fecha, servicio y tu estilista
+                    </p>
+
+                </div>
+
+                <span class="accion-flecha">
+                    →
+                </span>
+
+            </a>
+
+
+            <div class="accion">
+
+                <div class="accion-icono">
+                    S
+                </div>
+
+                <div class="accion-texto">
+
+                    <h3>
+                        Ver Servicios
+                    </h3>
+
+                    <p>
+                        Explora nuestras especialidades exclusivas
+                    </p>
+
+                </div>
+
+                <span class="accion-flecha">
+                    →
+                </span>
+
+            </div>
+
+
+            <div class="accion">
+
+                <div class="accion-icono">
+                    O
+                </div>
+
+                <div class="accion-texto">
+
+                    <h3>
+                        Contactar Soporte
+                    </h3>
+
+                    <p>
+                        Chatea directamente con recepción
+                    </p>
+
+                </div>
+
+                <span class="accion-flecha">
+                    →
+                </span>
+
+            </div>
+
+
+            <!-- RESUMEN -->
+            <div class="card resumen">
+
+                <h2>
+                    Resumen de Citas
+                </h2>
+
+                <div class="numeros">
+
+                    <div class="numero-cita">
+
+                        <strong>
+                            2
+                        </strong>
+
+                        <span>
+                            Confirmadas
+                        </span>
+
+                        <small>
+                            Listas para ti
+                        </small>
+
+                    </div>
+
+
+                    <div class="numero-cita">
+
+                        <strong>
+                            1
+                        </strong>
+
+                        <span>
+                            Pendiente
+                        </span>
+
+                        <small>
+                            En aprobación
+                        </small>
+
+                    </div>
+
+
+                    <div class="numero-cita">
+
+                        <strong>
+                            0
+                        </strong>
+
+                        <span>
+                            Canceladas
+                        </span>
+
+                        <small>
+                            Este mes
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

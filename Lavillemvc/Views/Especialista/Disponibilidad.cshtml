@@ -1,0 +1,311 @@
+﻿@{
+    ViewData["Title"] = "Disponibilidad";
+    Layout = "~/Views/Shared/_LayoutEspecialista.cshtml";
+}
+
+<div class="disponibilidad-page">
+
+    <div class="disponibilidad-header">
+
+        <div>
+            <h1>Mi Disponibilidad</h1>
+
+            <p>
+                Configura tus horarios de atención para que los clientes puedan reservar contigo.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="disponibilidad-contenido">
+
+
+        <div class="horarios-card">
+
+            <h2>HORARIOS SEMANALES HABITUALES</h2>
+
+
+            <div class="dia-horario">
+
+                <label class="switch-horario">
+                    <input type="checkbox" checked>
+                    <span></span>
+                </label>
+
+                <strong>Lunes</strong>
+
+                <select>
+                    <option>9:00 AM</option>
+                </select>
+
+                <span>a</span>
+
+                <select>
+                    <option>7:00 PM</option>
+                </select>
+
+                <div class="almuerzo-horario">
+                    <small>ALMUERZO:</small>
+                    <span>1:00 PM - 2:00 PM</span>
+                </div>
+
+            </div>
+
+
+            <div class="dia-horario">
+
+                <label class="switch-horario">
+                    <input type="checkbox" checked>
+                    <span></span>
+                </label>
+
+                <strong>Martes</strong>
+
+                <select>
+                    <option>9:00 AM</option>
+                </select>
+
+                <span>a</span>
+
+                <select>
+                    <option>7:00 PM</option>
+                </select>
+
+                <div class="almuerzo-horario">
+                    <small>ALMUERZO:</small>
+                    <span>1:00 PM - 2:00 PM</span>
+                </div>
+
+            </div>
+
+
+            <div class="dia-horario">
+
+                <label class="switch-horario">
+                    <input type="checkbox" checked>
+                    <span></span>
+                </label>
+
+                <strong>Miércoles</strong>
+
+                <select>
+                    <option>10:00 AM</option>
+                </select>
+
+                <span>a</span>
+
+                <select>
+                    <option>7:00 PM</option>
+                </select>
+
+                <div class="almuerzo-horario">
+                    <small>ALMUERZO:</small>
+                    <span>2:00 PM - 3:00 PM</span>
+                </div>
+
+            </div>
+
+
+            <div class="dia-horario">
+
+                <label class="switch-horario">
+                    <input type="checkbox" checked>
+                    <span></span>
+                </label>
+
+                <strong>Jueves</strong>
+
+                <select>
+                    <option>9:00 AM</option>
+                </select>
+
+                <span>a</span>
+
+                <select>
+                    <option>7:00 PM</option>
+                </select>
+
+                <div class="almuerzo-horario">
+                    <small>ALMUERZO:</small>
+                    <span>1:00 PM - 2:00 PM</span>
+                </div>
+
+            </div>
+
+
+            <div class="dia-horario">
+
+                <label class="switch-horario">
+                    <input type="checkbox" checked>
+                    <span></span>
+                </label>
+
+                <strong>Viernes</strong>
+
+                <select>
+                    <option>9:00 AM</option>
+                </select>
+
+                <span>a</span>
+
+                <select>
+                    <option>6:00 PM</option>
+                </select>
+
+                <div class="almuerzo-horario">
+                    <small>ALMUERZO:</small>
+                    <span>1:00 PM - 2:00 PM</span>
+                </div>
+
+            </div>
+
+
+            <div class="dia-horario">
+
+                <label class="switch-horario">
+                    <input type="checkbox" checked>
+                    <span></span>
+                </label>
+
+                <strong>Sábado</strong>
+
+                <select>
+                    <option>9:00 AM</option>
+                </select>
+
+                <span>a</span>
+
+                <select>
+                    <option>1:00 PM</option>
+                </select>
+
+                <div class="almuerzo-horario">
+                    <small>ALMUERZO:</small>
+                    <span>12:00 PM</span>
+                </div>
+
+            </div>
+
+
+            <div class="dia-horario domingo">
+
+                <label class="switch-horario">
+                    <input type="checkbox">
+                    <span></span>
+                </label>
+
+                <strong>Domingo</strong>
+
+                <span class="descanso-semanal">
+                    Descanso semanal
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="disponibilidad-derecha">
+
+
+            <div class="ausencias-card">
+
+                <h2>Días Especiales / Ausencias</h2>
+
+
+                <div class="ausencia-item">
+
+                    <div>
+                        <strong>Vacaciones</strong>
+                        <small>15 Oct 2026</small>
+                    </div>
+
+                    <span class="ausencia-vacaciones">
+                        VACACIONES
+                    </span>
+
+                </div>
+
+
+                <div class="ausencia-item">
+
+                    <div>
+                        <strong>Capacitación Interna</strong>
+                        <small>20 Oct 2026</small>
+                    </div>
+
+                    <span class="ausencia-capacitacion">
+                        CAPACITACIÓN
+                    </span>
+
+                </div>
+
+
+                <div class="ausencia-item">
+
+                    <div>
+                        <strong>Día Personal</strong>
+                        <small>31 Oct 2026</small>
+                    </div>
+
+                    <span class="ausencia-personal">
+                        PERSONAL
+                    </span>
+
+                </div>
+
+
+                <button type="button" class="agregar-ausencia">
+                    + Agregar Ausencia o Día Especial
+                </button>
+
+            </div>
+
+
+            <div class="resumen-semanal">
+
+                <h2>Resumen Semanal</h2>
+
+                <div>
+                    <span>Horas semanales de atención</span>
+                    <strong>44h</strong>
+                </div>
+
+                <div>
+                    <span>Días de atención activos</span>
+                    <strong>6 días</strong>
+                </div>
+
+                <div>
+                    <span>Descanso semanal</span>
+                    <strong>Domingo</strong>
+                </div>
+
+                <div>
+                    <span>Próxima ausencia programada</span>
+                    <strong class="proxima-ausencia">
+                        15 Oct (Vacaciones)
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="disponibilidad-acciones">
+
+        <button type="button" class="btn-restablecer">
+            Restablecer Horario
+        </button>
+
+        <button type="button" class="btn-guardar-horario">
+            Guardar Cambios
+        </button>
+
+    </div>
+
+</div>
