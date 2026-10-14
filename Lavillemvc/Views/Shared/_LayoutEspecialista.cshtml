@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - L'Avielle
+    </title>
+
+    <link rel="stylesheet"
+          href="~/css/especialista2.css" />
+
+    <link rel="stylesheet"
+          href="~/css/especialista.css" />
+
+</head>
+
+
+<body>
+
+    <div class="especialista-layout">
+
+
+        <aside class="sidebar-especialista">
+
+
+            <div class="logo-especialista">
+                L'Avielle
+            </div>
+
+
+            <div class="especialista-datos-menu">
+
+                <strong>
+                    Valentina Rojas
+                </strong>
+
+                <span>
+                    Colorista Experta
+                </span>
+
+            </div>
+
+
+            <nav class="menu-especialista">
+
+
+                <a asp-controller="Especialista"
+                   asp-action="MiAgenda">
+
+                    Mi Agenda
+
+                </a>
+
+
+                <a asp-controller="Especialista"
+                   asp-action="Disponibilidad">
+
+                    Disponibilidad
+
+                </a>
+
+
+                <a asp-controller="Especialista"
+                   asp-action="PerfilEspecialista">
+
+                    Mi Perfil
+
+                </a>
+
+
+            </nav>
+
+
+            <div class="cerrar-especialista">
+
+                Cerrar Sesión
+
+            </div>
+
+
+        </aside>
+
+
+        <main class="contenido-especialista">
+
+            @RenderBody()
+
+        </main>
+
+
+    </div>
+
+
+    <footer class="footer">
+
+        <div class="footer-seccion">
+
+            <h2>
+                L’Avielle
+            </h2>
+
+            <p>
+                Un concepto exclusivo de salón de belleza
+                y spa de bienestar, donde el lujo se
+                traduce en calma, elegancia y atención
+                de nivel internacional.
+            </p>
+
+        </div>
+
+
+        <div class="footer-seccion">
+
+            <h4>
+                NAVEGACIÓN
+            </h4>
+
+            <p>
+                Mi Agenda
+            </p>
+
+            <p>
+                Disponibilidad
+            </p>
+
+            <p>
+                Mi Perfil
+            </p>
+
+        </div>
+
+
+        <div class="footer-seccion">
+
+            <h4>
+                CONTACTO & UBICACIÓN
+            </h4>
+
+            <p>
+                Paseo de la Reforma 402,
+                Juárez, CDMX
+            </p>
+
+            <p>
+                +52 55 1234 5678
+            </p>
+
+            <p>
+                contacto@lavielle.com
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+
+</html>

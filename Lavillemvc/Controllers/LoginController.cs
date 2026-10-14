@@ -7,34 +7,46 @@ namespace Lavillemvc.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View(); // Abre Views/Login/Index.cshtml
+            return View();
         }
 
         [HttpPost]
-        public IActionResult Index(string usuario, string password)
+        public IActionResult Index(string txtEmail, string txtPassword)
         {
-            // Lógica temporal para probar la conexión de las vistas
-            if (usuario == "admin")
+            // Convertimos a minúsculas y evitamos null
+            string correo = txtEmail?.ToLower() ?? "";
+
+            // ===== LÓGICA TEMPORAL SIN BASE DE DATOS =====
+
+            // ADMIN
+            if (correo.Contains("admin"))
             {
                 return RedirectToAction("Dashboard", "Admin");
             }
-            else if (usuario == "recepcionista")
+            // RECEPCIONISTA
+            else if (correo.Contains("recepcion"))
             {
                 return RedirectToAction("PanelPrinciRecepcionista", "Gestion");
             }
-            else if (usuario == "cliente")
+            // ESPECIALISTA / ESTILISTA / COLORISTA
+            else if (correo.Contains("especialista") || correo.Contains("estilista") || correo.Contains("colorista"))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("MiAgenda", "Especialista");
+            }
+            // CLIENTE (si el correo contiene "cliente" o es un @gmail normal)
+            else if (correo.Contains("cliente") || correo.Contains("@gmail"))
+            {
+                return RedirectToAction("DashboardCliente", "Cliente");
             }
 
-            ViewBag.Error = "Credenciales incorrectas (Prueba con admin, recepcionista o cliente)";
+            ViewBag.Error = "Credenciales incorrectas. Prueba con admin@..., recepcion@..., especialista@... o cliente@gmail.com";
             return View();
         }
 
         [HttpGet]
         public IActionResult Registro()
         {
-            return View(); // Abre Views/Login/Registro.cshtml
+            return View();
         }
     }
 }
