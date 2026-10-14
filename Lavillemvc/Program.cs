@@ -23,6 +23,6 @@ app.UseAuthorization();
 // AQUÍ ESTABA EL ERROR: Lo cambiamos de vuelta a Index
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Login}/{action=Index}/{id?}");
 
 app.Run();

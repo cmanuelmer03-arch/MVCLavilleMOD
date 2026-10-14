@@ -38,6 +38,11 @@ namespace Lavillemvc.Controllers
             {
                 return RedirectToAction("DashboardCliente", "Cliente");
             }
+            //INVENTARIO 
+            else if(correo.Contains("inventario"))
+            {
+                return RedirectToAction("PanlInventario", "Inventario")
+            }
 
             ViewBag.Error = "Credenciales incorrectas. Prueba con admin@..., recepcion@..., especialista@... o cliente@gmail.com";
             return View();
