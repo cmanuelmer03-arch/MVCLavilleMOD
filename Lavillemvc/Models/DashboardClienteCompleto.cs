@@ -1,148 +1,80 @@
 ﻿
-using Microsoft.AspNetCore.Mvc;
-using Lavillemvc.DAL;
-using Lavillemvc.Models;
-using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
 
-namespace Lavillemvc.Controllers
+namespace Lavillemvc.Models
 {
-    public class ClienteController : Controller
+    public class DashboardClienteCompleto
     {
-        private readonly Conexion _conexion;
+        // DATOS DEL CLIENTE
+        public int IdCliente { get; set; }
+        public string Nombre { get; set; } = "";
+        public string Apellido { get; set; } = "";
+        public string NombreCompleto { get; set; } = "";
+        public string? Correo { get; set; }
+        public string? Telefono { get; set; }
+        public string? TipoCliente { get; set; }
+        public int PuntosFidelidad { get; set; }
+        public int TotalPedidos { get; set; }
 
-        public ClienteController(IConfiguration configuration)
+        // MEMBRESÍA
+        public string? Membresia { get; set; }
+        public string? BeneficiosMembresia { get; set; }
+        public DateTime? InicioMembresia { get; set; }
+        public DateTime? FinMembresia { get; set; }
+
+        // PRÓXIMA CITA
+        public int? IdProximaCita { get; set; }
+        public string? ProximoServicio { get; set; }
+        public DateTime? FechaProximaCita { get; set; }
+        public TimeSpan? HoraProximaCita { get; set; }
+        public string? EstadoProximaCita { get; set; }
+        public string? EspecialistaProximaCita { get; set; }
+        public string? SucursalProximaCita { get; set; }
+
+        // RESUMEN DE CITAS
+        public int CitasConfirmadas { get; set; }
+        public int CitasPendientes { get; set; }
+        public int CitasCanceladasMes { get; set; }
+
+        // DATOS JSON
+        public string HistorialJson { get; set; } = "[]";
+        public string PromocionesJson { get; set; } = "[]";
+
+        public List<HistorialItem> HistorialReciente =>
+            JsonSerializer.Deserialize<List<HistorialItem>>(
+                HistorialJson ?? "[]"
+            ) ?? new List<HistorialItem>();
+
+        public List<PromocionItem> Promociones =>
+            JsonSerializer.Deserialize<List<PromocionItem>>(
+                PromocionesJson ?? "[]"
+            ) ?? new List<PromocionItem>();
+
+        // HISTORIAL
+        public class HistorialItem
         {
-            _conexion = new Conexion(configuration);
+            public int IdCita { get; set; }
+            public string Servicio { get; set; } = "";
+            public string? Especialista { get; set; }
+            public DateTime FechaCita { get; set; }
+            public string HoraCita { get; set; } = "";
+            public string? Estado { get; set; }
+            public decimal PrecioServicio { get; set; }
+            public decimal? TotalPagado { get; set; }
         }
 
-        public async Task<IActionResult> Dashboard()
+        // PROMOCIONES
+        public class PromocionItem
         {
-            // SOLO PARA PRUEBAS:
-            // María Silva tiene IdCliente = 1.
-            // Más adelante obtendremos el ID
-            // del usuario que inició sesión.
-            int idCliente = 1;
-
-            await using var conn =
-                _conexion.GetConnection();
-
-            await conn.OpenAsync();
-
-            string sql = @"
-                SELECT *
-                FROM public.vw_dashboard_cliente_completo
-                WHERE ""IdCliente"" = @idCliente";
-
-            await using var cmd =
-                new NpgsqlCommand(sql, conn);
-
-            cmd.Parameters.AddWithValue(
-                "idCliente", idCliente
-            );
-
-            await using var reader =
-                await cmd.ExecuteReaderAsync();
-
-            if (!await reader.ReadAsync())
-            {
-                return NotFound(
-                    "No se encontró el cliente."
-                );
-            }
-
-            string? Texto(string columna)
-            {
-                int i = reader.GetOrdinal(columna);
-                return reader.IsDBNull(i)
-                    ? null
-                    : reader.GetString(i);
-            }
-
-            DateTime? Fecha(string columna)
-            {
-                int i = reader.GetOrdinal(columna);
-                return reader.IsDBNull(i)
-                    ? null
-                    : reader.GetDateTime(i);
-            }
-
-            int? Entero(string columna)
-            {
-                int i = reader.GetOrdinal(columna);
-                return reader.IsDBNull(i)
-                    ? null
-                    : reader.GetInt32(i);
-            }
-
-            TimeSpan? Hora(string columna)
-            {
-                int i = reader.GetOrdinal(columna);
-                return reader.IsDBNull(i)
-                    ? null
-                    : reader.GetTimeSpan(i);
-            }
-
-            var modelo = new DashboardClienteCompleto
-            {
-                IdCliente = reader.GetInt32(
-                    reader.GetOrdinal("IdCliente")),
-
-                Nombre = Texto("Nombre") ?? "",
-                Apellido = Texto("Apellido") ?? "",
-                NombreCompleto =
-                    Texto("NombreCompleto") ?? "",
-
-                Correo = Texto("Correo"),
-                Telefono = Texto("Telefono"),
-                TipoCliente = Texto("TipoCliente"),
-
-                PuntosFidelidad = reader.GetInt32(
-                    reader.GetOrdinal("PuntosFidelidad")),
-
-                TotalPedidos = reader.GetInt32(
-                    reader.GetOrdinal("TotalPedidos")),
-
-                Membresia = Texto("Membresia"),
-                BeneficiosMembresia =
-                    Texto("BeneficiosMembresia"),
-
-                InicioMembresia =
-                    Fecha("InicioMembresia"),
-                FinMembresia =
-                    Fecha("FinMembresia"),
-
-                IdProximaCita =
-                    Entero("IdProximaCita"),
-                ProximoServicio =
-                    Texto("ProximoServicio"),
-                FechaProximaCita =
-                    Fecha("FechaProximaCita"),
-                HoraProximaCita =
-                    Hora("HoraProximaCita"),
-                EstadoProximaCita =
-                    Texto("EstadoProximaCita"),
-                EspecialistaProximaCita =
-                    Texto("EspecialistaProximaCita"),
-                SucursalProximaCita =
-                    Texto("SucursalProximaCita"),
-
-                CitasConfirmadas = reader.GetInt32(
-                    reader.GetOrdinal("CitasConfirmadas")),
-
-                CitasPendientes = reader.GetInt32(
-                    reader.GetOrdinal("CitasPendientes")),
-
-                CitasCanceladasMes = reader.GetInt32(
-                    reader.GetOrdinal("CitasCanceladasMes")),
-
-                HistorialJson =
-                    Texto("HistorialJson") ?? "[]",
-
-                PromocionesJson =
-                    Texto("PromocionesJson") ?? "[]"
-            };
-
-            return View(modelo);
+            public int IdPromocion { get; set; }
+            public string NombrePromocion { get; set; } = "";
+            public string? Descripcion { get; set; }
+            public decimal? Descuento { get; set; }
+            public DateTime? FechaInicio { get; set; }
+            public DateTime? FechaFin { get; set; }
+            public string Sucursal { get; set; } = "";
         }
     }
 }
