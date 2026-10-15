@@ -1,40 +1,78 @@
-﻿@{
+﻿@model Lavillemvc.Models.ReservarCita
+
+@using System.Linq
+@using System.Text.Json
+
+@{
     ViewData["Title"] = "Reservar Cita";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+
+    var opciones = Model.OpcionesDisponibles ?? new List<Lavillemvc.Models.ReservarCita.ReservaOpcion>();
+
+    var servicios = opciones
+        .GroupBy(x => x.IdServicio)
+        .Select(x => x.First())
+        .ToList();
+
+    var sucursales = opciones
+        .GroupBy(x => x.IdSucursal)
+        .Select(x => x.First())
+        .ToList();
+
+    var especialistas = opciones
+        .GroupBy(x => x.IdEspecialista)
+        .Select(x => x.First())
+        .ToList();
+
+    var opcionesJson = JsonSerializer.Serialize(opciones);
+
+    var idServicioInicial = Model.IdServicio ?? 0;
+    var idSucursalInicial = Model.IdSucursal ?? 0;
+    var idEspecialistaInicial = Model.IdEspecialista ?? 0;
+
+    var fechaInicial = Model.FechaCita.HasValue
+        ? Model.FechaCita.Value.ToString("yyyy-MM-dd")
+        : "";
+
+    var horaInicial = Model.HoraCita.HasValue
+        ? Model.HoraCita.Value.ToString(@"hh\:mm")
+        : "";
 }
 
 <div class="reserva">
 
+    <!-- ================================================= -->
     <!-- PASOS -->
+    <!-- ================================================= -->
 
     <div class="reserva-pasos">
 
-        <div class="paso activo">
+        <div class="paso activo" id="paso1">
             <span>1</span>
             Servicio
         </div>
 
-        <div class="paso">
+        <div class="paso" id="paso2">
             <span>2</span>
             Sucursal
         </div>
 
-        <div class="paso">
+        <div class="paso" id="paso3">
             <span>3</span>
             Especialista
         </div>
 
-        <div class="paso">
+        <div class="paso" id="paso4">
             <span>4</span>
             Puntos
         </div>
 
-        <div class="paso">
+        <div class="paso" id="paso5">
             <span>5</span>
             Horarios
         </div>
 
-        <div class="paso">
+        <div class="paso" id="paso6">
             <span>6</span>
             Confirmación
         </div>
@@ -43,1266 +81,1820 @@
 
 
     <!-- ================================================= -->
-    <!-- 1. SERVICIO -->
+    <!-- FORMULARIO -->
     <!-- ================================================= -->
 
-    <section class="reserva-seccion">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span>1</span>
-                Selecciona tu Servicio
-            </h2>
-
-            <label class="estado-completado">
-                Completado
-            </label>
-
-        </div>
-
-
-        <div class="servicios-grid">
-
-            <div class="servicio-card seleccionado">
-
-                <img class="servicio-imagen"
-                     src="/Images/servicio1.jpeg"
-                     alt="Tintes y Decoloración" />
-
-                <div class="servicio-info">
-
-                    <h3>
-                        Tintes y Decoloración
-                    </h3>
-
-                    <p>
-                        Desde Bs. 850
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="servicio-card">
-
-                <img class="servicio-imagen"
-                     src="/Images/servicio2.jpeg"
-                     alt="Manicura Premium" />
-
-                <div class="servicio-info">
-
-                    <h3>
-                        Manicura Premium
-                    </h3>
-
-                    <p>
-                        Desde Bs. 350
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="servicio-card">
-
-                <img class="servicio-imagen"
-                     src="/Images/servicio3.jpeg"
-                     alt="Pedicura Spa" />
-
-                <div class="servicio-info">
-
-                    <h3>
-                        Pedicura Spa
-                    </h3>
-
-                    <p>
-                        Desde Bs. 400
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="servicio-card">
-
-                <img class="servicio-imagen"
-                     src="/Images/servicio4.jpeg"
-                     alt="Corte de Pelo" />
-
-                <div class="servicio-info">
-
-                    <h3>
-                        Cortes de Pelo
-                    </h3>
-
-                    <p>
-                        Desde Bs. 250
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="servicio-card">
-
-                <img class="servicio-imagen"
-                     src="/Images/servicio5.jpeg"
-                     alt="Tratamientos Capilares" />
-
-                <div class="servicio-info">
-
-                    <h3>
-                        Tratamientos Capilares
-                    </h3>
-
-                    <p>
-                        Desde Bs. 1,200
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="servicio-card">
-
-                <img class="servicio-imagen"
-                     src="/Images/servicio6.jpeg"
-                     alt="Servicios para Hombres" />
-
-                <div class="servicio-info">
-
-                    <h3>
-                        Servicios para Hombres
-                    </h3>
-
-                    <p>
-                        Desde Bs. 200
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================================================= -->
-    <!-- SERVICIO ESPECÍFICO -->
-    <!-- ================================================= -->
-
-    <section class="reserva-seccion servicio-especifico">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span></span>
-                Tintes y Decoloración — Elige tu servicio específico
-            </h2>
-
-        </div>
-
-
-        <div class="servicios-especificos-grid">
-
-
-            <div class="servicio-especifico-card">
-
-                <div>
-
-                    <h3>
-                        Balayage Premium
-                    </h3>
-
-                    <p>
-                        Técnica de barrido a mano para un degradado natural y luminoso.
-                    </p>
-
-                    <small>
-                        ◷ 2h 30min &nbsp; Bs. 1,200
-                    </small>
-
-                </div>
-
-                <button type="button">
-                    Seleccionar
-                </button>
-
-            </div>
-
-
-            <div class="servicio-especifico-card">
-
-                <div>
-
-                    <h3>
-                        Mechas Tradicionales
-                    </h3>
-
-                    <p>
-                        Mechas clásicas con papel aluminio, cobertura parcial o completa.
-                    </p>
-
-                    <small>
-                        ◷ 2h &nbsp; Bs. 950
-                    </small>
-
-                </div>
-
-                <button type="button">
-                    Seleccionar
-                </button>
-
-            </div>
-
-
-            <div class="servicio-especifico-card seleccionado">
-
-                <div>
-
-                    <h3>
-                        Tinte Completo
-                    </h3>
-
-                    <p>
-                        Coloración completa raíz a puntas, incluye tratamiento post-color.
-                    </p>
-
-                    <small>
-                        ◷ 1h 30min &nbsp; Bs. 850
-                    </small>
-
-                </div>
-
-                <button type="button" class="seleccionado-btn">
-                    Seleccionado ✓
-                </button>
-
-            </div>
-
-
-            <div class="servicio-especifico-card">
-
-                <div>
-
-                    <h3>
-                        Decoloración + Matiz
-                    </h3>
-
-                    <p>
-                        Decoloración profesional con matizado para tonos fantasía o platinados.
-                    </p>
-
-                    <small>
-                        ◷ 3h &nbsp; Bs. 1,500
-                    </small>
-
-                </div>
-
-                <button type="button">
-                    Seleccionar
-                </button>
-
-            </div>
-
-
-            <div class="servicio-especifico-card">
-
-                <div>
-
-                    <h3>
-                        Retoque de Raíz
-                    </h3>
-
-                    <p>
-                        Retoque de crecimiento para mantener tu color.
-                    </p>
-
-                    <small>
-                        ◷ 1h &nbsp; Bs. 450
-                    </small>
-
-                </div>
-
-                <button type="button">
-                    Seleccionar
-                </button>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- ================================================= -->
-    <!-- 2. SUCURSAL -->
-    <!-- ================================================= -->
-
-    <section class="reserva-seccion">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span>2</span>
-                Selecciona tu Sucursal
-            </h2>
-
-            <label class="estado-completado">
-                Completado
-            </label>
-
-        </div>
-
-
-        <div class="sucursales-grid">
-
-
-            <div class="sucursal-card">
-
-                <h3>
-                    L'Avielle Centro
-                </h3>
-
-                <p class="direccion">
-                    Av. Central, C.C. City Market, Piso 2
-                </p>
-
-                <p>
-                    Horario: Lun-Sáb 8:00 - 19:00
-                </p>
-
-                <p class="disponibles">
-                    12 especialistas disponibles
-                </p>
-
-                <button type="button" class="btn-sucursal">
-                    Seleccionar
-                </button>
-
-            </div>
-
-
-            <div class="sucursal-card seleccionado">
-
-                <h3>
-                    L'Avielle Las Mercedes
-                </h3>
-
-                <p class="direccion">
-                    Calle Madrid, C.C. Paseo Las Mercedes
-                </p>
-
-                <p>
-                    Horario: Lun-Sáb 9:00 - 20:00
-                </p>
-
-                <p class="disponibles">
-                    10 especialistas disponibles
-                </p>
-
-                <button type="button"
-                        class="btn-sucursal seleccionado-btn">
-
-                    Seleccionado
-
-                </button>
-
-            </div>
-
-
-            <div class="sucursal-card">
-
-                <h3>
-                    L'Avielle Altamira
-                </h3>
-
-                <p class="direccion">
-                    Av. San Juan Bosco
-                </p>
-
-                <p>
-                    Horario: Lun-Sáb 8:00 - 18:00
-                </p>
-
-                <p class="disponibles">
-                    8 especialistas disponibles
-                </p>
-
-                <button type="button" class="btn-sucursal">
-                    Seleccionar
-                </button>
-
-            </div>
-
-
-            <div class="sucursal-card no-disponible">
-
-                <h3>
-                    L'Avielle La Castellana
-                </h3>
-
-                <p class="direccion">
-                    Torre Millennium
-                </p>
-
-                <p>
-                    Próximamente
-                </p>
-
-                <button type="button"
-                        class="btn-sucursal"
-                        disabled>
-
-                    No Disponible
-
-                </button>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- ================================================= -->
-    <!-- 3. ESPECIALISTA -->
-    <!-- ================================================= -->
-
-    <section class="reserva-seccion">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span>3</span>
-                Selecciona tu Especialista
-            </h2>
-
-            <label class="estado-completado">
-                Completado
-            </label>
-
-        </div>
-
-
-        <div class="especialistas-grid">
-
-
-            <div class="especialista-card seleccionado">
-
-                <img src="/Images/valentina.jpeg"
-                     alt="Valentina Rojas" />
-
-                <div class="especialista-info">
-
-                    <h3>
-                        Valentina Rojas
-                    </h3>
-
-                    <p class="cargo">
-                        Colorista Senior
-                    </p>
-
-                    <p>
-                        8 años de experiencia
-                    </p>
-
-                    <p class="rating">
-                        ★ 4.9 (23 reseñas)
-                    </p>
-
-                    <div class="especialista-tags">
-
-                        <span>
-                            Balayage
-                        </span>
-
-                        <span>
-                            Tintes
-                        </span>
-
-                    </div>
-
-                    <button type="button"
-                            class="btn-especialista seleccionado-btn">
-
-                        Seleccionada
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="especialista-card">
-
-                <img src="/Images/isabella.jpeg"
-                     alt="Isabella Marchetti" />
-
-                <div class="especialista-info">
-
-                    <h3>
-                        Isabella Marchetti
-                    </h3>
-
-                    <p class="cargo">
-                        Colorista
-                    </p>
-
-                    <p>
-                        5 años de experiencia
-                    </p>
-
-                    <p class="rating">
-                        ★ 4.8 (18 reseñas)
-                    </p>
-
-                    <div class="especialista-tags">
-
-                        <span>
-                            Mechas
-                        </span>
-
-                        <span>
-                            Decoloración
-                        </span>
-
-                    </div>
-
-                    <button type="button"
-                            class="btn-especialista">
-
-                        Seleccionar
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="especialista-card">
-
-                <img src="/Images/sofia.jpeg"
-                     alt="Sofía Montenegro" />
-
-                <div class="especialista-info">
-
-                    <h3>
-                        Sofía Montenegro
-                    </h3>
-
-                    <p class="cargo">
-                        Estilista Integral
-                    </p>
-
-                    <p>
-                        6 años de experiencia
-                    </p>
-
-                    <p>
-                        ★ 4.7 (15 reseñas)
-                    </p>
-
-                    <div class="especialista-tags">
-
-                        <span>
-                            Cortes
-                        </span>
-
-                        <span>
-                            Color
-                        </span>
-
-                    </div>
-
-                    <button type="button"
-                            class="btn-especialista">
-
-                        Seleccionar
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="especialista-card sin-preferencia">
-
-                <div class="sin-preferencia-icon">
-                    +
-                </div>
-
-                <h3>
-                    Sin Preferencia
-                </h3>
-
-                <p>
-                    Asignaremos el mejor
-                    especialista disponible.
-                </p>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- ================================================= -->
-    <!-- 4. PUNTOS -->
-    <!-- ================================================= -->
-
-    <section class="reserva-seccion">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span>4</span>
-                Tus Puntos L'Avielle
-            </h2>
-
-            <label class="estado-activo">
-                Activo
-            </label>
-
-        </div>
-
-
-        <div class="puntos-card">
-
-
-            <div class="puntos-superior">
-
-                <div>
-
-                    <h3>
-                        2,450 puntos disponibles
-                    </h3>
-
-                    <p>
-                        Puedes usar tus puntos para descuentos en esta reserva.
-                    </p>
-
-                </div>
-
-                <div class="porcentaje">
-                    100%
-                </div>
-
-            </div>
-
-
-            <div class="puntos-opcion">
-
-                <div>
-
-                    <strong>
-                        Usar puntos en esta reserva
-                    </strong>
-
-                </div>
-
-                <div class="switch activo">
-                    <div></div>
-                </div>
-
-            </div>
-
-
-            <div class="puntos-valores">
-
-                <span>
-                    0 puntos
-                </span>
-
-                <span>
-                    500 puntos
-                </span>
-
-                <span>
-                    2,450 puntos
-                </span>
-
-            </div>
-
-
-            <div class="puntos-barra">
-
-                <div class="puntos-progreso"></div>
-
-                <div class="punto-marcador"></div>
-
-            </div>
-
-
-            <div class="puntos-resumen">
-
-                <span>
-                    Usarás 500 puntos = Bs. 50 de descuento
-                </span>
-
-                <strong>
-                    Descuento aplicado: -Bs. 50
-                </strong>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- ================================================= -->
-    <!-- 5. FECHA Y HORA -->
-    <!-- ================================================= -->
-
-    <section class="reserva-seccion">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span>5</span>
-                Selecciona Fecha y Hora
-            </h2>
-
-            <label class="estado-pendiente">
-                Pendiente
-            </label>
-
-        </div>
-
-
-        <div class="fecha-hora-grid">
-
-
-            <!-- CALENDARIO -->
-
-            <div class="calendario-card">
-
-                <div class="calendario-header">
-
-                    <strong>
-                        Selecciona una fecha
-                    </strong>
-
-                </div>
-
-
-                <table class="calendario-real">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>L</th>
-                            <th>M</th>
-                            <th>M</th>
-                            <th>J</th>
-                            <th>V</th>
-                            <th>S</th>
-                            <th>D</th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        <tr>
-
-                            <td></td>
-
-                            <td>
-                                <a href="#">1</a>
-                            </td>
-
-                            <td>
-                                <a href="#">2</a>
-                            </td>
-
-                            <td>
-                                <a href="#">3</a>
-                            </td>
-
-                            <td>
-                                <a href="#">4</a>
-                            </td>
-
-                            <td>
-                                <a href="#">5</a>
-                            </td>
-
-                            <td>
-                                <a href="#">6</a>
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-                            <td>
-                                <a href="#">7</a>
-                            </td>
-
-                            <td>
-                                <a href="#">8</a>
-                            </td>
-
-                            <td>
-                                <a href="#">9</a>
-                            </td>
-
-                            <td>
-                                <a href="#">10</a>
-                            </td>
-
-                            <td>
-                                <a href="#">11</a>
-                            </td>
-
-                            <td>
-                                <a href="#">12</a>
-                            </td>
-
-                            <td>
-                                <a href="#">13</a>
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-                            <td>
-                                <a href="#">14</a>
-                            </td>
-
-                            <td>
-
-                                <a href="#"
-                                   style="
-                                    background:#cba45b !important;
-                                    color:white !important;
-                                    ">
-
-                                    15
-
-                                </a>
-
-                            </td>
-
-                            <td>
-                                <a href="#">16</a>
-                            </td>
-
-                            <td>
-                                <a href="#">17</a>
-                            </td>
-
-                            <td>
-                                <a href="#">18</a>
-                            </td>
-
-                            <td>
-                                <a href="#">19</a>
-                            </td>
-
-                            <td>
-                                <a href="#">20</a>
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-                            <td>
-                                <a href="#">21</a>
-                            </td>
-
-                            <td>
-                                <a href="#">22</a>
-                            </td>
-
-                            <td>
-                                <a href="#">23</a>
-                            </td>
-
-                            <td>
-                                <a href="#">24</a>
-                            </td>
-
-                            <td>
-                                <a href="#">25</a>
-                            </td>
-
-                            <td>
-                                <a href="#">26</a>
-                            </td>
-
-                            <td>
-                                <a href="#">27</a>
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-                            <td>
-                                <a href="#">28</a>
-                            </td>
-
-                            <td>
-                                <a href="#">29</a>
-                            </td>
-
-                            <td>
-                                <a href="#">30</a>
-                            </td>
-
-                            <td>
-                                <a href="#">31</a>
-                            </td>
-
-                            <td>
-                                <a href="#"
-                                   style="color:#d8cec6 !important;">
-                                    1
-                                </a>
-                            </td>
-
-                            <td>
-                                <a href="#"
-                                   style="color:#d8cec6 !important;">
-                                    2
-                                </a>
-                            </td>
-
-                            <td>
-                                <a href="#"
-                                   style="color:#d8cec6 !important;">
-                                    3
-                                </a>
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- HORARIOS -->
-
-            <div class="horarios-card">
-
-                <div class="horarios-header">
-
-                    <strong>
-                        Horarios Disponibles - Martes 15 Oct
-                    </strong>
-
-                    <span>
-                        15 Oct
-                    </span>
-
-                </div>
-
-
-                <div class="horarios-grid">
-
-                    <button type="button">
-                        8:00
-                    </button>
-
-                    <button type="button">
-                        8:30
-                    </button>
-
-                    <button type="button">
-                        9:00
-                    </button>
-
-                    <button type="button">
-                        9:30
-                    </button>
-
-                    <button type="button"
-                            class="hora-seleccionada">
-
-                        10:00
-
-                    </button>
-
-                    <button type="button">
-                        10:30
-                    </button>
-
-                    <button type="button">
-                        11:00
-                    </button>
-
-                    <button type="button">
-                        11:30
-                    </button>
-
-                    <button type="button">
-                        14:00
-                    </button>
-
-                    <button type="button">
-                        14:30
-                    </button>
-
-                    <button type="button">
-                        15:00
-                    </button>
-
-                    <button type="button">
-                        15:30
-                    </button>
-
-                    <button type="button">
-                        16:00
-                    </button>
-
-                    <button type="button">
-                        16:30
-                    </button>
-
-                    <button type="button">
-                        17:00
-                    </button>
-
-                    <button type="button">
-                        17:30
-                    </button>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-
-    <!-- ================================================= -->
-    <!-- 6. CONFIRMACIÓN -->
-    <!-- ================================================= -->
-
-    <section class="reserva-seccion confirmacion-seccion">
-
-        <div class="seccion-titulo">
-
-            <h2>
-                <span>6</span>
-                Confirmación de tu Cita
-            </h2>
-
-            <label class="estado-pendiente">
-                Pendiente
-            </label>
-
-        </div>
-
-
-        <div class="confirmacion-card">
-
-
-            <div class="confirmacion-contenido">
-
-
-                <div class="resumen-cita">
-
-                    <h3>
-                        Resumen de tu reserva
-                    </h3>
-
-
-                    <div class="resumen-linea">
-
-                        <span>
-                            Servicio
-                        </span>
-
-                        <strong>
-                            Tintes y Decoloración
-                        </strong>
-
-                    </div>
-
-
-                    <div class="resumen-linea">
-
-                        <span>
-                            Sucursal
-                        </span>
-
-                        <strong>
-                            L'Avielle Las Mercedes
-                        </strong>
-
-                    </div>
-
-
-                    <div class="resumen-linea">
-
-                        <span>
-                            Especialista
-                        </span>
-
-                        <strong>
-                            Valentina Rojas
-                        </strong>
-
-                    </div>
-
-
-                    <div class="resumen-linea">
-
-                        <span>
-                            Fecha
-                        </span>
-
-                        <strong>
-                            Martes 15 de Octubre
-                        </strong>
-
-                    </div>
-
-
-                    <div class="resumen-linea">
-
-                        <span>
-                            Hora
-                        </span>
-
-                        <strong>
-                            10:00 AM
-                        </strong>
-
-                    </div>
-
-
-                </div>
-
-
-                <div class="resumen-precio">
-
-                    <h3>
-                        Detalle de pago
-                    </h3>
-
-
-                    <div class="precio-linea">
-
-                        <span>
-                            Servicio
-                        </span>
-
-                        <strong>
-                            Bs. 850
-                        </strong>
-
-                    </div>
-
-
-                    <div class="precio-linea">
-
-                        <span>
-                            Descuento por puntos
-                        </span>
-
-                        <strong class="descuento">
-                            - Bs. 50
-                        </strong>
-
-                    </div>
-
-
-                    <div class="precio-total">
-
-                        <span>
-                            Total
-                        </span>
-
-                        <strong>
-                            Bs. 800
-                        </strong>
-
-                    </div>
-
-
-                    <p>
-                        Los precios pueden variar según el servicio seleccionado.
-                    </p>
-
-                </div>
-
-
-            </div>
-
-
-            <div class="terminos">
-
-                <label>
-
-                    <input type="checkbox" />
-
-                    <span>
-                        He leído y acepto los términos y condiciones de reserva,
-                        políticas de cancelación y privacidad de L'Avielle.
-                    </span>
-
+    <form asp-controller="Cliente"
+          asp-action="ConfirmarReserva"
+          method="post"
+          id="formReserva">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="IdCliente"
+               value="@Model.IdCliente" />
+
+        <input type="hidden"
+               name="IdServicio"
+               id="IdServicio"
+               value="@Model.IdServicio" />
+
+        <input type="hidden"
+               name="IdSucursal"
+               id="IdSucursal"
+               value="@Model.IdSucursal" />
+
+        <input type="hidden"
+               name="IdEspecialista"
+               id="IdEspecialista"
+               value="@Model.IdEspecialista" />
+
+        <input type="hidden"
+               name="FechaCita"
+               id="FechaCita"
+               value="@fechaInicial" />
+
+        <input type="hidden"
+               name="HoraCita"
+               id="HoraCita"
+               value="@horaInicial" />
+
+
+        <!-- ================================================= -->
+        <!-- 1. SERVICIO -->
+        <!-- ================================================= -->
+
+        <section class="reserva-seccion">
+
+            <div class="seccion-titulo">
+
+                <h2>
+                    <span>1</span>
+                    Selecciona tu Servicio
+                </h2>
+
+                <label class="estado-pendiente"
+                       id="estadoServicio">
+                    Pendiente
                 </label>
 
             </div>
 
 
-            <div class="botones-confirmacion">
+            <div class="servicios-grid"
+                 id="serviciosGrid">
 
-                <button type="button"
-                        class="btn-anterior">
+                @for (int i = 0; i < servicios.Count; i++)
+                {
+                    var servicio = servicios[i];
 
-                    ← Anterior
+                    var imagen =
+                        $"/Images/servicio{(i % 6) + 1}.jpeg";
 
-                </button>
+                    <button type="button"
+                            class="servicio-card"
+                            data-id-servicio="@servicio.IdServicio">
 
+                        <img class="servicio-imagen"
+                             src="@imagen"
+                             alt="@servicio.Servicio" />
 
-                <a href="/Cliente/Pago"
-                   class="btn-pago">
+                        <div class="servicio-info">
 
-                    Proceder al Pago →
+                            <h3>
+                                @servicio.Servicio
+                            </h3>
 
-                </a>
+                            <p>
+                                Bs. @servicio.CostoServicio.ToString("N2")
+                            </p>
+
+                        </div>
+
+                    </button>
+                }
+
+                @if (!servicios.Any())
+                {
+                    <p>
+                        No hay servicios disponibles actualmente.
+                    </p>
+                }
 
             </div>
 
 
-        </div>
+            <!-- DETALLE DEL SERVICIO -->
 
-    </section>
+            <div class="servicio-especifico"
+                 id="detalleServicio"
+                 style="display:none;">
 
+                <div class="servicio-especifico-card">
+
+                    <div>
+
+                        <h3 id="detalleServicioNombre">
+                        </h3>
+
+                        <p id="detalleServicioDescripcion">
+                        </p>
+
+                        <small id="detalleServicioPrecio">
+                        </small>
+
+                    </div>
+
+                    <span>
+                        Seleccionado ✓
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- 2. SUCURSAL -->
+        <!-- ================================================= -->
+
+        <section class="reserva-seccion"
+                 id="seccionSucursal"
+                 style="display:none;">
+
+            <div class="seccion-titulo">
+
+                <h2>
+                    <span>2</span>
+                    Selecciona tu Sucursal
+                </h2>
+
+                <label class="estado-pendiente"
+                       id="estadoSucursal">
+                    Pendiente
+                </label>
+
+            </div>
+
+
+            <div class="sucursales-grid"
+                 id="sucursalesGrid">
+
+                @foreach (var sucursal in sucursales)
+                {
+                    var serviciosSucursal = string.Join(
+                        ",",
+                        opciones
+                            .Where(x =>
+                                x.IdSucursal == sucursal.IdSucursal)
+                            .Select(x => x.IdServicio)
+                            .Distinct()
+                    );
+
+                    <div class="sucursal-card"
+                         data-id-sucursal="@sucursal.IdSucursal"
+                         data-servicios="@serviciosSucursal">
+
+                        <h3>
+                            @sucursal.Sucursal
+                        </h3>
+
+                        <p class="direccion">
+                            @sucursal.DireccionSucursal
+                        </p>
+
+                        <p>
+                            Horario:
+                            @(sucursal.HorarioApertura?.ToString(@"hh\:mm") ?? "--:--")
+                            -
+                            @(sucursal.HorarioCierre?.ToString(@"hh\:mm") ?? "--:--")
+                        </p>
+
+                        <button type="button"
+                                class="btn-sucursal">
+
+                            Seleccionar
+
+                        </button>
+
+                    </div>
+                }
+
+            </div>
+
+            <p id="sinSucursales"
+               style="display:none;">
+                No hay sucursales disponibles para el servicio seleccionado.
+            </p>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- 3. ESPECIALISTA -->
+        <!-- ================================================= -->
+
+        <section class="reserva-seccion"
+                 id="seccionEspecialista"
+                 style="display:none;">
+
+            <div class="seccion-titulo">
+
+                <h2>
+                    <span>3</span>
+                    Selecciona tu Especialista
+                </h2>
+
+                <label class="estado-pendiente"
+                       id="estadoEspecialista">
+                    Pendiente
+                </label>
+
+            </div>
+
+
+            <div class="especialistas-grid"
+                 id="especialistasGrid">
+
+                @foreach (var especialista in especialistas)
+                {
+                    var combinaciones = string.Join(
+                        "|",
+                        opciones
+                            .Where(x =>
+                                x.IdEspecialista == especialista.IdEspecialista)
+                            .Select(x =>
+                                $"{x.IdServicio}:{x.IdSucursal}")
+                            .Distinct()
+                    );
+
+                    <div class="especialista-card"
+                         data-id-especialista="@especialista.IdEspecialista"
+                         data-combinaciones="@combinaciones">
+
+                        <img src="/Images/avatar.jpeg"
+                             alt="@especialista.Especialista" />
+
+                        <div class="especialista-info">
+
+                            <h3>
+                                @especialista.Especialista
+                            </h3>
+
+                            <p class="cargo">
+                                @especialista.RolEspecialista
+                            </p>
+
+                            <p>
+                                @(especialista.AniosExperiencia ?? 0)
+                                años de experiencia
+                            </p>
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                especialista.HorarioEspecialista))
+                            {
+                                <p>
+                                    @especialista.HorarioEspecialista
+                                </p>
+                            }
+
+                            <button type="button"
+                                    class="btn-especialista">
+
+                                Seleccionar
+
+                            </button>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+            <p id="sinEspecialistas"
+               style="display:none;">
+                No hay especialistas disponibles para esta combinación.
+            </p>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- 4. PUNTOS -->
+        <!-- ================================================= -->
+
+        <section class="reserva-seccion"
+                 id="seccionPuntos"
+                 style="display:none;">
+
+            <div class="seccion-titulo">
+
+                <h2>
+                    <span>4</span>
+                    Tus Puntos L'Avielle
+                </h2>
+
+                <label class="estado-activo">
+                    Activo
+                </label>
+
+            </div>
+
+
+            <div class="puntos-card">
+
+                <div class="puntos-superior">
+
+                    <div>
+
+                        <h3>
+                            @Model.PuntosFidelidad.ToString("N0")
+                            puntos disponibles
+                        </h3>
+
+                        <p>
+                            Puedes usar tus puntos para obtener
+                            descuentos en tu reserva.
+                        </p>
+
+                    </div>
+
+                    <div class="porcentaje">
+                        @(Model.PuntosFidelidad > 0 ? "100%" : "0%")
+                    </div>
+
+                </div>
+
+
+                <div class="puntos-opcion">
+
+                    <div>
+
+                        <strong>
+                            Usar puntos en esta reserva
+                        </strong>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input type="checkbox"
+                               id="usarPuntos" />
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="puntos-resumen"
+                     id="resumenPuntos"
+                     style="display:none;">
+
+                    <span>
+                        Puntos disponibles:
+                        @Model.PuntosFidelidad.ToString("N0")
+                    </span>
+
+                    <strong id="textoDescuento">
+                        0 puntos
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- 5. FECHA Y HORA -->
+        <!-- ================================================= -->
+
+        <section class="reserva-seccion"
+                 id="seccionFecha"
+                 style="display:none;">
+
+            <div class="seccion-titulo">
+
+                <h2>
+                    <span>5</span>
+                    Selecciona Fecha y Hora
+                </h2>
+
+                <label class="estado-pendiente"
+                       id="estadoFecha">
+                    Pendiente
+                </label>
+
+            </div>
+
+
+            <div class="fecha-hora-grid">
+
+
+                <!-- CALENDARIO -->
+
+                <div class="calendario-card">
+
+                    <div class="calendario-header">
+
+                        <button type="button"
+                                class="btn-mes"
+                                id="mesAnterior">
+                            ‹
+                        </button>
+
+                        <strong id="mesActual">
+                        </strong>
+
+                        <button type="button"
+                                class="btn-mes"
+                                id="mesSiguiente">
+                            ›
+                        </button>
+
+                    </div>
+
+
+                    <table class="calendario-real">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>L</th>
+                                <th>M</th>
+                                <th>M</th>
+                                <th>J</th>
+                                <th>V</th>
+                                <th>S</th>
+                                <th>D</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="calendarioBody">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- HORARIOS -->
+
+                <div class="horarios-card">
+
+                    <div class="horarios-header">
+
+                        <strong id="tituloHorarios">
+                            Selecciona una fecha
+                        </strong>
+
+                        <span id="fechaHorario">
+                            --
+                        </span>
+
+                    </div>
+
+
+                    <div class="horarios-grid"
+                         id="horariosGrid">
+
+                        <p>
+                            Primero selecciona una fecha.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- 6. CONFIRMACIÓN -->
+        <!-- ================================================= -->
+
+        <section class="reserva-seccion confirmacion-seccion"
+                 id="seccionConfirmacion"
+                 style="display:none;">
+
+            <div class="seccion-titulo">
+
+                <h2>
+                    <span>6</span>
+                    Confirmación de tu Cita
+                </h2>
+
+                <label class="estado-pendiente"
+                       id="estadoConfirmacion">
+                    Pendiente
+                </label>
+
+            </div>
+
+
+            <div class="confirmacion-card">
+
+                <div class="confirmacion-contenido">
+
+
+                    <!-- RESUMEN -->
+
+                    <div class="resumen-cita">
+
+                        <h3>
+                            Resumen de tu reserva
+                        </h3>
+
+
+                        <div class="resumen-linea">
+
+                            <span>
+                                Servicio
+                            </span>
+
+                            <strong id="resumenServicio">
+                                -
+                            </strong>
+
+                        </div>
+
+
+                        <div class="resumen-linea">
+
+                            <span>
+                                Sucursal
+                            </span>
+
+                            <strong id="resumenSucursal">
+                                -
+                            </strong>
+
+                        </div>
+
+
+                        <div class="resumen-linea">
+
+                            <span>
+                                Especialista
+                            </span>
+
+                            <strong id="resumenEspecialista">
+                                -
+                            </strong>
+
+                        </div>
+
+
+                        <div class="resumen-linea">
+
+                            <span>
+                                Fecha
+                            </span>
+
+                            <strong id="resumenFecha">
+                                -
+                            </strong>
+
+                        </div>
+
+
+                        <div class="resumen-linea">
+
+                            <span>
+                                Hora
+                            </span>
+
+                            <strong id="resumenHora">
+                                -
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PRECIO -->
+
+                    <div class="resumen-precio">
+
+                        <h3>
+                            Detalle de pago
+                        </h3>
+
+
+                        <div class="precio-linea">
+
+                            <span>
+                                Servicio
+                            </span>
+
+                            <strong id="resumenPrecio">
+                                Bs. 0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="precio-linea">
+
+                            <span>
+                                Descuento por puntos
+                            </span>
+
+                            <strong class="descuento"
+                                    id="resumenDescuento">
+                                - Bs. 0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="precio-total">
+
+                            <span>
+                                Total
+                            </span>
+
+                            <strong id="resumenTotal">
+                                Bs. 0.00
+                            </strong>
+
+                        </div>
+
+
+                        <p>
+                            Los precios corresponden al servicio
+                            seleccionado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="terminos">
+
+                    <label>
+
+                        <input type="checkbox"
+                               id="aceptarTerminos" />
+
+                        <span>
+                            He leído y acepto los términos y condiciones
+                            de reserva, políticas de cancelación y
+                            privacidad de L'Avielle.
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="botones-confirmacion">
+
+                    <button type="button"
+                            class="btn-anterior"
+                            id="btnAnterior">
+
+                        ← Anterior
+
+                    </button>
+
+
+                    <button type="submit"
+                            class="btn-pago"
+                            id="btnConfirmar"
+                            disabled>
+
+                        Confirmar Reserva →
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </form>
 
 </div>
+
+
+<script>
+
+    /* =========================================================
+       DATOS DE LA BASE DE DATOS
+       ========================================================= */
+
+    const opciones = @Html.Raw(opcionesJson);
+
+
+    /* =========================================================
+       ESTADO ACTUAL
+       ========================================================= */
+
+    let idServicio = @(idServicioInicial);
+    let idSucursal = @(idSucursalInicial);
+    let idEspecialista = @(idEspecialistaInicial);
+
+    let fechaSeleccionada = "@fechaInicial";
+    let horaSeleccionada = "@horaInicial";
+
+    let mesActual = new Date();
+
+    if (fechaSeleccionada) {
+
+        const partes = fechaSeleccionada.split("-");
+
+        if (partes.length === 3) {
+
+            mesActual = new Date(
+                parseInt(partes[0]),
+                parseInt(partes[1]) - 1,
+                1
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ELEMENTOS
+       ========================================================= */
+
+    const seccionSucursal =
+        document.getElementById("seccionSucursal");
+
+    const seccionEspecialista =
+        document.getElementById("seccionEspecialista");
+
+    const seccionPuntos =
+        document.getElementById("seccionPuntos");
+
+    const seccionFecha =
+        document.getElementById("seccionFecha");
+
+    const seccionConfirmacion =
+        document.getElementById("seccionConfirmacion");
+
+
+    /* =========================================================
+       SERVICIO
+       ========================================================= */
+
+    document
+        .querySelectorAll(".servicio-card")
+        .forEach(card => {
+
+            card.addEventListener("click", function () {
+
+                idServicio =
+                    parseInt(this.dataset.idServicio);
+
+                document.getElementById("IdServicio").value =
+                    idServicio;
+
+
+                document
+                    .querySelectorAll(".servicio-card")
+                    .forEach(x =>
+                        x.classList.remove("seleccionado")
+                    );
+
+                this.classList.add("seleccionado");
+
+
+                const opcion =
+                    opciones.find(x =>
+                        x.IdServicio === idServicio
+                    );
+
+                if (opcion) {
+
+                    document.getElementById(
+                        "detalleServicioNombre"
+                    ).textContent =
+                        opcion.Servicio;
+
+                    document.getElementById(
+                        "detalleServicioDescripcion"
+                    ).textContent =
+                        opcion.DescripcionServicio || "";
+
+                    document.getElementById(
+                        "detalleServicioPrecio"
+                    ).textContent =
+                        "Bs. " +
+                        Number(opcion.CostoServicio)
+                            .toFixed(2);
+
+                    document.getElementById(
+                        "detalleServicio"
+                    ).style.display = "block";
+
+                }
+
+
+                resetearDesdeSucursal();
+
+                filtrarSucursales();
+
+                seccionSucursal.style.display = "block";
+
+                marcarPaso("paso2");
+
+            });
+
+        });
+
+
+    /* =========================================================
+       SUCURSALES
+       ========================================================= */
+
+    function filtrarSucursales() {
+
+        let cantidad = 0;
+
+        document
+            .querySelectorAll(".sucursal-card")
+            .forEach(card => {
+
+                const ids =
+                    card.dataset.servicios
+                        .split(",")
+                        .map(Number);
+
+                const disponible =
+                    ids.includes(idServicio);
+
+                if (disponible) {
+
+                    card.style.display = "";
+                    cantidad++;
+
+                } else {
+
+                    card.style.display = "none";
+
+                }
+
+            });
+
+
+        document.getElementById(
+            "sinSucursales"
+        ).style.display =
+            cantidad === 0 ? "block" : "none";
+
+    }
+
+
+    document
+        .querySelectorAll(".btn-sucursal")
+        .forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const card =
+                    this.closest(".sucursal-card");
+
+                idSucursal =
+                    parseInt(card.dataset.idSucursal);
+
+                document.getElementById("IdSucursal").value =
+                    idSucursal;
+
+
+                document
+                    .querySelectorAll(".sucursal-card")
+                    .forEach(x =>
+                        x.classList.remove("seleccionado")
+                    );
+
+                card.classList.add("seleccionado");
+
+
+                resetearDesdeEspecialista();
+
+                filtrarEspecialistas();
+
+                seccionEspecialista.style.display =
+                    "block";
+
+                marcarPaso("paso3");
+
+            });
+
+        });
+
+
+    /* =========================================================
+       ESPECIALISTAS
+       ========================================================= */
+
+    function filtrarEspecialistas() {
+
+        let cantidad = 0;
+
+        document
+            .querySelectorAll(".especialista-card")
+            .forEach(card => {
+
+                const combinaciones =
+                    card.dataset.combinaciones
+                        .split("|");
+
+                const combinacion =
+                    idServicio + ":" + idSucursal;
+
+                const disponible =
+                    combinaciones.includes(combinacion);
+
+                if (disponible) {
+
+                    card.style.display = "";
+                    cantidad++;
+
+                } else {
+
+                    card.style.display = "none";
+
+                }
+
+            });
+
+
+        document.getElementById(
+            "sinEspecialistas"
+        ).style.display =
+            cantidad === 0 ? "block" : "none";
+
+    }
+
+
+    document
+        .querySelectorAll(".btn-especialista")
+        .forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const card =
+                    this.closest(".especialista-card");
+
+                idEspecialista =
+                    parseInt(card.dataset.idEspecialista);
+
+                document.getElementById(
+                    "IdEspecialista"
+                ).value =
+                    idEspecialista;
+
+
+                document
+                    .querySelectorAll(".especialista-card")
+                    .forEach(x =>
+                        x.classList.remove("seleccionado")
+                    );
+
+                card.classList.add("seleccionado");
+
+
+                seccionPuntos.style.display =
+                    "block";
+
+                seccionFecha.style.display =
+                    "block";
+
+                marcarPaso("paso4");
+
+                cargarCalendario();
+
+            });
+
+        });
+
+
+    /* =========================================================
+       PUNTOS
+       ========================================================= */
+
+    const usarPuntos =
+        document.getElementById("usarPuntos");
+
+    usarPuntos.addEventListener("change", function () {
+
+        const resumen =
+            document.getElementById("resumenPuntos");
+
+        if (this.checked) {
+
+            resumen.style.display = "flex";
+
+            document.getElementById(
+                "textoDescuento"
+            ).textContent =
+                "Puntos disponibles: " +
+                Number(@Model.PuntosFidelidad)
+                    .toLocaleString();
+
+        } else {
+
+            resumen.style.display = "none";
+
+        }
+
+        actualizarResumen();
+
+    });
+
+
+    /* =========================================================
+       CALENDARIO
+       ========================================================= */
+
+    const nombresMeses = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre"
+    ];
+
+
+    function cargarCalendario() {
+
+        const year =
+            mesActual.getFullYear();
+
+        const month =
+            mesActual.getMonth();
+
+
+        document.getElementById(
+            "mesActual"
+        ).textContent =
+            nombresMeses[month] + " " + year;
+
+
+        const tbody =
+            document.getElementById(
+                "calendarioBody"
+            );
+
+        tbody.innerHTML = "";
+
+
+        const primerDia =
+            new Date(
+                year,
+                month,
+                1
+            );
+
+
+        let diaSemana =
+            primerDia.getDay();
+
+        /*
+         * JavaScript:
+         * domingo = 0
+         * lunes = 1
+         */
+
+        diaSemana =
+            diaSemana === 0
+                ? 6
+                : diaSemana - 1;
+
+
+        const diasMes =
+            new Date(
+                year,
+                month + 1,
+                0
+            ).getDate();
+
+
+        let fila =
+            document.createElement("tr");
+
+
+        for (let i = 0; i < diaSemana; i++) {
+
+            const td =
+                document.createElement("td");
+
+            fila.appendChild(td);
+
+        }
+
+
+        for (
+            let dia = 1;
+            dia <= diasMes;
+            dia++
+        ) {
+
+            if (fila.children.length === 7) {
+
+                tbody.appendChild(fila);
+
+                fila =
+                    document.createElement("tr");
+
+            }
+
+
+            const td =
+                document.createElement("td");
+
+            const enlace =
+                document.createElement("a");
+
+            enlace.href = "#";
+
+            enlace.textContent = dia;
+
+
+            const fecha =
+                new Date(
+                    year,
+                    month,
+                    dia
+                );
+
+
+            const hoy =
+                new Date();
+
+            hoy.setHours(0, 0, 0, 0);
+
+
+            if (fecha < hoy) {
+
+                enlace.style.color =
+                    "#d8cec6";
+
+                enlace.style.pointerEvents =
+                    "none";
+
+            } else {
+
+                enlace.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.preventDefault();
+
+                        seleccionarFecha(
+                            year,
+                            month,
+                            dia,
+                            enlace
+                        );
+
+                    }
+                );
+
+            }
+
+
+            if (
+                fechaSeleccionada ===
+                formatearFecha(fecha)
+            ) {
+
+                enlace.style.background =
+                    "#cba45b";
+
+                enlace.style.color =
+                    "white";
+
+            }
+
+
+            td.appendChild(enlace);
+
+            fila.appendChild(td);
+
+        }
+
+
+        while (
+            fila.children.length < 7
+        ) {
+
+            fila.appendChild(
+                document.createElement("td")
+            );
+
+        }
+
+
+        tbody.appendChild(fila);
+
+    }
+
+
+    function seleccionarFecha(
+        year,
+        month,
+        day,
+        enlace
+    ) {
+
+        const fecha =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+
+        fechaSeleccionada =
+            formatearFecha(fecha);
+
+
+        document.getElementById(
+            "FechaCita"
+        ).value =
+            fechaSeleccionada;
+
+
+        document
+            .querySelectorAll(
+                ".calendario-real a"
+            )
+            .forEach(x => {
+
+                x.style.background =
+                    "";
+
+                x.style.color =
+                    "";
+
+            });
+
+
+        enlace.style.background =
+            "#cba45b";
+
+        enlace.style.color =
+            "white";
+
+
+        horaSeleccionada = "";
+
+        document.getElementById(
+            "HoraCita"
+        ).value = "";
+
+
+        cargarHorasDisponibles();
+
+    }
+
+
+    function formatearFecha(fecha) {
+
+        const year =
+            fecha.getFullYear();
+
+        const month =
+            String(
+                fecha.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                fecha.getDate()
+            ).padStart(2, "0");
+
+
+        return `${year}-${month}-${day}`;
+
+    }
+
+
+    document.getElementById(
+        "mesAnterior"
+    ).addEventListener(
+        "click",
+        function () {
+
+            mesActual.setMonth(
+                mesActual.getMonth() - 1
+            );
+
+            cargarCalendario();
+
+        }
+    );
+
+
+    document.getElementById(
+        "mesSiguiente"
+    ).addEventListener(
+        "click",
+        function () {
+
+            mesActual.setMonth(
+                mesActual.getMonth() + 1
+            );
+
+            cargarCalendario();
+
+        }
+    );
+
+
+    /* =========================================================
+       HORARIOS
+       ========================================================= */
+
+    async function cargarHorasDisponibles() {
+
+        const grid =
+            document.getElementById(
+                "horariosGrid"
+            );
+
+
+        if (
+            !idEspecialista ||
+            !idSucursal ||
+            !fechaSeleccionada
+        ) {
+
+            grid.innerHTML =
+                "<p>Selecciona una fecha.</p>";
+
+            return;
+
+        }
+
+
+        grid.innerHTML =
+            "<p>Consultando disponibilidad...</p>";
+
+
+        document.getElementById(
+            "tituloHorarios"
+        ).textContent =
+            "Horarios disponibles";
+
+
+        document.getElementById(
+            "fechaHorario"
+        ).textContent =
+            fechaSeleccionada;
+
+
+        try {
+
+            const url =
+                '@Url.Action("ObtenerHorasDisponibles", "Cliente")'
+                +
+                '?idEspecialista='
+                +
+                encodeURIComponent(idEspecialista)
+                +
+                '&idSucursal='
+                +
+                encodeURIComponent(idSucursal)
+                +
+                '&fecha='
+                +
+                encodeURIComponent(fechaSeleccionada);
+
+
+            const respuesta =
+                await fetch(url);
+
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+                    "No se pudieron obtener los horarios."
+                );
+
+            }
+
+
+            const horas =
+                await respuesta.json();
+
+
+            grid.innerHTML = "";
+
+
+            if (
+                !horas ||
+                horas.length === 0
+            ) {
+
+                grid.innerHTML =
+                    "<p>No hay horarios disponibles para esta fecha.</p>";
+
+                return;
+
+            }
+
+
+            horas.forEach(hora => {
+
+                let textoHora =
+                    String(hora);
+
+
+                if (
+                    textoHora.length >= 5
+                ) {
+
+                    textoHora =
+                        textoHora.substring(
+                            0,
+                            5
+                        );
+
+                }
+
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                button.type =
+                    "button";
+
+                button.textContent =
+                    textoHora;
+
+
+                if (
+                    horaSeleccionada ===
+                    textoHora
+                ) {
+
+                    button.classList.add(
+                        "hora-seleccionada"
+                    );
+
+                }
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        document
+                            .querySelectorAll(
+                                "#horariosGrid button"
+                            )
+                            .forEach(x =>
+                                x.classList.remove(
+                                    "hora-seleccionada"
+                                )
+                            );
+
+
+                        this.classList.add(
+                            "hora-seleccionada"
+                        );
+
+
+                        horaSeleccionada =
+                            textoHora;
+
+
+                        document.getElementById(
+                            "HoraCita"
+                        ).value =
+                            horaSeleccionada;
+
+
+                        seccionConfirmacion
+                            .style.display =
+                            "block";
+
+
+                        marcarPaso("paso6");
+
+                        actualizarResumen();
+
+                    }
+                );
+
+
+                grid.appendChild(button);
+
+            });
+
+        }
+        catch (error) {
+
+            grid.innerHTML =
+                "<p>Error al consultar los horarios disponibles.</p>";
+
+            console.error(error);
+
+        }
+
+    }
+
+
+    /* =========================================================
+       RESUMEN
+       ========================================================= */
+
+    function actualizarResumen() {
+
+        const opcion =
+            opciones.find(x =>
+                x.IdServicio === idServicio &&
+                x.IdSucursal === idSucursal &&
+                x.IdEspecialista === idEspecialista
+            );
+
+
+        if (!opcion) {
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "resumenServicio"
+        ).textContent =
+            opcion.Servicio;
+
+
+        document.getElementById(
+            "resumenSucursal"
+        ).textContent =
+            opcion.Sucursal;
+
+
+        document.getElementById(
+            "resumenEspecialista"
+        ).textContent =
+            opcion.Especialista;
+
+
+        document.getElementById(
+            "resumenFecha"
+        ).textContent =
+            fechaSeleccionada || "-";
+
+
+        document.getElementById(
+            "resumenHora"
+        ).textContent =
+            horaSeleccionada || "-";
+
+
+        const precio =
+            Number(
+                opcion.CostoServicio
+            );
+
+
+        document.getElementById(
+            "resumenPrecio"
+        ).textContent =
+            "Bs. " +
+            precio.toFixed(2);
+
+
+        /*
+         * La aplicación real del descuento
+         * debe hacerse también en el Controller.
+         */
+
+        document.getElementById(
+            "resumenDescuento"
+        ).textContent =
+            "- Bs. 0.00";
+
+
+        document.getElementById(
+            "resumenTotal"
+        ).textContent =
+            "Bs. " +
+            precio.toFixed(2);
+
+
+        comprobarFormulario();
+
+    }
+
+
+    /* =========================================================
+       VALIDACIÓN
+       ========================================================= */
+
+    const terminos =
+        document.getElementById(
+            "aceptarTerminos"
+        );
+
+
+    terminos.addEventListener(
+        "change",
+        comprobarFormulario
+    );
+
+
+    function comprobarFormulario() {
+
+        const completo =
+            idServicio > 0 &&
+            idSucursal > 0 &&
+            idEspecialista > 0 &&
+            fechaSeleccionada !== "" &&
+            horaSeleccionada !== "" &&
+            terminos.checked;
+
+
+        document.getElementById(
+            "btnConfirmar"
+        ).disabled =
+            !completo;
+
+    }
+
+
+    /* =========================================================
+       REINICIOS
+       ========================================================= */
+
+    function resetearDesdeSucursal() {
+
+        idSucursal = 0;
+
+        idEspecialista = 0;
+
+        fechaSeleccionada = "";
+
+        horaSeleccionada = "";
+
+
+        document.getElementById(
+            "IdSucursal"
+        ).value = "";
+
+
+        document.getElementById(
+            "IdEspecialista"
+        ).value = "";
+
+
+        document.getElementById(
+            "FechaCita"
+        ).value = "";
+
+
+        document.getElementById(
+            "HoraCita"
+        ).value = "";
+
+
+        seccionEspecialista.style.display =
+            "none";
+
+        seccionPuntos.style.display =
+            "none";
+
+        seccionFecha.style.display =
+            "none";
+
+        seccionConfirmacion.style.display =
+            "none";
+
+    }
+
+
+    function resetearDesdeEspecialista() {
+
+        idEspecialista = 0;
+
+        fechaSeleccionada = "";
+
+        horaSeleccionada = "";
+
+
+        document.getElementById(
+            "IdEspecialista"
+        ).value = "";
+
+
+        document.getElementById(
+            "FechaCita"
+        ).value = "";
+
+
+        document.getElementById(
+            "HoraCita"
+        ).value = "";
+
+
+        seccionPuntos.style.display =
+            "none";
+
+        seccionFecha.style.display =
+            "none";
+
+        seccionConfirmacion.style.display =
+            "none";
+
+    }
+
+
+    /* =========================================================
+       PASOS
+       ========================================================= */
+
+    function marcarPaso(id) {
+
+        const pasos =
+            document.querySelectorAll(
+                ".paso"
+            );
+
+
+        pasos.forEach(paso =>
+            paso.classList.remove(
+                "activo"
+            )
+        );
+
+
+        const actual =
+            document.getElementById(id);
+
+
+        if (actual) {
+
+            actual.classList.add(
+                "activo"
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       INICIALIZACIÓN
+       ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            cargarCalendario();
+
+
+            if (idServicio > 0) {
+
+                const cardServicio =
+                    document.querySelector(
+                        `.servicio-card[data-id-servicio="${idServicio}"]`
+                    );
+
+                if (cardServicio) {
+
+                    cardServicio.click();
+
+                }
+
+            }
+
+        }
+    );
+
+</script>
