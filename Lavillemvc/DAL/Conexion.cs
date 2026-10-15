@@ -1,26 +1,25 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using System.IO;
+﻿
+using Npgsql;
 
 namespace Lavillemvc.DAL
 {
     public class Conexion
     {
-        private readonly string _connectionString;
+        private readonly string _cadenaConexion;
 
-        public Conexion()
+        public Conexion(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            _connectionString = builder.GetConnectionString("DefaultConnection");
+            _cadenaConexion =
+                configuration.GetConnectionString(
+                    "SupabaseConnection"
+                ) ?? throw new Exception(
+                    "No se encontró la cadena de conexión."
+                );
         }
 
-        public SqlConnection GetConnection()
+        public NpgsqlConnection GetConnection()
         {
-            return new SqlConnection(_connectionString);
+            return new NpgsqlConnection(_cadenaConexion);
         }
     }
 }
