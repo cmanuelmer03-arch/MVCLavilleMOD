@@ -1,7 +1,9 @@
 ﻿@using System
+@using System.Linq
 @using System.Globalization
 @using Lavillemvc.Controllers
 @model List<Lavillemvc.Controllers.ProductoInventarioItem>
+
 @{
     Layout = null;
 
@@ -9,38 +11,66 @@
     var categoriaActual = ViewBag.Categoria as string ?? "Todos";
     var ordenarPor = ViewBag.OrdenarPor as string ?? "Nombre";
 
-    var paginaActual = (int)(ViewBag.PaginaActual ?? 1);
-    var totalPaginas = (int)(ViewBag.TotalPaginas ?? 1);
-    var totalFiltrados = (int)(ViewBag.TotalFiltrados ?? 0);
-    var mostrarDesde = (int)(ViewBag.MostrarDesde ?? 0);
-    var mostrarHasta = (int)(ViewBag.MostrarHasta ?? 0);
+    int paginaActual = (int)(ViewBag.PaginaActual ?? 1);
+    int totalPaginas = (int)(ViewBag.TotalPaginas ?? 1);
+    int totalFiltrados = (int)(ViewBag.TotalFiltrados ?? 0);
+    int mostrarDesde = (int)(ViewBag.MostrarDesde ?? 0);
+    int mostrarHasta = (int)(ViewBag.MostrarHasta ?? 0);
 
     var categorias = ViewBag.CategoriasDisponibles as string[]
         ?? Array.Empty<string>();
 
-    var formularioAbierto = (bool)(ViewBag.FormularioAbierto ?? false);
+    // Opciones conocidas más las existentes en Supabase.
+    var categoriasFormulario = new[]
+    {
+        "Coloración",
+        "Consumibles",
+        "Cuidado Capilar",
+        "Herramientas"
+    }
+    .Concat(categorias)
+    .Where(c => !string.IsNullOrWhiteSpace(c))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .OrderBy(c => c)
+    .ToArray();
+
+    bool formularioAbierto =
+        (bool)(ViewBag.FormularioAbierto ?? false);
 
     var productoFormulario =
         ViewBag.ProductoFormulario as ProductoInventarioItem
-        ?? new ProductoInventarioItem
-        {
-            Categoria = "Coloración",
-            StockMinimo = 5
-        };
+        ?? new ProductoInventarioItem();
 
     var productoDetalle =
         ViewBag.ProductoDetalle as ProductoInventarioItem;
 
-    var esEdicion = productoFormulario.Id > 0;
+    bool esEdicion = productoFormulario.Id > 0;
 
-    var mensaje = ViewBag.Mensaje as string;
-    var mensajeError = ViewBag.MensajeError as string;
+    string? mensaje = ViewBag.Mensaje as string;
+    string? mensajeError = ViewBag.MensajeError as string;
+
+    DateTime? ultimaActualizacion =
+        ViewBag.UltimaActualizacion as DateTime?;
+
+    // Al agregar, obligamos a seleccionar una categoría.
+    // Al editar, conservamos la categoría actual.
+    // Si falla el POST, conservamos la elección realizada.
+    string categoriaSeleccionada =
+        esEdicion ||
+        string.Equals(
+            Context.Request.Method,
+            "POST",
+            StringComparison.OrdinalIgnoreCase)
+        ? productoFormulario.Categoria
+        : "";
 }
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
     <title>Gestión de Productos - L'Avielle</title>
 
@@ -56,27 +86,34 @@
                         <div class="brand-logo">L'Avielle</div>
 
                         <div class="role-badge">
-                            Encargado de Inventario — Las Mercedes
+                            Gestión de inventario
                         </div>
                     </div>
 
-                    <nav class="nav-list" aria-label="Navegación de inventario">
+                    <nav class="nav-list"
+                         aria-label="Navegación de inventario">
+
                         <a href="@Url.Action("PanelInventario", "Inventario")"
                            class="sidebar-link">
+
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                                    <rect x="4" y="4"
+                                          width="16" height="16" rx="2"></rect>
                                     <path d="M8 8h8"></path>
                                     <path d="M8 12h5"></path>
                                     <path d="M8 16h4"></path>
                                 </svg>
                             </span>
 
-                            <span class="tab-text">Panel de Inventario</span>
+                            <span class="tab-text">
+                                Panel de Inventario
+                            </span>
                         </a>
 
                         <a href="@Url.Action("GestionProductos", "Inventario")"
                            class="sidebar-link active">
+
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M5 7h14"></path>
@@ -88,7 +125,10 @@
                                 </svg>
                             </span>
 
-                            <span class="tab-text">Gestión de Productos</span>
+                            <span class="tab-text">
+                                Gestión de Productos
+                            </span>
+
                             <span class="active-indicator"></span>
                         </a>
                     </nav>
@@ -99,6 +139,7 @@
 
                     <a href="@Url.Action("Index", "Login")"
                        class="sidebar-link logout-link">
+
                         <span class="nav-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
@@ -113,11 +154,14 @@
             </aside>
 
             <main class="main-content">
+
                 <section class="products-header">
                     <div class="header-text">
                         <h1>Gestión de Productos</h1>
+
                         <p>
-                            Visualiza, edita y añade productos al catálogo de L'Avielle.
+                            Visualiza, edita y añade productos
+                            al catálogo de L'Avielle.
                         </p>
                     </div>
 
@@ -148,11 +192,19 @@
                                name="ordenarPor"
                                value="@ordenarPor" />
 
-                        <button type="submit" class="secondary-button">
+                        <button type="submit"
+                                class="secondary-button">
                             Buscar
                         </button>
 
-                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, mostrarFormulario = true, pagina = paginaActual })"
+                        <a href="@Url.Action("GestionProductos", "Inventario", new
+                           {
+                               busqueda,
+                               categoria = categoriaActual,
+                               ordenarPor,
+                               mostrarFormulario = true,
+                               pagina = paginaActual
+                           })"
                            class="add-product-button">
                             + Agregar Producto
                         </a>
@@ -176,18 +228,27 @@
                 @if (formularioAbierto)
                 {
                     <section class="product-form-card">
+
                         <div class="section-head">
                             <h2>
-                                @(esEdicion ? "Editar producto" : "Agregar producto")
+                                @(esEdicion
+                                    ? "Editar producto"
+                                    : "Agregar producto")
                             </h2>
 
                             <a class="secondary-button"
-                               href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual })">
+                               href="@Url.Action("GestionProductos", "Inventario")">
                                 Cancelar
                             </a>
                         </div>
 
-                        @Html.ValidationSummary(false, "Revisa los siguientes datos:")
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            @Html.ValidationSummary(
+                                false,
+                                "Revisa los siguientes datos:"
+                            )
+                        }
 
                         <form method="post"
                               action="@Url.Action("GuardarProducto", "Inventario")">
@@ -215,8 +276,11 @@
                                    value="@paginaActual" />
 
                             <div class="product-form-grid">
+
                                 <div class="product-form-field">
-                                    <label for="Nombre">Nombre del producto</label>
+                                    <label for="Nombre">
+                                        Nombre del producto
+                                    </label>
 
                                     <input id="Nombre"
                                            name="Nombre"
@@ -228,20 +292,44 @@
                                 </div>
 
                                 <div class="product-form-field">
-                                    <label for="Categoria">Categoría</label>
+                                    <label for="Categoria">
+                                        Categoría
+                                    </label>
 
                                     <select id="Categoria"
                                             name="Categoria"
-                                            required>
-                                        @foreach (var cat in categorias)
+                                            required
+                                            aria-label="Seleccionar categoría">
+
+                                        @if (string.IsNullOrWhiteSpace(categoriaSeleccionada))
                                         {
-                                            if (productoFormulario.Categoria == cat)
+                                            <option value="" disabled selected>
+                                                Selecciona una categoría
+                                            </option>
+                                        }
+                                        else
+                                        {
+                                            <option value="" disabled>
+                                                Selecciona una categoría
+                                            </option>
+                                        }
+
+                                        @foreach (var cat in categoriasFormulario)
+                                        {
+                                            if (string.Equals(
+                                                categoriaSeleccionada,
+                                                cat,
+                                                StringComparison.OrdinalIgnoreCase))
                                             {
-                                                <option value="@cat" selected>@cat</option>
+                                                <option value="@cat" selected>
+                                                    @cat
+                                                </option>
                                             }
                                             else
                                             {
-                                                <option value="@cat">@cat</option>
+                                                <option value="@cat">
+                                                    @cat
+                                                </option>
                                             }
                                         }
                                     </select>
@@ -262,7 +350,9 @@
                                 </div>
 
                                 <div class="product-form-field">
-                                    <label for="StockActual">Stock actual</label>
+                                    <label for="StockActual">
+                                        Stock actual
+                                    </label>
 
                                     <input id="StockActual"
                                            name="StockActual"
@@ -277,22 +367,9 @@
                                 </div>
 
                                 <div class="product-form-field">
-                                    <label for="StockMinimo">Stock mínimo</label>
-
-                                    <input id="StockMinimo"
-                                           name="StockMinimo"
-                                           type="number"
-                                           min="0"
-                                           max="1000000"
-                                           step="1"
-                                           required
-                                           value="@productoFormulario.StockMinimo" />
-
-                                    @Html.ValidationMessage("StockMinimo")
-                                </div>
-
-                                <div class="product-form-field">
-                                    <label for="Precio">Precio unitario ($)</label>
+                                    <label for="Precio">
+                                        Precio unitario ($)
+                                    </label>
 
                                     <input id="Precio"
                                            name="Precio"
@@ -304,18 +381,23 @@
 
                                     @Html.ValidationMessage("Precio")
                                 </div>
+
                             </div>
 
                             <div class="product-form-actions">
-                                <button class="add-product-button" type="submit">
-                                    @(esEdicion ? "Guardar cambios" : "Guardar producto")
+                                <button class="add-product-button"
+                                        type="submit">
+                                    @(esEdicion
+                                        ? "Guardar cambios"
+                                        : "Guardar producto")
                                 </button>
 
                                 <a class="secondary-button"
-                                   href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual })">
+                                   href="@Url.Action("GestionProductos", "Inventario")">
                                     Cancelar
                                 </a>
                             </div>
+
                         </form>
                     </section>
                 }
@@ -327,7 +409,7 @@
                             <h2>Detalle del producto</h2>
 
                             <a class="secondary-button"
-                               href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual })">
+                               href="@Url.Action("GestionProductos", "Inventario")">
                                 Cerrar
                             </a>
                         </div>
@@ -365,7 +447,9 @@
 
                             <div>
                                 <span>Precio unitario</span>
-                                <strong>$ @productoDetalle.Precio.ToString("N2")</strong>
+                                <strong>
+                                    $ @productoDetalle.Precio.ToString("N2")
+                                </strong>
                             </div>
 
                             <div>
@@ -377,15 +461,28 @@
                 }
 
                 <section class="filters-row">
+
                     <div class="filter-options">
-                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = "Todos", ordenarPor, pagina = 1 })"
+                        <a href="@Url.Action("GestionProductos", "Inventario", new
+                           {
+                               busqueda,
+                               categoria = "Todos",
+                               ordenarPor,
+                               pagina = 1
+                           })"
                            class="filter @(categoriaActual == "Todos" ? "selected" : "")">
                             Todos
                         </a>
 
                         @foreach (var cat in categorias)
                         {
-                            <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = cat, ordenarPor, pagina = 1 })"
+                            <a href="@Url.Action("GestionProductos", "Inventario", new
+                               {
+                                   busqueda,
+                                   categoria = cat,
+                                   ordenarPor,
+                                   pagina = 1
+                               })"
                                class="filter @(categoriaActual == cat ? "selected" : "")">
                                 @cat
                             </a>
@@ -427,7 +524,7 @@
 
                             <option value="PrecioDesc"
                                     selected="@(ordenarPor == "PrecioDesc" ? "selected" : null)">
-                                Precio mayor a menor
+                                Precio mayor a mayor
                             </option>
 
                             <option value="StockAsc"
@@ -466,6 +563,7 @@
                            value="@paginaActual" />
 
                     <section class="products-table-card">
+
                         <div class="product-form-actions">
                             <button type="submit"
                                     class="secondary-button"
@@ -515,6 +613,7 @@
                                             : "low-status";
 
                                 <div class="product-row">
+
                                     <div class="code">
                                         <input type="checkbox"
                                                class="seleccionar-producto"
@@ -530,6 +629,7 @@
                                     </div>
 
                                     <div>@producto.Categoria</div>
+
                                     <div>@producto.Marca</div>
 
                                     <div class="@(producto.StockActual < producto.StockMinimo ? "warning-text" : "")">
@@ -549,13 +649,27 @@
                                     </div>
 
                                     <div class="row-actions">
-                                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual, detalleId = producto.Id })">
+                                        <a href="@Url.Action("GestionProductos", "Inventario", new
+                                           {
+                                               busqueda,
+                                               categoria = categoriaActual,
+                                               ordenarPor,
+                                               pagina = paginaActual,
+                                               detalleId = producto.Id
+                                           })">
                                             Ver
                                         </a>
 
                                         <span>·</span>
 
-                                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual, editarId = producto.Id })">
+                                        <a href="@Url.Action("GestionProductos", "Inventario", new
+                                           {
+                                               busqueda,
+                                               categoria = categoriaActual,
+                                               ordenarPor,
+                                               pagina = paginaActual,
+                                               editarId = producto.Id
+                                           })">
                                             Editar
                                         </a>
                                     </div>
@@ -565,13 +679,20 @@
 
                         <div class="table-bottom">
                             <span>
-                                Mostrando @mostrarDesde-@mostrarHasta de @totalFiltrados productos
+                                Mostrando @mostrarDesde-@mostrarHasta
+                                de @totalFiltrados productos
                             </span>
 
                             <div class="pagination">
                                 @if (paginaActual > 1)
                                 {
-                                    <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual - 1 })">
+                                    <a href="@Url.Action("GestionProductos", "Inventario", new
+                                       {
+                                           busqueda,
+                                           categoria = categoriaActual,
+                                           ordenarPor,
+                                           pagina = paginaActual - 1
+                                       })">
                                         Anterior
                                     </a>
                                 }
@@ -585,7 +706,13 @@
                                     p <= Math.Min(totalPaginas, paginaActual + 2);
                                     p++)
                                 {
-                                    <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = p })"
+                                    <a href="@Url.Action("GestionProductos", "Inventario", new
+                                       {
+                                           busqueda,
+                                           categoria = categoriaActual,
+                                           ordenarPor,
+                                           pagina = p
+                                       })"
                                        class="@(p == paginaActual ? "current-page" : "")">
                                         @p
                                     </a>
@@ -593,7 +720,13 @@
 
                                 @if (paginaActual < totalPaginas)
                                 {
-                                    <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual + 1 })">
+                                    <a href="@Url.Action("GestionProductos", "Inventario", new
+                                       {
+                                           busqueda,
+                                           categoria = categoriaActual,
+                                           ordenarPor,
+                                           pagina = paginaActual + 1
+                                       })">
                                         Siguiente
                                     </a>
                                 }
@@ -603,6 +736,7 @@
                                 }
                             </div>
                         </div>
+
                     </section>
                 </form>
 
@@ -623,18 +757,24 @@
                     </div>
 
                     <div class="last-update">
-                        Última actualización: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                        Última actualización:
+                        @(ultimaActualizacion?.ToString("dd/MM/yyyy HH:mm")
+                            ?? "Sin registro")
                     </div>
                 </section>
+
             </main>
         </div>
     </div>
 
     <script>
-            const seleccionarTodos = document.getElementById('seleccionarTodos');
+            const seleccionarTodos =
+                document.getElementById('seleccionarTodos');
 
             const casillasProducto = () =>
-                Array.from(document.querySelectorAll('.seleccionar-producto'));
+                Array.from(
+                    document.querySelectorAll('.seleccionar-producto')
+                );
 
             seleccionarTodos?.addEventListener('change', function() {
                 casillasProducto().forEach(casilla => {
@@ -654,7 +794,9 @@
 
             function confirmarEliminacion() {
                 const seleccionados =
-                    casillasProducto().filter(casilla => casilla.checked).length;
+                    casillasProducto().filter(
+                        casilla => casilla.checked
+                    ).length;
 
                 if (seleccionados === 0) {
                     alert('Selecciona al menos un producto para eliminar.');
@@ -662,7 +804,7 @@
                 }
 
                 return confirm(
-                    `¿Seguro que quieres eliminar ${seleccionados} producto(s)? Esta acción no se puede deshacer.`
+                    `¿Seguro que quieres eliminar ${seleccionados} producto(s) del inventario?`
                 );
             }
     </script>
