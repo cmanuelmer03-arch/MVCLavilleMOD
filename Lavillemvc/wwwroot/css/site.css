@@ -437,14 +437,6 @@ button, input, select {
     color: #737a87;
 }
 
-/* Rejilla del dashboard */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 1.5rem;
-    align-items: start;
-}
-
 .card-container {
     padding: 1.6rem;
 }

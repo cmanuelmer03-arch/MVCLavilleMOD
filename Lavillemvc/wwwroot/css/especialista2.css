@@ -145,9 +145,10 @@ h3 {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
     gap: 30px;
     margin-top: 0;
+    align-items: start;
 }
 
 .columna-izquierda,
@@ -400,6 +401,8 @@ button {
     color: white;
     border-radius: 18px;
     padding: 28px;
+    margin-top: 0;
+    align-self: start;
 }
 
 .membresia-titulo {
@@ -596,10 +599,6 @@ button {
 
     .contenido {
         padding: 35px 30px;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
     }
 
     .dashboard-header {
@@ -3608,5 +3607,18 @@ body .cancelar-reserva {
 
     .servicios-especificos-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr) !important;
+    gap: 30px !important;
+    align-items: start;
+}
+
+@media screen and (max-width: 700px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
     }
 }

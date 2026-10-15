@@ -1,5 +1,7 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
+﻿@model Lavillemvc.Models.DashboardClienteCompleto
+
+@{
+    ViewData["Title"] = "Dashboard Cliente";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
 
@@ -8,20 +10,35 @@
     <div class="dashboard-header">
 
         <div class="titulo-dashboard">
-            <h1>Bienvenida, María</h1>
+
+            <h1>Bienvenida, @Model.Nombre</h1>
 
             <p>
                 Tu resumen de belleza
                 <span>•</span>
-                <strong>Sábado, 4 de Octubre 2026</strong>
+
+                @if (Model.FechaProximaCita.HasValue)
+                {
+                    <strong>
+                        @Model.FechaProximaCita.Value.ToString("dddd, d 'de' MMMM 'de' yyyy")
+                    </strong>
+                }
             </p>
+
         </div>
 
         <div class="usuario">
+
             <div class="usuario-info">
-                <strong>María Silva</strong>
-                <small>Socio Gold</small>
+
+                <strong>@Model.NombreCompleto</strong>
+
+                <small>
+                    Socio @Model.Membresia
+                </small>
+
             </div>
+
         </div>
 
     </div>
@@ -31,210 +48,190 @@
 
         <div class="columna-izquierda">
 
-            <!-- PRÓXIMA CITA -->
-            <div class="card cita">
+            @if (Model.IdProximaCita.HasValue)
+            {
+                <div class="card cita">
 
-                <div class="card-title">
+                    <div class="card-title">
 
-                    <span class="titulo-cita">
-                        TU PRÓXIMA CITA
-                    </span>
+                        <span class="titulo-cita">
+                            TU PRÓXIMA CITA
+                        </span>
 
-                    <span class="estado-confirmada">
-                        Confirmada
-                    </span>
-
-                </div>
-
-                <div class="cita-contenido">
-
-                    <div>
-                        <h2>Balayage + Corte</h2>
-
-                        <p class="especialista">
-                            Especialista:
-                            <strong>Valentina Rojas</strong>
-                        </p>
-                    </div>
-
-                    <div class="datos-cita">
-
-                        <strong>
-                            Sábado 4 Oct, 10:00 AM
-                        </strong>
-
-                        <span>
-                            L'Avielle Las Mercedes
+                        <span class="estado-confirmada">
+                            @Model.EstadoProximaCita
                         </span>
 
                     </div>
 
+
+                    <div class="cita-contenido">
+
+                        <div>
+
+                            <h2>
+                                @Model.ProximoServicio
+                            </h2>
+
+                            <p class="especialista">
+
+                                Especialista:
+
+                                <strong>
+                                    @Model.EspecialistaProximaCita
+                                </strong>
+
+                            </p>
+
+                        </div>
+
+
+                        <div class="datos-cita">
+
+                            <strong>
+
+                                @if (Model.FechaProximaCita.HasValue)
+                                {
+                                    @Model.FechaProximaCita.Value.ToString("d 'de' MMMM 'de' yyyy")
+                                }
+
+                                @if (Model.HoraProximaCita.HasValue)
+                                {
+                                    @Model.HoraProximaCita.Value.ToString(@"hh\:mm")
+                                }
+
+                            </strong>
+
+                            <span>
+                                @Model.SucursalProximaCita
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr />
+
+
+                    <div class="botones-cita">
+
+                        <a asp-controller="Cliente"
+                           asp-action="ReservarCita"
+                           asp-route-especialista="@Model.EspecialistaProximaCita"
+                           asp-route-servicio="@Model.ProximoServicio"
+                           asp-route-sucursal="@Model.SucursalProximaCita">
+
+                            Modificar Cita
+
+                        </a>
+
+                        <button type="button" class="btn-light">
+                            Cancelar Cita
+                        </button>
+
+                    </div>
+
                 </div>
-
-                <hr />
-
-                <div class="botones-cita">
-
-                    <button type="button">
-                        Modificar Cita
-                    </button>
-
-                    <button type="button" class="btn-light">
-                        Cancelar Cita
-                    </button>
-
-                </div>
-
-            </div>
+            }
 
 
-            <!-- HISTORIAL -->
             <div class="card historial-card">
 
-                <h2>Historial Reciente</h2>
+                <h2>
+                    Historial Reciente
+                </h2>
+
 
                 <div class="historial-lista">
 
-                    <div class="historial-item">
+                    @foreach (var cita in Model.HistorialReciente)
+                    {
+                        <div class="historial-item">
 
-                        <div class="historial-servicio">
-                            <strong>
-                                Tratamiento de Hidratación Profunda
+                            <div class="historial-servicio">
+
+                                <strong>
+                                    @cita.Servicio
+                                </strong>
+
+                                <span>
+                                    Con @cita.Especialista
+                                </span>
+
+                            </div>
+
+                            <span class="historial-fecha">
+
+                                @cita.FechaCita.ToString("d 'de' MMMM 'de' yyyy")
+
+                            </span>
+
+                            <strong class="historial-precio">
+
+                                $@cita.PrecioServicio.ToString("0.00")
+
                             </strong>
 
-                            <span>
-                                Con Sofía Montenegro
-                            </span>
                         </div>
-
-                        <span class="historial-fecha">
-                            12 de Septiembre, 2026
-                        </span>
-
-                        <strong class="historial-precio">
-                            $85.00
-                        </strong>
-
-                    </div>
-
-
-                    <div class="historial-item">
-
-                        <div class="historial-servicio">
-                            <strong>
-                                Maquillaje Social de Gala
-                            </strong>
-
-                            <span>
-                                Con Mateo Valenzuela
-                            </span>
-                        </div>
-
-                        <span class="historial-fecha">
-                            28 de Agosto, 2026
-                        </span>
-
-                        <strong class="historial-precio">
-                            $120.00
-                        </strong>
-
-                    </div>
-
-
-                    <div class="historial-item">
-
-                        <div class="historial-servicio">
-                            <strong>
-                                Manicura Spa & Gel
-                            </strong>
-
-                            <span>
-                                Con Isabella Conti
-                            </span>
-                        </div>
-
-                        <span class="historial-fecha">
-                            05 de Agosto, 2026
-                        </span>
-
-                        <strong class="historial-precio">
-                            $45.00
-                        </strong>
-
-                    </div>
+                    }
 
                 </div>
 
             </div>
 
 
-            <!-- PROMOCIONES -->
             <h2 class="titulo-promociones">
                 Promociones Exclusivas para Ti
             </h2>
 
+
             <div class="promociones">
 
-                <div class="promo promo-1">
+    @for (int i = 0; i < Model.Promociones.Count; i++)
+    {
+        var promocion = Model.Promociones[i];
 
-                    <div class="promo-contenido">
+        <div class="promo @(i % 2 == 0 ? "promo-1" : "promo-2")">
 
-                        <span class="promo-descuento">
-                            15% DE DESCUENTO
-                        </span>
+            <div class="promo-contenido">
 
-                        <h3>
-                            Martes de<br />
-                            Nutrición<br />
-                            Capilar
-                        </h3>
+                @if (promocion.Descuento.HasValue)
+                {
+                    <span class="promo-descuento">
+                        @promocion.Descuento.Value% OFF
+                    </span>
+                }
 
-                        <button type="button" class="btn-promo">
-                            APROVECHAR →
-                        </button>
+                <h3>
+                    @promocion.NombrePromocion
+                </h3>
 
-                    </div>
+                <p>
+                    @promocion.Descripcion
+                </p>
 
-                </div>
+                <button type="button" class="btn-promo">
+                    APROVECHAR →
+                </button>
 
+            </div>
 
-                <div class="promo promo-2">
-
-                    <div class="promo-contenido">
-
-                        <span class="promo-descuento">
-                            TRATAMIENTO VIP
-                        </span>
-
-                        <h3>
-                            Ritual de<br />
-                            Ácido<br />
-                            Hialurónico
-                        </h3>
-
-                        <button type="button" class="btn-promo">
-                            APROVECHAR →
-                        </button>
-
-                    </div>
-
-                </div>
+        </div>
+    }
 
             </div>
 
         </div>
 
-
-        <!-- COLUMNA DERECHA -->
         <div class="columna-derecha">
 
-            <!-- MEMBRESÍA -->
             <div class="membresia">
 
                 <div class="membresia-titulo">
 
                     <h2>
-                        Membresía Gold
+                        Membresía @Model.Membresia
                     </h2>
 
                     <span class="icono-membresia">
@@ -243,42 +240,59 @@
 
                 </div>
 
+
                 <h1>
-                    2,450
+                    @Model.PuntosFidelidad.ToString("N0")
                 </h1>
 
                 <p>
                     PUNTOS ACUMULADOS
                 </p>
 
-                <div class="barra">
-                    <div></div>
-                </div>
 
-                <div class="membresia-abajo">
+                <div class="membresia-beneficios">
 
                     <small>
-                        Faltan 550 pts para Platinum
+                        @Model.BeneficiosMembresia
                     </small>
 
-                    <strong>
-                        80%
-                    </strong>
-
                 </div>
+
+
+                @if (Model.InicioMembresia.HasValue && Model.FinMembresia.HasValue)
+                {
+                    <div class="membresia-fechas">
+
+                        <small>
+                            Membresía activa desde
+                        </small>
+
+                        <strong>
+                            @Model.InicioMembresia.Value.ToString("d 'de' MMMM 'de' yyyy")
+                        </strong>
+
+                        <small>
+                            Hasta
+                        </small>
+
+                        <strong>
+                            @Model.FinMembresia.Value.ToString("d 'de' MMMM 'de' yyyy")
+                        </strong>
+
+                    </div>
+                }
 
             </div>
 
 
-            <!-- ACCIONES RÁPIDAS -->
             <h2 class="titulo-acciones">
                 Acciones Rápidas
             </h2>
 
 
-            <a asp-controller="Cliente"
-               asp-action="ReservarCita"
-               class="accion">
+            <a class="accion"
+               asp-controller="Cliente"
+               asp-action="ReservarCita">
 
                 <div class="accion-icono">
                     +
@@ -287,11 +301,11 @@
                 <div class="accion-texto">
 
                     <h3>
-                        Reservar Nueva Cita
+                        Reservar Cita
                     </h3>
 
                     <p>
-                        Elige fecha, servicio y tu estilista
+                        Agenda un nuevo servicio
                     </p>
 
                 </div>
@@ -303,20 +317,22 @@
             </a>
 
 
-            <div class="accion">
+            <a class="accion"
+               asp-controller="Cliente"
+               asp-action="MisReservas">
 
                 <div class="accion-icono">
-                    S
+                    ◷
                 </div>
 
                 <div class="accion-texto">
 
                     <h3>
-                        Ver Servicios
+                        Mis Reservas
                     </h3>
 
                     <p>
-                        Explora nuestras especialidades exclusivas
+                        Consulta y administra tus citas
                     </p>
 
                 </div>
@@ -325,23 +341,25 @@
                     →
                 </span>
 
-            </div>
+            </a>
 
 
-            <div class="accion">
+            <a class="accion"
+               asp-controller="Cliente"
+               asp-action="Promociones">
 
                 <div class="accion-icono">
-                    O
+                    %
                 </div>
 
                 <div class="accion-texto">
 
                     <h3>
-                        Contactar Soporte
+                        Promociones
                     </h3>
 
                     <p>
-                        Chatea directamente con recepción
+                        Descubre ofertas disponibles
                     </p>
 
                 </div>
@@ -350,22 +368,50 @@
                     →
                 </span>
 
-            </div>
+            </a>
 
 
-            <!-- RESUMEN -->
+            <a class="accion"
+               asp-controller="Cliente"
+               asp-action="PerfilCliente">
+
+                <div class="accion-icono">
+                    ◉
+                </div>
+
+                <div class="accion-texto">
+
+                    <h3>
+                        Mi Perfil
+                    </h3>
+
+                    <p>
+                        Consulta tus datos personales
+                    </p>
+
+                </div>
+
+                <span class="accion-flecha">
+                    →
+                </span>
+
+            </a>
+
+
             <div class="card resumen">
 
                 <h2>
                     Resumen de Citas
                 </h2>
 
+
                 <div class="numeros">
+
 
                     <div class="numero-cita">
 
                         <strong>
-                            2
+                            @Model.CitasConfirmadas
                         </strong>
 
                         <span>
@@ -382,11 +428,11 @@
                     <div class="numero-cita">
 
                         <strong>
-                            1
+                            @Model.CitasPendientes
                         </strong>
 
                         <span>
-                            Pendiente
+                            Pendientes
                         </span>
 
                         <small>
@@ -399,7 +445,7 @@
                     <div class="numero-cita">
 
                         <strong>
-                            0
+                            @Model.CitasCanceladasMes
                         </strong>
 
                         <span>
@@ -412,9 +458,11 @@
 
                     </div>
 
+
                 </div>
 
             </div>
+
 
         </div>
 
