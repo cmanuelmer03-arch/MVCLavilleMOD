@@ -355,13 +355,13 @@ namespace Lavillemvc.Controllers
         }
 
         public async Task<IActionResult> ReservarCita(
-            int? idServicio,
-            int? idEspecialista,
-            int? idSucursal,
-            DateTime? fechaCita,
-            string? especialista,
-            string? servicio,
-            string? sucursal)
+    int? idServicio,
+    int? idEspecialista,
+    int? idSucursal,
+    DateTime? fechaCita,
+    string? especialista,
+    string? servicio,
+    string? sucursal)
         {
             await using var conn = _conexion.GetConnection();
             await conn.OpenAsync();
@@ -392,68 +392,97 @@ namespace Lavillemvc.Controllers
                 var opcion = new ReservarCita.ReservaOpcion
                 {
                     IdServicio = Convert.ToInt32(reader["IdServicio"]),
-                    Servicio = reader["Servicio"]?.ToString() ?? "",
-                    CostoServicio = reader["CostoServicio"] == DBNull.Value
-                        ? 0
-                        : Convert.ToDecimal(reader["CostoServicio"]),
 
-                    IdEspecialista = Convert.ToInt32(reader["IdEspecialista"]),
-                    Especialista = reader["Especialista"]?.ToString() ?? "",
-                    RolEspecialista = reader["RolEspecialista"]?.ToString(),
+                    IdServicioPadre =
+                        reader["IdServicioPadre"] == DBNull.Value
+                            ? null
+                            : Convert.ToInt32(reader["IdServicioPadre"]),
 
-                    AniosExperiencia = reader["AniosExperiencia"] == DBNull.Value
-                        ? null
-                        : Convert.ToInt32(reader["AniosExperiencia"]),
+                    Servicio =
+                        reader["Servicio"]?.ToString() ?? "",
+
+                    CostoServicio =
+                        reader["CostoServicio"] == DBNull.Value
+                            ? 0
+                            : Convert.ToDecimal(reader["CostoServicio"]),
+
+                    IdEspecialista =
+                        Convert.ToInt32(reader["IdEspecialista"]),
+
+                    Especialista =
+                        reader["Especialista"]?.ToString() ?? "",
+
+                    RolEspecialista =
+                        reader["RolEspecialista"]?.ToString(),
+
+                    AniosExperiencia =
+                        reader["AniosExperiencia"] == DBNull.Value
+                            ? null
+                            : Convert.ToInt32(reader["AniosExperiencia"]),
 
                     HorarioEspecialista =
                         reader["HorarioEspecialista"]?.ToString(),
 
-                    IdSucursal = Convert.ToInt32(reader["IdSucursal"]),
-                    Sucursal = reader["Sucursal"]?.ToString() ?? "",
+                    IdSucursal =
+                        Convert.ToInt32(reader["IdSucursal"]),
+
+                    Sucursal =
+                        reader["Sucursal"]?.ToString() ?? "",
+
                     DireccionSucursal =
                         reader["DireccionSucursal"]?.ToString(),
 
-                    HorarioApertura = reader["HorarioApertura"] == DBNull.Value
-    ? null
-    : ((TimeOnly)reader["HorarioApertura"]).ToTimeSpan(),
+                    HorarioApertura =
+                        reader["HorarioApertura"] == DBNull.Value
+                            ? null
+                            : ((TimeOnly)reader["HorarioApertura"]).ToTimeSpan(),
 
-                    HorarioCierre = reader["HorarioCierre"] == DBNull.Value
-    ? null
-    : ((TimeOnly)reader["HorarioCierre"]).ToTimeSpan(),
+                    HorarioCierre =
+                        reader["HorarioCierre"] == DBNull.Value
+                            ? null
+                            : ((TimeOnly)reader["HorarioCierre"]).ToTimeSpan(),
 
-                    IdEspecialidad = reader["IdEspecialidad"] == DBNull.Value
-                        ? null
-                        : Convert.ToInt32(reader["IdEspecialidad"]),
+                    IdEspecialidad =
+                        reader["IdEspecialidad"] == DBNull.Value
+                            ? null
+                            : Convert.ToInt32(reader["IdEspecialidad"]),
 
-                    Especialidad = reader["Especialidad"]?.ToString()
+                    Especialidad =
+                        reader["Especialidad"]?.ToString()
                 };
 
                 modelo.OpcionesDisponibles.Add(opcion);
             }
 
+            // IMPORTANTE:
+            // El reader se cierra DESPUÉS de terminar el while.
             await reader.CloseAsync();
 
+            // Obtener puntos del cliente
             string sqlPuntos = @"
-    SELECT COALESCE(puntos_fidelidad, 0)
-    FROM public.cliente
-    WHERE id_cliente = @IdCliente;
-";
+        SELECT COALESCE(puntos_fidelidad, 0)
+        FROM public.cliente
+        WHERE id_cliente = @IdCliente;
+    ";
 
-            await using var cmdPuntos = new NpgsqlCommand(sqlPuntos, conn);
+            await using var cmdPuntos =
+                new NpgsqlCommand(sqlPuntos, conn);
 
             cmdPuntos.Parameters.AddWithValue(
                 "@IdCliente",
                 modelo.IdCliente);
 
-            var puntos = await cmdPuntos.ExecuteScalarAsync();
+            var puntos =
+                await cmdPuntos.ExecuteScalarAsync();
 
             modelo.PuntosFidelidad =
                 puntos == null || puntos == DBNull.Value
                     ? 0
                     : Convert.ToInt32(puntos);
-            // Permitir que los enlaces antiguos del Dashboard
-            // sigan funcionando usando nombres.
-            if (!idServicio.HasValue && !string.IsNullOrWhiteSpace(servicio))
+
+            // Compatibilidad con enlaces antiguos del Dashboard
+            if (!idServicio.HasValue &&
+                !string.IsNullOrWhiteSpace(servicio))
             {
                 var opcion = modelo.OpcionesDisponibles
                     .FirstOrDefault(x =>
@@ -465,7 +494,8 @@ namespace Lavillemvc.Controllers
                     modelo.IdServicio = opcion.IdServicio;
             }
 
-            if (!idEspecialista.HasValue && !string.IsNullOrWhiteSpace(especialista))
+            if (!idEspecialista.HasValue &&
+                !string.IsNullOrWhiteSpace(especialista))
             {
                 var opcion = modelo.OpcionesDisponibles
                     .FirstOrDefault(x =>
@@ -477,7 +507,8 @@ namespace Lavillemvc.Controllers
                     modelo.IdEspecialista = opcion.IdEspecialista;
             }
 
-            if (!idSucursal.HasValue && !string.IsNullOrWhiteSpace(sucursal))
+            if (!idSucursal.HasValue &&
+                !string.IsNullOrWhiteSpace(sucursal))
             {
                 var opcion = modelo.OpcionesDisponibles
                     .FirstOrDefault(x =>
@@ -608,7 +639,7 @@ namespace Lavillemvc.Controllers
                 if (readerCitas["hora_cita"] != DBNull.Value)
                 {
                     horasOcupadas.Add(
-                        (TimeSpan)readerCitas["hora_cita"]);
+    ((TimeOnly)readerCitas["hora_cita"]).ToTimeSpan());
                 }
             }
 
@@ -944,7 +975,8 @@ namespace Lavillemvc.Controllers
             }
         }
 
-        private async Task<IActionResult> RecargarReserva(
+       
+                    private async Task<IActionResult> RecargarReserva(
     ReservarCita modelo)
         {
             await using var conn = _conexion.GetConnection();
@@ -971,7 +1003,14 @@ namespace Lavillemvc.Controllers
                     new ReservarCita.ReservaOpcion
                     {
                         IdServicio =
-                            Convert.ToInt32(reader["IdServicio"]),
+                            Convert.ToInt32(
+                                reader["IdServicio"]),
+
+                        IdServicioPadre =
+                            reader["IdServicioPadre"] == DBNull.Value
+                                ? null
+                                : Convert.ToInt32(
+                                    reader["IdServicioPadre"]),
 
                         Servicio =
                             reader["Servicio"]?.ToString() ?? "",
@@ -1014,14 +1053,16 @@ namespace Lavillemvc.Controllers
                         HorarioApertura =
                             reader["HorarioApertura"] == DBNull.Value
                                 ? null
-                                : (TimeSpan?)reader[
-                                    "HorarioApertura"],
+                                : ((TimeOnly)
+                                    reader["HorarioApertura"])
+                                    .ToTimeSpan(),
 
                         HorarioCierre =
                             reader["HorarioCierre"] == DBNull.Value
                                 ? null
-                                : (TimeSpan?)reader[
-                                    "HorarioCierre"],
+                                : ((TimeOnly)
+                                    reader["HorarioCierre"])
+                                    .ToTimeSpan(),
 
                         IdEspecialidad =
                             reader["IdEspecialidad"] == DBNull.Value
@@ -1036,7 +1077,6 @@ namespace Lavillemvc.Controllers
 
             return View("ReservarCita", modelo);
         }
-
 
         private bool EspecialistaTrabajaEseDia(
             string horario,

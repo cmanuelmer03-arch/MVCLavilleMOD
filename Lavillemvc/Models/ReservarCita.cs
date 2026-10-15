@@ -116,6 +116,8 @@ namespace Lavillemvc.Models
         {
             public int IdServicio { get; set; }
 
+            public int? IdServicioPadre { get; set; }
+
             public string Servicio { get; set; } = "";
 
             public decimal CostoServicio { get; set; }
