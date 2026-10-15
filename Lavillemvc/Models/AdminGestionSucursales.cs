@@ -5,84 +5,104 @@ namespace Lavillemvc.Models
 {
     public class AdminGestionSucursales
     {
-        // =====================================
-        // IDENTIFICACIÓN DE SUCURSAL
-        // =====================================
+        // IDENTIFICACIÓN DE LA SUCURSAL
 
         public int IdSucursal { get; set; }
 
-        public string NombreSucursal { get; set; }
-            = string.Empty;
+        public string NombreSucursal { get; set; } = "";
 
-        public string Direccion { get; set; }
-            = string.Empty;
+
+        // INFORMACIÓN DE CONTACTO
+
+        public string Direccion { get; set; } = "";
 
         public string? Telefono { get; set; }
 
 
-        // =====================================
-        // HORARIOS
-        // =====================================
+        // HORARIOS DE ATENCIÓN
 
         public TimeSpan? HorarioApertura { get; set; }
 
         public TimeSpan? HorarioCierre { get; set; }
 
 
-        // =====================================
-        // ESTADO DE SUCURSAL
-        // =====================================
+        // ESTADO DE LA SUCURSAL
 
         public bool? Abierto { get; set; }
 
-        public string EstadoSucursal { get; set; }
-            = string.Empty;
+        public string EstadoSucursal { get; set; } = "";
 
 
-        // =====================================
-        // GERENTE ASIGNADO
-        // =====================================
+        // INFORMACIÓN DE EMPLEADOS
 
-        public int? IdGerente { get; set; }
+        public string Gerente { get; set; } = "";
 
-        public string? NombreGerente { get; set; }
+        public int CantidadEmpleados { get; set; }
 
 
-        // =====================================
-        // PERSONAL
-        // =====================================
+        // RENDIMIENTO MENSUAL
+
+        public int ReservasMes { get; set; }
+
+        public decimal IngresosMes { get; set; }
+
+        public decimal? ValoracionPromedio { get; set; }
+
+
+        // ESTADÍSTICAS GENERALES
+
+        public int TotalSucursales { get; set; }
+
+        public int SucursalesAbiertas { get; set; }
+
+        public int SucursalesCerradas { get; set; }
 
         public int TotalEmpleados { get; set; }
 
 
-        // =====================================
-        // RENDIMIENTO MENSUAL
-        // =====================================
+        // MOSTRAR HORARIOS
 
-        public int ReservasMes { get; set; }
+        public string HorarioMostrar
+        {
+            get
+            {
+                if (!HorarioApertura.HasValue ||
+                    !HorarioCierre.HasValue)
+                {
+                    return "Horario no asignado";
+                }
 
-        public decimal IngresosCitasMes { get; set; }
-
-        public decimal? Valoracion { get; set; }
-
-
-        // =====================================
-        // INDICADORES GENERALES
-        // =====================================
-
-        public int TotalSucursales { get; set; }
-
-        public int SucursalesActivas { get; set; }
-
-        public int SucursalesCerradas { get; set; }
-
-        public int EmpleadosTotales { get; set; }
+                return
+                    HorarioApertura.Value.ToString(@"hh\:mm")
+                    + " - " +
+                    HorarioCierre.Value.ToString(@"hh\:mm");
+            }
+        }
 
 
-        // =====================================
-        // PERIODO DEL DASHBOARD
-        // =====================================
+        // MOSTRAR TELÉFONO
 
-        public DateOnly MesReferencia { get; set; }
+        public string TelefonoMostrar
+        {
+            get
+            {
+                return string.IsNullOrWhiteSpace(Telefono)
+                    ? "Sin teléfono registrado"
+                    : Telefono;
+            }
+        }
+
+
+        // MOSTRAR VALORACIÓN
+
+        public string ValoracionMostrar
+        {
+            get
+            {
+                return ValoracionPromedio.HasValue
+                    ? ValoracionPromedio.Value.ToString("0.0")
+                    : "Sin valoración";
+            }
+        }
     }
 }

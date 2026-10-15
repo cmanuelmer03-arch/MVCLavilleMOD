@@ -1,15 +1,157 @@
-﻿<!DOCTYPE html>
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
-
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
     <title>Reportes Generales - L'Avielle</title>
 
-    <!-- conexion con css -->
-    <link href="~/css/reportesgenerales.css" rel="stylesheet" />
+    <link href="~/css/reportesgenerales.css"
+          rel="stylesheet" />
+
+    <style>
+            /* Complementos funcionales del diseño original */
+
+            .date-range-selector .arrow-left,
+            .date-range-selector .arrow-right {
+                cursor: pointer;
+                user-select: none;
+            }
+
+                .date-range-selector .arrow-right.disabled {
+                    opacity: .3;
+                    cursor: not-allowed;
+                }
+
+            .report-notice {
+                margin: 12px 0 22px;
+                background: #f5eee8;
+                color: #705248;
+                border-radius: 10px;
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+                .report-notice.error {
+                    background: #fff0eb;
+                    color: #a4493d;
+                }
+
+            .report-empty {
+                padding: 20px 10px;
+                color: #90796d;
+                font-size: 14px;
+                text-align: center;
+            }
+
+            .trend.neutral {
+                color: #897970;
+            }
+
+            .revenue-chart {
+                min-height: 190px;
+            }
+
+                .revenue-chart .chart-area {
+                    min-width: 0;
+                }
+
+                .revenue-chart .revenue-line {
+                    width: 100%;
+                    height: 140px;
+                    overflow: visible;
+                }
+
+            .revenue-line polyline {
+                fill: none;
+                stroke: #ad836d;
+                stroke-width: 3;
+                stroke-linejoin: round;
+                stroke-linecap: round;
+            }
+
+            .revenue-line circle {
+                fill: #ad836d;
+                stroke: white;
+                stroke-width: 1.5;
+            }
+
+            .revenue-chart .x-axis {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .popularity-track {
+                overflow: hidden;
+            }
+
+                .popularity-track div {
+                    height: 100%;
+                    background: #b99077;
+                    border-radius: inherit;
+                }
+
+            .performance-table {
+                overflow-x: auto;
+            }
+
+            .performance-row {
+                min-width: 780px;
+            }
+
+                .performance-row .no-data {
+                    color: #97867d;
+                }
+
+            .growth.negative {
+                color: #b25a4c;
+            }
+
+            .growth.neutral-growth {
+                color: #918178;
+            }
+
+            .donut-chart {
+                background: #e9dfd6;
+            }
+
+            .donut-legend .legend-dot {
+                display: inline-block;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .donut-legend > div {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+            }
+
+                .donut-legend > div span:last-child {
+                    overflow-wrap: anywhere;
+                }
+
+            .date-range-selector [role="button"]:focus-visible {
+                outline: 2px solid #96725e;
+                outline-offset: 4px;
+            }
+
+            .report-footnote {
+                color: #938077;
+                font-size: 12px;
+                line-height: 1.6;
+                margin-top: 12px;
+            }
+    </style>
 
 </head>
 
@@ -19,7 +161,8 @@
 
         <div class="content-wrapper">
 
-            <!-- sidebar -->
+            <!-- SIDEBAR -->
+
             <aside class="sidebar">
 
                 <div class="sidebar-top">
@@ -36,32 +179,41 @@
 
                     </div>
 
-                    <!-- conexion entre frames -->
                     <nav class="nav-list">
 
-                        <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("Dashboard", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                    <rect x="3" y="3"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+                                    <rect x="14" y="3"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+                                    <rect x="3" y="14"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+                                    <rect x="14" y="14"
+                                          width="7" height="7"
+                                          rx="1"></rect>
                                 </svg>
                             </span>
 
                             <span class="tab-text">
                                 Dashboard General
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionUsuarios", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionUsuarios", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <circle cx="9" cy="8" r="3"></circle>
+                                    <circle cx="9"
+                                            cy="8"
+                                            r="3"></circle>
                                     <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
                                     <path d="M16 11c2.8 0 5 1.5 5 4"></path>
                                 </svg>
@@ -70,46 +222,44 @@
                             <span class="tab-text">
                                 Gestión de Usuarios
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionSucursales", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionSucursales", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+                                    <rect x="4" y="3"
+                                          width="16" height="18"
+                                          rx="1"></rect>
                                     <path d="M8 7h1M12 7h1M16 7h1"></path>
                                     <path d="M8 11h1M12 11h1M16 11h1"></path>
                                     <path d="M8 15h1M12 15h1M16 15h1"></path>
-                                    <path d="M10 21v-3h4v3"></path>
                                 </svg>
                             </span>
 
                             <span class="tab-text">
                                 Gestión de Sucursales
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionServicios", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionServicios", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M12 3l1.3 4.7L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-1.3z"></path>
-                                    <path d="m19 14 0.7 2.3L22 17l-2.3 0.7L19 20l-0.7-2.3L16 17l2.3-0.7z"></path>
+                                    <path d="m19 14 .7 2.3L22 17l-.7-2.3L19 20l-.7-2.3L16 17l2.3-.7z"></path>
                                 </svg>
                             </span>
 
                             <span class="tab-text">
                                 Gestión de Servicios
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("ReportesGenerales", "Admin")" class="sidebar-link active">
+                        <a href="@Url.Action("ReportesGenerales", "Admin")"
+                           class="sidebar-link active">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
@@ -125,19 +275,18 @@
                             </span>
 
                             <span class="active-indicator"></span>
-
                         </a>
 
                     </nav>
 
                 </div>
 
-                <!-- cerrar sesion -->
                 <div class="sidebar-bottom">
 
                     <div class="divider"></div>
 
-                    <a href="#" class="sidebar-link logout-link">
+                    <a href="@Url.Action("Index", "Login")"
+                       class="sidebar-link logout-link">
 
                         <span class="nav-icon">
                             <svg viewBox="0 0 24 24">
@@ -150,25 +299,23 @@
                         <span class="tab-text">
                             Cerrar Sesión
                         </span>
-
                     </a>
 
                 </div>
 
             </aside>
 
+            <!-- CONTENIDO -->
 
-            <!-- contenido -->
             <main class="main-content">
 
-                <!-- encabezado -->
+                <!-- ENCABEZADO Y FILTRO DE FECHAS -->
+
                 <section class="welcome-header">
 
                     <div class="header-text">
 
-                        <h1>
-                            Reportes Generales
-                        </h1>
+                        <h1>Reportes Generales</h1>
 
                         <p>
                             L'Avielle — Análisis del Negocio
@@ -176,39 +323,46 @@
 
                     </div>
 
-
                     <div class="header-actions">
 
-                        <!-- rango de fechas -->
                         <div class="date-range-selector">
 
-                            <span class="arrow-left">
+                            <span class="arrow-left"
+                                  id="mesAnterior"
+                                  role="button"
+                                  tabindex="0"
+                                  aria-label="Mes anterior">
                                 ←
                             </span>
 
-                            <span>
-                                Septiembre 2026
+                            <span id="mesSeleccionado">
+                                Cargando...
                             </span>
 
-                            <span class="arrow-right">
+                            <span class="arrow-right"
+                                  id="mesSiguiente"
+                                  role="button"
+                                  tabindex="0"
+                                  aria-label="Mes siguiente">
                                 →
                             </span>
 
                         </div>
 
-
-                        <a href="#" class="export-btn">
-                            Exportar Reporte
-                        </a>
+                        <!-- No hay botón Exportar Reporte -->
 
                     </div>
 
                 </section>
 
+                <div id="avisoReporte"
+                     class="report-notice"
+                     hidden>
+                </div>
 
-                <!-- indicadores -->
+                <!-- INDICADORES -->
+
                 <section class="kpi-cards-row">
-
 
                     <div class="kpi-card">
 
@@ -218,26 +372,20 @@
                                 Reservas del Mes
                             </span>
 
-                            <span class="trend positive">
-                                +12%
+                            <span class="trend neutral"
+                                  id="variacionReservas">
+                                N/D
                             </span>
 
                         </div>
 
                         <div class="kpi-footer">
 
-                            <strong>
-                                1,245
-                            </strong>
-
-                            <svg class="sparkline" viewBox="0 0 64 20">
-                                <polyline points="0,16 8,15 16,17 24,13 32,14 40,9 48,10 56,4 64,2"></polyline>
-                            </svg>
+                            <strong id="totalReservas">0</strong>
 
                         </div>
 
                     </div>
-
 
                     <div class="kpi-card">
 
@@ -247,55 +395,46 @@
                                 Ingresos Totales
                             </span>
 
-                            <span class="trend positive">
-                                +8.5%
+                            <span class="trend neutral"
+                                  id="variacionIngresos">
+                                N/D
                             </span>
 
                         </div>
 
                         <div class="kpi-footer">
 
-                            <strong class="money-value">
-                                Bs. 485,200
+                            <strong class="money-value"
+                                    id="totalIngresos">
+                                $0.00
                             </strong>
-
-                            <svg class="sparkline" viewBox="0 0 64 20">
-                                <polyline points="0,14 8,13 16,12 24,11 32,9 40,8 48,6 56,4 64,2"></polyline>
-                            </svg>
 
                         </div>
 
                     </div>
-
 
                     <div class="kpi-card">
 
                         <div class="kpi-header">
 
                             <span class="kpi-title">
-                                Clientes Activos
+                                Clientes con Reservas
                             </span>
 
-                            <span class="trend positive">
-                                +5.2%
+                            <span class="trend neutral"
+                                  id="variacionClientes">
+                                N/D
                             </span>
 
                         </div>
 
                         <div class="kpi-footer">
 
-                            <strong>
-                                2,890
-                            </strong>
-
-                            <svg class="sparkline" viewBox="0 0 64 20">
-                                <polyline points="0,17 8,16 16,15 24,13 32,12 40,10 48,7 56,5 64,3"></polyline>
-                            </svg>
+                            <strong id="totalClientes">0</strong>
 
                         </div>
 
                     </div>
-
 
                     <div class="kpi-card">
 
@@ -305,26 +444,21 @@
                                 Tasa Ocupación
                             </span>
 
-                            <span class="trend negative">
-                                -2.1%
+                            <span class="trend neutral">
+                                Sin datos
                             </span>
 
                         </div>
 
                         <div class="kpi-footer">
 
-                            <strong>
-                                78%
+                            <strong id="tasaOcupacion">
+                                N/D
                             </strong>
-
-                            <svg class="sparkline neutral" viewBox="0 0 64 20">
-                                <polyline points="0,3 8,6 16,7 24,11 32,9 40,13 48,15 56,12 64,17"></polyline>
-                            </svg>
 
                         </div>
 
                     </div>
-
 
                     <div class="kpi-card">
 
@@ -334,21 +468,18 @@
                                 Ticket Promedio
                             </span>
 
-                            <span class="trend positive">
-                                +3.7%
+                            <span class="trend neutral">
+                                Pagos confirmados
                             </span>
 
                         </div>
 
                         <div class="kpi-footer">
 
-                            <strong class="money-value">
-                                Bs. 389
+                            <strong class="money-value"
+                                    id="ticketPromedio">
+                                $0.00
                             </strong>
-
-                            <svg class="sparkline" viewBox="0 0 64 20">
-                                <polyline points="0,15 8,12 16,14 24,10 32,9 40,7 48,8 56,4 64,2"></polyline>
-                            </svg>
 
                         </div>
 
@@ -356,10 +487,9 @@
 
                 </section>
 
+                <!-- GRÁFICOS -->
 
-                <!-- graficas -->
                 <section class="charts-row">
-
 
                     <div class="revenue-chart-card">
 
@@ -369,17 +499,17 @@
 
                         <div class="revenue-chart">
 
-                            <div class="y-axis">
+                            <div class="y-axis"
+                                 id="ejeIngresos">
 
-                                <span>Bs. 500K</span>
-                                <span>Bs. 400K</span>
-                                <span>Bs. 300K</span>
-                                <span>Bs. 200K</span>
-                                <span>Bs. 100K</span>
-                                <span>Bs. 0</span>
+                                <span>$0</span>
+                                <span>$0</span>
+                                <span>$0</span>
+                                <span>$0</span>
+                                <span>$0</span>
+                                <span>$0</span>
 
                             </div>
-
 
                             <div class="chart-area">
 
@@ -389,29 +519,14 @@
                                 <div class="grid-line line-4"></div>
                                 <div class="grid-line line-5"></div>
 
-                                <svg viewBox="0 0 450 140" preserveAspectRatio="none" class="revenue-line">
-
-                                    <polyline points="0,118 90,105 180,84 270,65 360,49 450,32"></polyline>
-
-                                    <circle cx="0" cy="118" r="3"></circle>
-                                    <circle cx="90" cy="105" r="3"></circle>
-                                    <circle cx="180" cy="84" r="3"></circle>
-                                    <circle cx="270" cy="65" r="3"></circle>
-                                    <circle cx="360" cy="49" r="3"></circle>
-                                    <circle cx="450" cy="32" r="3"></circle>
-
+                                <svg viewBox="0 0 450 140"
+                                     preserveAspectRatio="none"
+                                     class="revenue-line"
+                                     id="graficoIngresos">
                                 </svg>
 
-
-                                <div class="x-axis">
-
-                                    <span>Abr</span>
-                                    <span>May</span>
-                                    <span>Jun</span>
-                                    <span>Jul</span>
-                                    <span>Ago</span>
-                                    <span>Sep</span>
-
+                                <div class="x-axis"
+                                     id="mesesIngresos">
                                 </div>
 
                             </div>
@@ -420,81 +535,18 @@
 
                     </div>
 
-
-                    <!-- servicios mas solicitados -->
                     <div class="services-popularity-card">
 
                         <h2>
                             Servicios más Solicitados
                         </h2>
 
+                        <div class="popularity-list"
+                             id="serviciosPopulares">
 
-                        <div class="popularity-list">
-
-                            <div class="popularity-row">
-                                <span>Balayage</span>
-
-                                <div class="popularity-track">
-                                    <div style="width:100%;"></div>
-                                </div>
-
-                                <strong>265</strong>
-                            </div>
-
-
-                            <div class="popularity-row">
-                                <span>Manicura Gel</span>
-
-                                <div class="popularity-track">
-                                    <div style="width:83%;"></div>
-                                </div>
-
-                                <strong>190</strong>
-                            </div>
-
-
-                            <div class="popularity-row">
-                                <span>Corte Dama</span>
-
-                                <div class="popularity-track">
-                                    <div style="width:74%;"></div>
-                                </div>
-
-                                <strong>156</strong>
-                            </div>
-
-
-                            <div class="popularity-row">
-                                <span>Keratina</span>
-
-                                <div class="popularity-track">
-                                    <div style="width:54%;"></div>
-                                </div>
-
-                                <strong>142</strong>
-                            </div>
-
-
-                            <div class="popularity-row">
-                                <span>Pedicura Spa</span>
-
-                                <div class="popularity-track">
-                                    <div style="width:49%;"></div>
-                                </div>
-
-                                <strong>118</strong>
-                            </div>
-
-
-                            <div class="popularity-row">
-                                <span>Barbería</span>
-
-                                <div class="popularity-track">
-                                    <div style="width:38%;"></div>
-                                </div>
-
-                                <strong>96</strong>
-                            </div>
+                            <p class="report-empty">
+                                Consultando servicios...
+                            </p>
 
                         </div>
 
@@ -502,16 +554,16 @@
 
                 </section>
 
+                <!-- RENDIMIENTO POR SUCURSAL -->
 
-                <!-- rendimiento por sucursal -->
                 <section class="branch-performance-card">
 
                     <h2>
                         Rendimiento por Sucursal
                     </h2>
 
-
-                    <div class="performance-table">
+                    <div class="performance-table"
+                         id="tablaSucursales">
 
                         <div class="performance-row performance-header">
 
@@ -525,149 +577,54 @@
 
                         </div>
 
-
-                        <div class="performance-row">
-
-                            <div class="branch-name">Centro</div>
-                            <div>412</div>
-                            <div class="income">Bs. 145,000</div>
-                            <div>82%</div>
-                            <div>Balayage</div>
-                            <div>☆ 4.8</div>
-                            <div class="growth">↑ +5%</div>
-
-                        </div>
-
-
-                        <div class="performance-row highlighted">
-
-                            <div class="branch-name">Las Mercedes</div>
-                            <div>380</div>
-                            <div class="income">Bs. 138,500</div>
-                            <div>79%</div>
-                            <div>Manicura</div>
-                            <div>☆ 4.9</div>
-                            <div class="growth">↑ +8%</div>
-
-                        </div>
-
-
-                        <div class="performance-row">
-
-                            <div class="branch-name">Altamira</div>
-                            <div>298</div>
-                            <div class="income">Bs. 112,700</div>
-                            <div>74%</div>
-                            <div>Keratina</div>
-                            <div>☆ 4.7</div>
-                            <div class="growth">↑ +3%</div>
-
-                        </div>
-
-
-                        <div class="performance-row highlighted">
-
-                            <div class="branch-name">La Castellana</div>
-                            <div>155</div>
-                            <div class="income">Bs. 89,000</div>
-                            <div>65%</div>
-                            <div>Corte</div>
-                            <div>☆ 4.5</div>
-                            <div class="growth neutral-growth">→ 0%</div>
-
-                        </div>
-
                     </div>
+
+                    <p class="report-footnote">
+                        Los ingresos corresponden a pagos
+                        confirmados en USD. Los pagos sin una
+                        sucursal identificable se incluyen en
+                        el total general, pero no se atribuyen
+                        a una sede específica.
+                    </p>
 
                 </section>
 
+                <!-- ACTIVIDAD Y RESERVAS -->
 
-                <!-- actividad y reservas -->
                 <section class="bottom-row">
 
-
-                    <!-- actividad -->
                     <div class="activity-card">
 
                         <h2>
                             Actividad del Sistema
                         </h2>
 
+                        <div class="timeline"
+                             id="actividadSistema">
 
-                        <div class="timeline">
-
-                            <div class="timeline-row">
-
-                                <span class="date-tag">
-                                    Hoy
-                                </span>
-
-                                <span>
-                                    47 reservas confirmadas, 12 cancelaciones, 3 nuevos clientes
-                                </span>
-
-                            </div>
-
-
-                            <div class="timeline-row">
-
-                                <span class="date-tag">
-                                    Ayer
-                                </span>
-
-                                <span>
-                                    52 reservas confirmadas, 8 cancelaciones, 7 nuevos clientes
-                                </span>
-
-                            </div>
-
-
-                            <div class="timeline-row">
-
-                                <span class="date-tag">
-                                    Lun 22 Sep
-                                </span>
-
-                                <span>
-                                    38 reservas, mantenimiento programado Sucursal Altamira
-                                </span>
-
-                            </div>
-
-
-                            <div class="timeline-row">
-
-                                <span class="date-tag">
-                                    Dom 21 Sep
-                                </span>
-
-                                <span>
-                                    Día cerrado (todas las sucursales)
-                                </span>
-
-                            </div>
+                            <p class="report-empty">
+                                Consultando actividad...
+                            </p>
 
                         </div>
 
                     </div>
 
-
-                    <!-- distribucion de reservas -->
                     <div class="reservations-breakdown-card">
 
                         <h2>
                             Distribución de Reservas
                         </h2>
 
-
                         <div class="donut-section">
 
-                            <div class="donut-chart">
+                            <div class="donut-chart"
+                                 id="graficoReservas">
 
                                 <div class="donut-hole">
 
-                                    <strong>
-                                        1,245
+                                    <strong id="reservasDonut">
+                                        0
                                     </strong>
 
                                     <span>
@@ -678,34 +635,8 @@
 
                             </div>
 
-
-                            <div class="donut-legend">
-
-                                <div>
-                                    <span class="legend-dot completed"></span>
-                                    <span>Completadas (42%)</span>
-                                </div>
-
-                                <div>
-                                    <span class="legend-dot confirmed"></span>
-                                    <span>Confirmadas (22%)</span>
-                                </div>
-
-                                <div>
-                                    <span class="legend-dot cancelled"></span>
-                                    <span>Canceladas (8%)</span>
-                                </div>
-
-                                <div>
-                                    <span class="legend-dot pending"></span>
-                                    <span>Pendientes (4%)</span>
-                                </div>
-
-                                <div>
-                                    <span class="legend-dot no-show"></span>
-                                    <span>No-show (2%)</span>
-                                </div>
-
+                            <div class="donut-legend"
+                                 id="leyendaReservas">
                             </div>
 
                         </div>
@@ -718,11 +649,10 @@
 
         </div>
 
+        <!-- FOOTER -->
 
-        <!-- footer -->
         <footer class="footer">
 
-            <!-- informacion del footer -->
             <div class="footer-upper">
 
                 <div class="footer-about">
@@ -732,54 +662,81 @@
                     </div>
 
                     <p>
-                        Un concepto exclusivo de salón de belleza y spa de bienestar,
-                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                        Un concepto exclusivo de salón de belleza
+                        y spa de bienestar, donde el lujo se traduce
+                        en calma, elegancia y atención de nivel internacional.
                     </p>
 
-                    <!-- redes sociales -->
                     <div class="social-row">
 
-                        <a href="#" class="social-button">Instagram</a>
-                        <a href="#" class="social-button">Facebook</a>
-                        <a href="#" class="social-button">Web</a>
+                        <a href="#"
+                           class="social-button">
+                            Instagram
+                        </a>
+
+                        <a href="#"
+                           class="social-button">
+                            Facebook
+                        </a>
+
+                        <a href="#"
+                           class="social-button">
+                            Web
+                        </a>
 
                     </div>
 
                 </div>
 
-
-                <!-- navegacion del footer -->
                 <div class="footer-column">
 
                     <h3>Navegación</h3>
 
                     <div class="footer-links">
 
-                        <a href="@Url.Action("Dashboard", "Admin")">Inicio</a>
-                        <a href="#">Servicios</a>
-                        <a href="#">Especialistas</a>
-                        <a href="#">Perfil</a>
-                        <a href="#">Iniciar Sesión</a>
-                        <a href="#">Registrarse</a>
+                        <a href="@Url.Action("Dashboard", "Admin")">
+                            Inicio
+                        </a>
+
+                        <a href="@Url.Action("GestionServicios", "Admin")">
+                            Servicios
+                        </a>
+
+                        <a href="#">
+                            Especialistas
+                        </a>
+
+                        <a href="#">
+                            Perfil
+                        </a>
+
+                        <a href="@Url.Action("Index", "Login")">
+                            Iniciar Sesión
+                        </a>
+
+                        <a href="#">
+                            Registrarse
+                        </a>
 
                     </div>
 
                 </div>
 
-
-                <!-- contacto -->
                 <div class="footer-column">
 
-                    <h3>Contacto &amp; Ubicación</h3>
+                    <h3>
+                        Contacto &amp; Ubicación
+                    </h3>
 
                     <div class="contact-list">
 
                         <div class="contact-item">
-                            Paseo de la Reforma 402, Juárez, CDMX
+                            Colonia Escalón,
+                            San Salvador, El Salvador
                         </div>
 
                         <div class="contact-item">
-                            +52 55 1234 5678
+                            +503 2200-0101
                         </div>
 
                         <div class="contact-item">
@@ -792,21 +749,24 @@
 
             </div>
 
-
             <div class="footer-divider"></div>
 
-
-            <!-- parte final del footer -->
             <div class="footer-bottom">
 
                 <span>
-                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                    © 2026 L'Avielle Salón de Belleza.
+                    Todos los derechos reservados.
                 </span>
 
                 <div class="footer-legal">
 
-                    <a href="#">Política de Privacidad</a>
-                    <a href="#">Términos del Servicio</a>
+                    <a href="#">
+                        Política de Privacidad
+                    </a>
+
+                    <a href="#">
+                        Términos del Servicio
+                    </a>
 
                 </div>
 
@@ -815,6 +775,1058 @@
         </footer>
 
     </div>
+
+    <script>
+
+            // =========================================
+            // CONEXIÓN CON ADMINREPORTESCONTROLLER
+            // =========================================
+
+            const rutaReportes =
+                '@Url.Action("Datos", "AdminReportes")';
+
+            // =========================================
+            // FECHAS
+            // =========================================
+
+            const hoy = new Date();
+
+            let periodoActual = new Date(
+                hoy.getFullYear(),
+                hoy.getMonth(),
+                1
+            );
+
+            const ultimoPeriodo = new Date(
+                hoy.getFullYear(),
+                hoy.getMonth(),
+                1
+            );
+
+            const anterior = document.getElementById(
+                'mesAnterior'
+            );
+
+            const siguiente = document.getElementById(
+                'mesSiguiente'
+            );
+
+            const tituloMes = document.getElementById(
+                'mesSeleccionado'
+            );
+
+            let numeroPeticion = 0;
+
+            function leer(objeto, propiedad, defecto) {
+
+                if (!objeto) {
+                    return defecto;
+                }
+
+                const nombreCamel =
+                    propiedad.charAt(0).toLowerCase()
+                    + propiedad.slice(1);
+
+                if (objeto[nombreCamel] !== undefined) {
+                    return objeto[nombreCamel];
+                }
+
+                if (objeto[propiedad] !== undefined) {
+                    return objeto[propiedad];
+                }
+
+                return defecto;
+            }
+
+            function numero(valor) {
+
+                const resultado = Number(valor);
+
+                return Number.isFinite(resultado)
+                    ? resultado
+                    : 0;
+            }
+
+            function entero(valor) {
+
+                return new Intl.NumberFormat('es-SV')
+                    .format(numero(valor));
+            }
+
+            function dinero(valor) {
+
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(numero(valor));
+            }
+
+            function dineroCorto(valor) {
+
+                const n = numero(valor);
+
+                if (n === 0) {
+                    return '$0';
+                }
+
+                if (Math.abs(n) >= 1000000) {
+                    return '$' +
+                        (n / 1000000).toFixed(1) + 'M';
+                }
+
+                if (Math.abs(n) >= 1000) {
+                    return '$' +
+                        (n / 1000).toFixed(1) + 'K';
+                }
+
+                return '$' + n.toFixed(0);
+            }
+
+            function elemento(tipo, clase, contenido) {
+
+                const nodo = document.createElement(tipo);
+
+                if (clase) {
+                    nodo.className = clase;
+                }
+
+                if (contenido !== undefined) {
+                    nodo.textContent = String(contenido);
+                }
+
+                return nodo;
+            }
+
+            function actualizarMes() {
+
+                const texto = periodoActual.toLocaleDateString(
+                    'es-SV',
+                    {
+                        month: 'long',
+                        year: 'numeric'
+                    }
+                );
+
+                tituloMes.textContent =
+                    texto.charAt(0).toUpperCase()
+                    + texto.slice(1);
+
+                const esUltimo =
+                    periodoActual.getFullYear() ===
+                    ultimoPeriodo.getFullYear()
+                    &&
+                    periodoActual.getMonth() ===
+                    ultimoPeriodo.getMonth();
+
+                siguiente.classList.toggle(
+                    'disabled',
+                    esUltimo
+                );
+
+                siguiente.setAttribute(
+                    'aria-disabled',
+                    esUltimo ? 'true' : 'false'
+                );
+            }
+
+            async function cambiarMes(diferencia) {
+
+                const nuevo = new Date(
+                    periodoActual.getFullYear(),
+                    periodoActual.getMonth() + diferencia,
+                    1
+                );
+
+                if (nuevo > ultimoPeriodo) {
+                    return;
+                }
+
+                periodoActual = nuevo;
+
+                await cargarReporte();
+            }
+
+            anterior.addEventListener(
+                'click',
+                function() {
+                    cambiarMes(-1);
+                }
+            );
+
+            siguiente.addEventListener(
+                'click',
+                function() {
+                    cambiarMes(1);
+                }
+            );
+
+            [anterior, siguiente].forEach(function(control) {
+
+                control.addEventListener('keydown', function(e) {
+
+                    if (e.key === 'Enter' || e.key === ' ') {
+
+                        e.preventDefault();
+                        control.click();
+                    }
+                });
+            });
+
+            // =========================================
+            // MENSAJES
+            // =========================================
+
+            function aviso(texto, error) {
+
+                const contenedor =
+                    document.getElementById('avisoReporte');
+
+                contenedor.hidden = !texto;
+
+                contenedor.textContent = texto || '';
+
+                contenedor.className = error
+                    ? 'report-notice error'
+                    : 'report-notice';
+            }
+
+            // =========================================
+            // VARIACIONES RESPECTO AL MES ANTERIOR
+            // =========================================
+
+            function tendencia(actual, anterior, id) {
+
+                const nodo = document.getElementById(id);
+
+                const previo = numero(anterior);
+                const valor = numero(actual);
+
+                if (previo === 0) {
+
+                    nodo.textContent = 'Sin comparativo';
+                    nodo.className = 'trend neutral';
+
+                    return;
+                }
+
+                const cambio =
+                    (valor - previo) / previo * 100;
+
+                const texto =
+                    (cambio > 0 ? '+' : '') +
+                    cambio.toFixed(1) + '%';
+
+                nodo.textContent = texto;
+
+                nodo.className =
+                    'trend ' +
+                    (
+                        cambio > 0
+                            ? 'positive'
+                            : cambio < 0
+                                ? 'negative'
+                                : 'neutral'
+                    );
+            }
+
+            // =========================================
+            // INDICADORES GENERALES
+            // =========================================
+
+            function renderizarIndicadores(datos) {
+
+                const reservas = leer(
+                    datos, 'Reservas', 0
+                );
+
+                const ingresos = leer(
+                    datos, 'Ingresos', 0
+                );
+
+                const clientes = leer(
+                    datos, 'ClientesConReservas', 0
+                );
+
+                const ocupacion = leer(
+                    datos, 'TasaOcupacion', null
+                );
+
+                const ticket = leer(
+                    datos, 'TicketPromedio', 0
+                );
+
+                document.getElementById('totalReservas')
+                    .textContent = entero(reservas);
+
+                document.getElementById('totalIngresos')
+                    .textContent = dinero(ingresos);
+
+                document.getElementById('totalClientes')
+                    .textContent = entero(clientes);
+
+                document.getElementById('ticketPromedio')
+                    .textContent = dinero(ticket);
+
+                document.getElementById('tasaOcupacion')
+                    .textContent =
+                    ocupacion === null
+                        ? 'N/D'
+                        : numero(ocupacion).toFixed(1) + '%';
+
+                document.getElementById('reservasDonut')
+                    .textContent = entero(reservas);
+
+                tendencia(
+                    reservas,
+                    leer(datos, 'ReservasMesAnterior', 0),
+                    'variacionReservas'
+                );
+
+                tendencia(
+                    ingresos,
+                    leer(datos, 'IngresosMesAnterior', 0),
+                    'variacionIngresos'
+                );
+
+                tendencia(
+                    clientes,
+                    leer(datos, 'ClientesMesAnterior', 0),
+                    'variacionClientes'
+                );
+            }
+
+            // =========================================
+            // GRÁFICO DE INGRESOS MENSUALES
+            // =========================================
+
+            function renderizarIngresos(datos) {
+
+                const meses = leer(
+                    datos, 'IngresosMensuales', []
+                ) || [];
+
+                const grafico = document.getElementById(
+                    'graficoIngresos'
+                );
+
+                const ejeY = document.getElementById(
+                    'ejeIngresos'
+                );
+
+                const ejeX = document.getElementById(
+                    'mesesIngresos'
+                );
+
+                grafico.replaceChildren();
+                ejeY.replaceChildren();
+                ejeX.replaceChildren();
+
+                if (meses.length === 0) {
+                    return;
+                }
+
+                const valores = meses.map(function(mes) {
+
+                    return numero(
+                        leer(mes, 'Ingresos', 0)
+                    );
+                });
+
+                const maximo = Math.max(
+                    0,
+                    ...valores
+                );
+
+                // Seis marcas de escala desde el valor
+                // máximo hasta cero.
+
+                for (let i = 0; i < 6; i++) {
+
+                    const marca = maximo === 0
+                        ? 0
+                        : maximo * (5 - i) / 5;
+
+                    ejeY.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            dineroCorto(marca)
+                        )
+                    );
+                }
+
+                const ancho = 450;
+                const alto = 140;
+                const margenSuperior = 12;
+                const margenInferior = 118;
+
+                const puntos = valores.map(
+                    function(valor, indice) {
+
+                        const x = valores.length === 1
+                            ? ancho / 2
+                            : indice * ancho /
+                            (valores.length - 1);
+
+                        const proporcion = maximo > 0
+                            ? valor / maximo
+                            : 0;
+
+                        const y = margenInferior
+                            - proporcion *
+                            (margenInferior - margenSuperior);
+
+                        return {
+                            x: x,
+                            y: y,
+                            valor: valor
+                        };
+                    }
+                );
+
+                const namespace =
+                    'http://www.w3.org/2000/svg';
+
+                const linea = document.createElementNS(
+                    namespace,
+                    'polyline'
+                );
+
+                linea.setAttribute(
+                    'points',
+                    puntos.map(function(p) {
+
+                        return p.x + ',' + p.y;
+                    }).join(' ')
+                );
+
+                grafico.appendChild(linea);
+
+                puntos.forEach(function(p) {
+
+                    const circulo = document.createElementNS(
+                        namespace,
+                        'circle'
+                    );
+
+                    circulo.setAttribute('cx', p.x);
+                    circulo.setAttribute('cy', p.y);
+                    circulo.setAttribute('r', '4');
+
+                    const titulo = document.createElementNS(
+                        namespace,
+                        'title'
+                    );
+
+                    titulo.textContent = dinero(p.valor);
+
+                    circulo.appendChild(titulo);
+
+                    grafico.appendChild(circulo);
+                });
+
+                meses.forEach(function(mes) {
+
+                    ejeX.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            leer(mes, 'Etiqueta', '')
+                        )
+                    );
+                });
+            }
+
+            // =========================================
+            // SERVICIOS MÁS SOLICITADOS
+            // =========================================
+
+            function renderizarServicios(datos) {
+
+                const contenedor = document.getElementById(
+                    'serviciosPopulares'
+                );
+
+                const servicios = leer(
+                    datos, 'ServiciosPopulares', []
+                ) || [];
+
+                contenedor.replaceChildren();
+
+                if (servicios.length === 0) {
+
+                    contenedor.appendChild(
+                        elemento(
+                            'p',
+                            'report-empty',
+                            'Sin servicios reservados durante este mes.'
+                        )
+                    );
+
+                    return;
+                }
+
+                const maximo = Math.max(
+                    1,
+                    ...servicios.map(function(s) {
+
+                        return numero(
+                            leer(s, 'Reservas', 0)
+                        );
+                    })
+                );
+
+                servicios.forEach(function(servicio) {
+
+                    const nombre = leer(
+                        servicio, 'Nombre', ''
+                    );
+
+                    const cantidad = numero(
+                        leer(servicio, 'Reservas', 0)
+                    );
+
+                    const porcentaje =
+                        cantidad / maximo * 100;
+
+                    const fila = elemento(
+                        'div',
+                        'popularity-row'
+                    );
+
+                    fila.appendChild(
+                        elemento('span', '', nombre)
+                    );
+
+                    const pista = elemento(
+                        'div',
+                        'popularity-track'
+                    );
+
+                    const barra = elemento('div');
+
+                    barra.style.width =
+                        porcentaje.toFixed(1) + '%';
+
+                    pista.appendChild(barra);
+
+                    fila.appendChild(pista);
+
+                    fila.appendChild(
+                        elemento(
+                            'strong',
+                            '',
+                            entero(cantidad)
+                        )
+                    );
+
+                    contenedor.appendChild(fila);
+                });
+            }
+
+            // =========================================
+            // RENDIMIENTO POR SUCURSAL
+            // =========================================
+
+            function renderizarSucursales(datos) {
+
+                const contenedor = document.getElementById(
+                    'tablaSucursales'
+                );
+
+                const sucursales = leer(
+                    datos, 'Sucursales', []
+                ) || [];
+
+                // Conservamos el encabezado original.
+
+                contenedor.querySelectorAll(
+                    '.performance-row:not(.performance-header)'
+                ).forEach(function(fila) {
+                    fila.remove();
+                });
+
+                if (sucursales.length === 0) {
+                    return;
+                }
+
+                sucursales.forEach(function(sucursal, indice) {
+
+                    const fila = elemento(
+                        'div',
+                        indice % 2 === 0
+                            ? 'performance-row'
+                            : 'performance-row highlighted'
+                    );
+
+                    const nombre = leer(
+                        sucursal, 'Nombre', ''
+                    );
+
+                    const reservas = numero(
+                        leer(sucursal, 'Reservas', 0)
+                    );
+
+                    const ingresos = numero(
+                        leer(sucursal, 'Ingresos', 0)
+                    );
+
+                    const ocupacion = leer(
+                        sucursal, 'Ocupacion', null
+                    );
+
+                    const valoracion = leer(
+                        sucursal, 'Valoracion', null
+                    );
+
+                    const top = leer(
+                        sucursal,
+                        'ServicioTop',
+                        'Sin reservas'
+                    );
+
+                    const variacion = leer(
+                        sucursal,
+                        'TendenciaReservas',
+                        null
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            'branch-name',
+                            nombre
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            '',
+                            entero(reservas)
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            'income',
+                            dinero(ingresos)
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            ocupacion === null
+                                ? 'no-data'
+                                : '',
+                            ocupacion === null
+                                ? 'N/D'
+                                : numero(ocupacion).toFixed(1) + '%'
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            '',
+                            top
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            valoracion === null
+                                ? 'no-data'
+                                : '',
+                            valoracion === null
+                                ? 'N/D'
+                                : '☆ ' +
+                                numero(valoracion).toFixed(1)
+                        )
+                    );
+
+                    let claseTendencia =
+                        'growth neutral-growth';
+
+                    let textoTendencia =
+                        'Sin comparativo';
+
+                    if (variacion !== null) {
+
+                        const valor = numero(variacion);
+
+                        if (valor > 0) {
+                            claseTendencia = 'growth';
+                        }
+                        else if (valor < 0) {
+                            claseTendencia = 'growth negative';
+                        }
+
+                        textoTendencia =
+                            (valor > 0 ? '↑ +' :
+                                valor < 0 ? '↓ ' : '→ ') +
+                            valor.toFixed(1) + '%';
+                    }
+
+                    fila.appendChild(
+                        elemento(
+                            'div',
+                            claseTendencia,
+                            textoTendencia
+                        )
+                    );
+
+                    contenedor.appendChild(fila);
+                });
+            }
+
+            // =========================================
+            // ACTIVIDAD DEL SISTEMA
+            // =========================================
+
+            function renderizarActividad(datos) {
+
+                const contenedor = document.getElementById(
+                    'actividadSistema'
+                );
+
+                const actividades = leer(
+                    datos, 'Actividad', []
+                ) || [];
+
+                contenedor.replaceChildren();
+
+                if (actividades.length === 0) {
+
+                    contenedor.appendChild(
+                        elemento(
+                            'p',
+                            'report-empty',
+                            'Sin citas ni registros de clientes en este período.'
+                        )
+                    );
+
+                    return;
+                }
+
+                actividades.forEach(function(actividad) {
+
+                    const textoFecha = leer(
+                        actividad, 'Fecha', null
+                    );
+
+                    const citas = numero(
+                        leer(actividad, 'CitasProgramadas', 0)
+                    );
+
+                    const registros = numero(
+                        leer(actividad, 'ClientesRegistrados', 0)
+                    );
+
+                    const fecha = textoFecha
+                        ? new Date(textoFecha)
+                        : null;
+
+                    const dia =
+                        fecha &&
+                            !Number.isNaN(fecha.getTime())
+                            ? fecha.toLocaleDateString(
+                                'es-SV',
+                                {
+                                    day: '2-digit',
+                                    month: 'short'
+                                })
+                            : 'Sin fecha';
+
+                    const fila = elemento(
+                        'div',
+                        'timeline-row'
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            'date-tag',
+                            dia
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            entero(citas) +
+                            ' citas programadas, ' +
+                            entero(registros) +
+                            ' clientes registrados'
+                        )
+                    );
+
+                    contenedor.appendChild(fila);
+                });
+            }
+
+            // =========================================
+            // DISTRIBUCIÓN DE RESERVAS
+            // =========================================
+
+            function renderizarEstados(datos) {
+
+                const registros = leer(
+                    datos, 'EstadosReservas', []
+                ) || [];
+
+                const leyenda = document.getElementById(
+                    'leyendaReservas'
+                );
+
+                const grafico = document.getElementById(
+                    'graficoReservas'
+                );
+
+                leyenda.replaceChildren();
+
+                const categorias = [
+                    {
+                        nombre: 'Completadas',
+                        color: '#9d7964',
+                        clase: 'completed'
+                    },
+                    {
+                        nombre: 'Confirmadas',
+                        color: '#c9a488',
+                        clase: 'confirmed'
+                    },
+                    {
+                        nombre: 'Canceladas',
+                        color: '#b76562',
+                        clase: 'cancelled'
+                    },
+                    {
+                        nombre: 'Pendientes',
+                        color: '#e2c38f',
+                        clase: 'pending'
+                    },
+                    {
+                        nombre: 'No asistieron',
+                        color: '#8c8b93',
+                        clase: 'no-show'
+                    },
+                    {
+                        nombre: 'Otros',
+                        color: '#d7d0c8',
+                        clase: ''
+                    }
+                ];
+
+                const valores = categorias.map(function(categoria) {
+
+                    const encontrado = registros.find(
+                        function(registro) {
+
+                            return leer(
+                                registro, 'Estado', ''
+                            ) === categoria.nombre;
+                        }
+                    );
+
+                    return encontrado
+                        ? numero(leer(encontrado, 'Cantidad', 0))
+                        : 0;
+                });
+
+                const total = valores.reduce(
+                    function(a, b) {
+                        return a + b;
+                    },
+                    0
+                );
+
+                if (total === 0) {
+
+                    grafico.style.setProperty(
+                        'background',
+                        '#e7dfd6',
+                        'important'
+                    );
+
+                    leyenda.appendChild(
+                        elemento(
+                            'p',
+                            'report-empty',
+                            'Sin reservas en este mes.'
+                        )
+                    );
+
+                    return;
+                }
+
+                let porcentajeAcumulado = 0;
+
+                const sectores = [];
+
+                categorias.forEach(function(categoria, indice) {
+
+                    const cantidad = valores[indice];
+
+                    if (cantidad === 0) {
+                        return;
+                    }
+
+                    const porcentaje =
+                        cantidad / total * 100;
+
+                    const desde = porcentajeAcumulado;
+
+                    porcentajeAcumulado += porcentaje;
+
+                    sectores.push(
+                        categoria.color + ' ' +
+                        desde.toFixed(3) + '% ' +
+                        porcentajeAcumulado.toFixed(3) + '%'
+                    );
+
+                    const fila = elemento('div');
+
+                    const punto = elemento(
+                        'span',
+                        'legend-dot ' + categoria.clase
+                    );
+
+                    punto.style.backgroundColor =
+                        categoria.color;
+
+                    fila.appendChild(punto);
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            categoria.nombre +
+                            ': ' +
+                            entero(cantidad) +
+                            ' (' +
+                            porcentaje.toFixed(1) +
+                            '%)'
+                        )
+                    );
+
+                    leyenda.appendChild(fila);
+                });
+
+                grafico.style.setProperty(
+                    'background',
+                    'conic-gradient(' +
+                    sectores.join(', ') +
+                    ')',
+                    'important'
+                );
+            }
+
+            // =========================================
+            // CONSULTA PRINCIPAL A SUPABASE
+            // =========================================
+
+            async function cargarReporte() {
+
+                actualizarMes();
+
+                const peticionActual = ++numeroPeticion;
+
+                aviso('Cargando reporte desde Supabase...', false);
+
+                const anio = periodoActual.getFullYear();
+
+                const mes = periodoActual.getMonth() + 1;
+
+                const url =
+                    rutaReportes +
+                    '?anio=' + encodeURIComponent(anio) +
+                    '&mes=' + encodeURIComponent(mes);
+
+                try {
+
+                    const respuesta = await fetch(
+                        url,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            cache: 'no-store'
+                        }
+                    );
+
+                    if (!respuesta.ok) {
+
+                        let mensaje =
+                            'No se pudo consultar el reporte.';
+
+                        try {
+
+                            const detalle = await respuesta.json();
+
+                            mensaje = leer(
+                                detalle,
+                                'mensaje',
+                                mensaje
+                            );
+                        }
+                        catch (error) {
+                            // Se conserva el mensaje general.
+                        }
+
+                        throw new Error(mensaje);
+                    }
+
+                    const datos = await respuesta.json();
+
+                    // Evita que una petición anterior
+                    // reemplace un mes seleccionado después.
+
+                    if (peticionActual !== numeroPeticion) {
+                        return;
+                    }
+
+                    renderizarIndicadores(datos);
+
+                    renderizarIngresos(datos);
+
+                    renderizarServicios(datos);
+
+                    renderizarSucursales(datos);
+
+                    renderizarActividad(datos);
+
+                    renderizarEstados(datos);
+
+                    aviso('', false);
+
+                }
+                catch (error) {
+
+                    if (peticionActual !== numeroPeticion) {
+                        return;
+                    }
+
+                    aviso(
+                        'Error al cargar el reporte: ' +
+                        error.message,
+                        true
+                    );
+                }
+            }
+
+            // =========================================
+            // INICIAR
+            // =========================================
+
+            cargarReporte();
+
+    </script>
 
 </body>
 
