@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
@@ -78,3 +77,6 @@ namespace Lavillemvc.Models
         }
     }
 }
+
+
+
