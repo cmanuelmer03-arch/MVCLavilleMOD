@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Lavillemvc.Models.PerfilCliente
+
+@{
     ViewData["Title"] = "Mi Perfil";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
@@ -6,29 +8,28 @@
 <div class="perfil">
 
     <div class="perfil-titulo">
-
-        <h1>
-            Mi Perfil
-        </h1>
+        <h1>Mi Perfil</h1>
 
         <p>
             Gestiona tu información personal, preferencias de belleza y ajustes de cuenta.
         </p>
-
     </div>
 
 
-    <div class="perfil-presentacion">
+    <!-- PRESENTACIÓN DEL CLIENTE -->
 
+    <div class="perfil-presentacion">
 
         <div class="perfil-foto">
 
-            <img src="/Images/avatar.jpeg"
+            <img src="@(string.IsNullOrEmpty(Model.FotoPerfilUrl)
+                        ? "/Images/avatar.jpeg"
+                        : Model.FotoPerfilUrl)"
                  alt="Foto de perfil" />
 
-            <a href="#">
-                Cambiar Foto
-            </a>
+            <span>
+                Foto de perfil
+            </span>
 
         </div>
 
@@ -38,27 +39,27 @@
             <div class="perfil-nombre">
 
                 <h2>
-                    María García López
+                    @Model.NombreCompleto
                 </h2>
 
                 <span>
-                    MEMBRESÍA GOLD
+                    @(Model.Membresia ?? "SIN MEMBRESÍA")
                 </span>
 
             </div>
 
 
             <p>
-                <strong>
-                    Correo:
-                </strong>
-
-                maria.garcia@email.com
+                <strong>Correo:</strong>
+                @(Model.Correo ?? "No registrado")
             </p>
 
 
             <p>
-                Miembro desde Enero 2024 · 2,450 puntos acumulados
+                Miembro desde
+                @(Model.MiembroDesde?.ToString("MMMM yyyy") ?? "No registrado")
+                ·
+                @Model.PuntosFidelidad.ToString("N0") puntos acumulados
             </p>
 
         </div>
@@ -66,341 +67,398 @@
     </div>
 
 
-    <div class="perfil-columnas">
+    <!-- FORMULARIO COMPLETO -->
+
+    <form asp-controller="Cliente"
+          asp-action="GuardarPerfil"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="IdCliente" />
+
+        <input type="hidden"
+               asp-for="IdEspecialistaPreferido" />
+
+        <input type="hidden"
+               asp-for="IdSucursalFavorita" />
 
 
-        <!-- INFORMACIÓN PERSONAL -->
-
-        <div class="informacion-personal card">
-
-            <h2>
-                Información Personal
-            </h2>
-
-            <hr />
+        <div class="perfil-columnas">
 
 
-            <div class="form-grid">
+            <!-- ================================= -->
+            <!-- INFORMACIÓN PERSONAL -->
+            <!-- ================================= -->
+
+            <div class="informacion-personal card">
+
+                <h2>
+                    Información Personal
+                </h2>
+
+                <hr />
 
 
-                <div class="campo">
+                <div class="form-grid">
 
-                    <label>
-                        Nombre
-                    </label>
 
-                    <input type="text"
-                           value="María" />
+                    <div class="campo">
+
+                        <label asp-for="Nombre">
+                            Nombre
+                        </label>
+
+                        <input asp-for="Nombre"
+                               type="text"
+                               required />
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label asp-for="Apellido">
+                            Apellido
+                        </label>
+
+                        <input asp-for="Apellido"
+                               type="text"
+                               required />
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label asp-for="Correo">
+                            Correo Electrónico
+                        </label>
+
+                        <input asp-for="Correo"
+                               type="email" />
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label asp-for="Telefono">
+                            Teléfono
+                        </label>
+
+                        <input asp-for="Telefono"
+                               type="tel" />
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label asp-for="FechaNacimiento">
+                            Fecha de Nacimiento
+                        </label>
+
+                        <input asp-for="FechaNacimiento"
+                               type="date" />
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label asp-for="Direccion">
+                            Dirección
+                        </label>
+
+                        <input asp-for="Direccion"
+                               type="text" />
+
+                    </div>
+
 
                 </div>
 
 
-                <div class="campo">
+                <div class="guardar-contenedor">
 
-                    <label>
-                        Apellido
-                    </label>
+                    <button type="submit"
+                            class="btn-guardar">
 
-                    <input type="text"
-                           value="García López" />
+                        Guardar Cambios
 
-                </div>
-
-
-                <div class="campo">
-
-                    <label>
-                        Correo Electrónico
-                    </label>
-
-                    <input type="text"
-                           value="maria.garcia@email.com" />
+                    </button>
 
                 </div>
-
-
-                <div class="campo">
-
-                    <label>
-                        Teléfono
-                    </label>
-
-                    <input type="text"
-                           value="+58 412 555 7890" />
-
-                </div>
-
-
-                <div class="campo">
-
-                    <label>
-                        Fecha de Nacimiento
-                    </label>
-
-                    <input type="text"
-                           value="15/03/1992" />
-
-                </div>
-
-
-                <div class="campo">
-
-                    <label>
-                        Dirección
-                    </label>
-
-                    <input type="text"
-                           value="Av. Principal, Altamira" />
-
-                </div>
-
 
             </div>
 
 
-            <div class="guardar-contenedor">
+            <!-- ================================= -->
+            <!-- COLUMNA DERECHA -->
+            <!-- ================================= -->
 
-                <button type="button"
-                        class="btn-guardar">
+            <div class="perfil-derecha">
 
-                    Guardar Cambios
 
-                </button>
+                <!-- ================================= -->
+                <!-- PREFERENCIAS DE BELLEZA -->
+                <!-- ================================= -->
+
+                <div class="preferencias card">
+
+                    <h2>
+                        Preferencias de Belleza
+                    </h2>
+
+                    <hr />
+
+
+                    <div class="preferencia">
+
+                        <span>
+                            Tipo de Cabello
+                        </span>
+
+                        <input asp-for="TipoCabello"
+                               type="text"
+                               placeholder="Ej. Ondulado" />
+
+                    </div>
+
+
+                    <div class="preferencia">
+
+                        <span>
+                            Especialista Preferida
+                        </span>
+
+                        <strong>
+                            @(Model.EspecialistaPreferido ?? "No seleccionada")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="preferencia">
+
+                        <span>
+                            Sucursal Favorita
+                        </span>
+
+                        <strong>
+                            @(Model.SucursalFavorita ?? "No seleccionada")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="preferencia">
+
+                        <span>
+                            Alergias o Condiciones
+                        </span>
+
+                        <input asp-for="AlergiasCondiciones"
+                               type="text"
+                               placeholder="Ninguna registrada" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- PREFERENCIAS DE CONTACTO -->
+                <!-- ================================= -->
+
+                <div class="preferencias-contacto card">
+
+                    <h2>
+                        Preferencias de Contacto
+                    </h2>
+
+                    <hr />
+
+
+                    <div class="contacto-opcion">
+
+                        <div>
+
+                            <strong>
+                                Notificaciones de Correo
+                            </strong>
+
+                            <p>
+                                Recibe confirmaciones de citas por e-mail
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input asp-for="NotificacionesCorreo"
+                                   type="checkbox" />
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="contacto-opcion">
+
+                        <div>
+
+                            <strong>
+                                Recordatorios SMS
+                            </strong>
+
+                            <p>
+                                Mensajes de texto 24 horas antes de tu cita
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input asp-for="RecordatoriosSms"
+                                   type="checkbox" />
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="contacto-opcion">
+
+                        <div>
+
+                            <strong>
+                                Promociones Especiales
+                            </strong>
+
+                            <p>
+                                Descuentos flash y eventos de socios
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input asp-for="PromocionesEspeciales"
+                                   type="checkbox" />
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="contacto-opcion">
+
+                        <div>
+
+                            <strong>
+                                Boletín Mensual
+                            </strong>
+
+                            <p>
+                                Tendencias capilares y consejos de cuidado
+                            </p>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input asp-for="BoletinMensual"
+                                   type="checkbox" />
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- CONFIGURACIÓN -->
+                <!-- ================================= -->
+
+                <div class="configuracion card">
+
+                    <h2>
+                        Configuración de la Cuenta
+                    </h2>
+
+                    <hr />
+
+
+                    <div class="configuracion-item">
+
+                        <span>
+                            Membresía
+                        </span>
+
+                        <strong>
+                            @(Model.Membresia ?? "Sin membresía")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="configuracion-item">
+
+                        <span>
+                            Puntos
+                        </span>
+
+                        <strong>
+                            @Model.PuntosFidelidad.ToString("N0")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="configuracion-item">
+
+                        <span>
+                            Idioma
+                        </span>
+
+                        <select asp-for="Idioma">
+
+                            <option value="es">
+                                Español (ES)
+                            </option>
+
+                            <option value="en">
+                                English (EN)
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
 
             </div>
 
         </div>
 
-
-        <!-- COLUMNA DERECHA -->
-
-        <div class="perfil-derecha">
-
-
-            <!-- PREFERENCIAS DE BELLEZA -->
-
-            <div class="preferencias card">
-
-                <h2>
-                    Preferencias de Belleza
-                </h2>
-
-                <hr />
-
-
-                <div class="preferencia">
-
-                    <span>
-                        Tipo de Cabello
-                    </span>
-
-                    <strong>
-                        Ondulado
-                    </strong>
-
-                </div>
-
-
-                <div class="preferencia">
-
-                    <span>
-                        Especialista Preferida
-                    </span>
-
-                    <strong>
-                        Valentina Rojas
-                    </strong>
-
-                </div>
-
-
-                <div class="preferencia">
-
-                    <span>
-                        Sucursal Favorita
-                    </span>
-
-                    <strong>
-                        Las Mercedes
-                    </strong>
-
-                </div>
-
-
-                <div class="preferencia">
-
-                    <span>
-                        Alergias o Condiciones
-                    </span>
-
-                    <strong>
-                        Ninguna registrada
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <!-- PREFERENCIAS DE CONTACTO -->
-
-            <div class="preferencias-contacto card">
-
-                <h2>
-                    Preferencias de Contacto
-                </h2>
-
-                <hr />
-
-
-                <div class="contacto-opcion">
-
-                    <div>
-
-                        <strong>
-                            Notificaciones de Correo
-                        </strong>
-
-                        <p>
-                            Recibe confirmaciones de citas por e-mail
-                        </p>
-
-                    </div>
-
-
-                    <label class="switch">
-
-                        <input type="checkbox"
-                               checked />
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </div>
-
-
-                <div class="contacto-opcion">
-
-                    <div>
-
-                        <strong>
-                            Recordatorios SMS
-                        </strong>
-
-                        <p>
-                            Mensajes de texto 24 horas antes de tu cita
-                        </p>
-
-                    </div>
-
-
-                    <label class="switch">
-
-                        <input type="checkbox"
-                               checked />
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </div>
-
-
-                <div class="contacto-opcion">
-
-                    <div>
-
-                        <strong>
-                            Promociones Especiales
-                        </strong>
-
-                        <p>
-                            Descuentos flash y eventos de socios
-                        </p>
-
-                    </div>
-
-
-                    <label class="switch">
-
-                        <input type="checkbox" />
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </div>
-
-
-                <div class="contacto-opcion">
-
-                    <div>
-
-                        <strong>
-                            Boletín Mensual
-                        </strong>
-
-                        <p>
-                            Tendencias capilares y consejos de cuidado
-                        </p>
-
-                    </div>
-
-
-                    <label class="switch">
-
-                        <input type="checkbox" />
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- CONFIGURACIÓN -->
-
-            <div class="configuracion card">
-
-                <h2>
-                    Configuración de la Cuenta
-                </h2>
-
-                <hr />
-
-
-                <div class="configuracion-item">
-                    Cambiar Contraseña
-                </div>
-
-
-                <div class="configuracion-item">
-
-                    <span>
-                        Idioma
-                    </span>
-
-                    <span>
-                        Español (ES)
-                    </span>
-
-                </div>
-
-
-                <div class="configuracion-item eliminar">
-
-                    Eliminar cuenta permanentemente
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </div>
+    </form>
 
 </div>
