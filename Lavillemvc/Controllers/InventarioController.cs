@@ -1,149 +1,501 @@
-﻿using Lavillemvc.Models;
+﻿
+using Lavillemvc.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Lavillemvc.Controllers
 {
     public class ProductoInventarioItem
     {
         public int Id { get; set; }
-        public string Codigo { get; set; } = string.Empty;
+        public int IdProducto { get; set; }
+        public int IdInventario { get; set; }
+        public int IdSucursal { get; set; }
 
-        [Required(ErrorMessage = "Escribe el nombre del producto.")]
-        [StringLength(120, ErrorMessage = "El nombre no puede superar los 120 caracteres.")]
-        public string Nombre { get; set; } = string.Empty;
+        public string Codigo { get; set; } = "";
+
+        [Required(ErrorMessage = "Escribe el nombre.")]
+        public string Nombre { get; set; } = "";
 
         [Required(ErrorMessage = "Selecciona una categoría.")]
-        public string Categoria { get; set; } = string.Empty;
+        public string Categoria { get; set; } = "";
 
         [Required(ErrorMessage = "Escribe la marca.")]
-        [StringLength(80, ErrorMessage = "La marca no puede superar los 80 caracteres.")]
-        public string Marca { get; set; } = string.Empty;
+        public string Marca { get; set; } = "";
 
-        [Range(0, 1000000, ErrorMessage = "El stock actual debe ser igual o mayor que cero.")]
+        [Range(0, 1000000)]
         public int StockActual { get; set; }
 
-        [Range(0, 1000000, ErrorMessage = "El stock mínimo debe ser igual o mayor que cero.")]
+        [Range(0, 1000000)]
         public int StockMinimo { get; set; }
 
-        [Range(typeof(decimal), "0", "999999999", ErrorMessage = "El precio debe ser igual o mayor que cero.")]
+        [Range(typeof(decimal), "0", "999999999")]
         public decimal Precio { get; set; }
 
-        public string Estado
-        {
-            get
-            {
-                if (StockActual <= 0) return "Sin stock";
-                if (StockActual * 2 < StockMinimo) return "Crítico";
-                if (StockActual < StockMinimo) return "Bajo";
-                return "En Stock";
-            }
-        }
+        public string Estado { get; set; } = "";
     }
 
     public class InventarioController : Controller
     {
-        private static readonly object Candado = new object();
-
-        private static readonly string[] Categorias =
+        private static readonly HttpClient Http = new HttpClient
         {
-            "Coloración",
-            "Cuidado Capilar",
-            "Herramientas",
-            "Consumibles",
-            "Mobiliario"
+            Timeout = TimeSpan.FromSeconds(30)
         };
 
-        // Datos temporales en memoria mientras se conecta la base de datos.
-        private static readonly List<ProductoInventarioItem> Productos =
-            CrearProductosIniciales();
-
-        private static readonly List<InventarioPanelInventario.MovimientoInventario> Movimientos =
-            CrearMovimientosIniciales();
-
-        private static int SiguienteMovimientoId = 4;
-        private static DateTime UltimaActualizacion = DateTime.Now;
-
-        public IActionResult PanelInventario()
-        {
-            lock (Candado)
+        private static readonly JsonSerializerOptions OpcionesJson =
+            new JsonSerializerOptions
             {
-                var productos = Productos
-                    .Select(CopiarProducto)
-                    .ToList();
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            };
 
-                var movimientos = Movimientos
-                    .OrderByDescending(m => m.Fecha)
-                    .Take(3)
-                    .Select(CopiarMovimiento)
-                    .ToList();
+        private readonly IConfiguration _config;
+        private readonly ILogger<InventarioController> _logger;
 
-                var alertas = productos
-                    .Where(p => p.StockActual <= 0 || p.StockActual < p.StockMinimo)
-                    .OrderBy(p => p.Id)
-                    .Take(3)
-                    .Select(p => new InventarioPanelInventario.AlertaInventario
+        public InventarioController(
+            IConfiguration configuration,
+            ILogger<InventarioController> logger)
+        {
+            _config = configuration;
+            _logger = logger;
+        }
+
+        private string? Url =>
+            _config["Supabase:Url"]?.TrimEnd('/');
+
+        private string? Clave =>
+            _config["Supabase:PublishableKey"];
+
+        private sealed class ResultadoProductos
+        {
+            public List<VwInventarioProducto> Productos { get; set; }
+                = new List<VwInventarioProducto>();
+
+            public string? Error { get; set; }
+        }
+
+        private sealed class ResultadoApi
+        {
+            public bool Correcto { get; set; }
+            public string Contenido { get; set; } = "";
+            public string Error { get; set; } = "";
+        }
+
+        private static string LeerError(string contenido)
+        {
+            try
+            {
+                using var documento =
+                    JsonDocument.Parse(contenido);
+
+                if (documento.RootElement.TryGetProperty(
+                    "message", out var mensaje))
+                {
+                    return mensaje.GetString()
+                        ?? "Supabase rechazó la operación.";
+                }
+            }
+            catch (JsonException)
+            {
+            }
+
+            return "Supabase rechazó la operación.";
+        }
+
+        // Ejecuta funciones SQL de Supabase
+        // sin requerir un segundo login de inventario.
+        private async Task<ResultadoApi> EjecutarRpcAsync(
+            string nombreFuncion,
+            object parametros)
+        {
+            var resultado = new ResultadoApi();
+
+            if (string.IsNullOrWhiteSpace(Url) ||
+                string.IsNullOrWhiteSpace(Clave))
+            {
+                resultado.Error =
+                    "Falta configurar la API REST de Supabase.";
+
+                return resultado;
+            }
+
+            try
+            {
+                using var solicitud = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    Url + "/rest/v1/rpc/" + nombreFuncion);
+
+                solicitud.Headers.Add("apikey", Clave);
+
+                solicitud.Content = new StringContent(
+                    JsonSerializer.Serialize(parametros),
+                    Encoding.UTF8,
+                    "application/json");
+
+                using var respuesta =
+                    await Http.SendAsync(solicitud);
+
+                resultado.Contenido =
+                    await respuesta.Content.ReadAsStringAsync();
+
+                resultado.Correcto =
+                    respuesta.IsSuccessStatusCode;
+
+                if (!resultado.Correcto)
+                {
+                    resultado.Error = LeerError(
+                        resultado.Contenido);
+
+                    _logger.LogWarning(
+                        "RPC {Funcion} devolvió HTTP {Codigo}: {Error}",
+                        nombreFuncion,
+                        (int)respuesta.StatusCode,
+                        resultado.Error);
+                }
+            }
+            catch (Exception ex) when (
+                ex is HttpRequestException ||
+                ex is TaskCanceledException ||
+                ex is UriFormatException)
+            {
+                resultado.Error =
+                    "No se pudo comunicar con Supabase.";
+
+                _logger.LogError(
+                    ex,
+                    "Error al ejecutar {Funcion}",
+                    nombreFuncion);
+            }
+
+            return resultado;
+        }
+
+        // OBTENER PRODUCTOS DESDE LA VIEW
+
+        private async Task<ResultadoProductos>
+            ConsultarProductosAsync()
+        {
+            var resultado = new ResultadoProductos();
+
+            if (string.IsNullOrWhiteSpace(Url) ||
+                string.IsNullOrWhiteSpace(Clave))
+            {
+                resultado.Error =
+                    "La API REST de Supabase no está configurada.";
+
+                return resultado;
+            }
+
+            try
+            {
+                const int tamanoPagina = 500;
+                int desplazamiento = 0;
+
+                int? idSucursal =
+                    _config.GetValue<int?>(
+                        "Inventario:IdSucursal");
+
+                while (true)
+                {
+                    string direccion =
+                        Url +
+                        "/rest/v1/vw_inventario_productos" +
+                        "?select=*" +
+                        "&order=id_detalle_inventario.asc" +
+                        "&limit=" + tamanoPagina +
+                        "&offset=" + desplazamiento;
+
+                    if (idSucursal.HasValue)
                     {
-                        IdProducto = p.Id,
+                        direccion +=
+                            "&id_sucursal=eq." +
+                            idSucursal.Value;
+                    }
+
+                    using var solicitud = new HttpRequestMessage(
+                        HttpMethod.Get,
+                        direccion);
+
+                    solicitud.Headers.Add("apikey", Clave);
+
+                    using var respuesta =
+                        await Http.SendAsync(solicitud);
+
+                    if (!respuesta.IsSuccessStatusCode)
+                    {
+                        resultado.Productos.Clear();
+
+                        resultado.Error =
+                            "No se pudieron consultar productos. HTTP " +
+                            (int)respuesta.StatusCode;
+
+                        return resultado;
+                    }
+
+                    string contenido =
+                        await respuesta.Content.ReadAsStringAsync();
+
+                    var pagina = JsonSerializer.Deserialize<
+                        List<VwInventarioProducto>>(
+                            contenido,
+                            OpcionesJson)
+                        ?? new List<VwInventarioProducto>();
+
+                    resultado.Productos.AddRange(pagina);
+
+                    if (pagina.Count < tamanoPagina)
+                        break;
+
+                    desplazamiento += tamanoPagina;
+                }
+            }
+            catch (Exception ex) when (
+                ex is HttpRequestException ||
+                ex is TaskCanceledException ||
+                ex is JsonException ||
+                ex is UriFormatException)
+            {
+                resultado.Productos.Clear();
+
+                resultado.Error =
+                    "No se pudieron cargar los productos.";
+
+                _logger.LogError(
+                    ex,
+                    "Error al consultar la VIEW de inventario");
+            }
+
+            return resultado;
+        }
+
+        // OBTENER MOVIMIENTOS REALES
+
+        private async Task<
+            (List<VwInventarioMovimiento> Movimientos, string? Error)>
+            ConsultarMovimientosAsync()
+        {
+            var respuesta = await EjecutarRpcAsync(
+                "inv_listar_movimientos",
+                new
+                {
+                    p_limite = 8,
+                    p_id_sucursal =
+                        _config.GetValue<int?>(
+                            "Inventario:IdSucursal")
+                });
+
+            if (!respuesta.Correcto)
+            {
+                return (
+                    new List<VwInventarioMovimiento>(),
+                    respuesta.Error
+                );
+            }
+
+            try
+            {
+                var movimientos = JsonSerializer.Deserialize<
+                    List<VwInventarioMovimiento>>(
+                        respuesta.Contenido,
+                        OpcionesJson)
+                    ?? new List<VwInventarioMovimiento>();
+
+                return (movimientos, null);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error interpretando los movimientos.");
+
+                return (
+                    new List<VwInventarioMovimiento>(),
+                    "No se pudo leer el historial de movimientos."
+                );
+            }
+        }
+
+        private static ProductoInventarioItem ConvertirProducto(
+            VwInventarioProducto p)
+        {
+            return new ProductoInventarioItem
+            {
+                Id = p.IdDetalleInventario,
+                IdProducto = p.IdProducto,
+                IdInventario = p.IdInventario,
+                IdSucursal = p.IdSucursal,
+                Codigo = p.Codigo,
+                Nombre = p.Nombre,
+                Categoria = p.Categoria,
+                Marca = p.Marca ?? "",
+                StockActual = p.StockActual,
+                StockMinimo = p.StockMinimo,
+                Precio = p.Precio,
+                Estado = p.Estado
+            };
+        }
+
+        // PANEL DE INVENTARIO
+
+        [HttpGet]
+        public async Task<IActionResult> PanelInventario()
+        {
+            var resultado = await ConsultarProductosAsync();
+            var productos = resultado.Productos;
+
+            var sucursales = productos
+                .Select(p => p.IdSucursal)
+                .Distinct()
+                .ToList();
+
+            var inventarios = productos
+                .Select(p => p.IdInventario)
+                .Distinct()
+                .ToList();
+
+            var alertas = productos
+                .Where(p =>
+                    p.StockActual <= 0 ||
+                    p.StockActual < p.StockMinimo)
+                .OrderBy(p => p.StockActual)
+                .Take(3)
+                .Select(p =>
+                    new InventarioPanelInventario.AlertaInventario
+                    {
+                        IdProducto = p.IdProducto,
                         NombreProducto = p.Nombre,
                         Cantidad = p.StockActual,
                         Precio = p.Precio,
                         NivelAlerta = p.Estado
                     })
-                    .ToList();
+                .ToList();
 
-                var categorias = Categorias
-                    .Select((nombre, indice) =>
-                        new InventarioPanelInventario.CategoriaInventario
-                        {
-                            IdCategoria = indice + 1,
-                            Categoria = nombre,
-                            CantidadProductos = productos.Count(
-                                p => p.Categoria == nombre),
-                            TotalUnidades = productos
-                                .Where(p => p.Categoria == nombre)
-                                .Sum(p => p.StockActual)
-                        })
-                    .ToList();
+            var categorias = productos
+                .GroupBy(p => p.Categoria)
+                .OrderBy(g => g.Key)
+                .Select((grupo, indice) =>
+                    new InventarioPanelInventario.CategoriaInventario
+                    {
+                        IdCategoria = indice + 1,
+                        Categoria = grupo.Key,
+                        CantidadProductos = grupo.Count(),
+                        TotalUnidades = grupo.Sum(
+                            p => p.StockActual)
+                    })
+                .ToList();
 
-                var modelo = new InventarioPanelInventario
-                {
-                    IdSucursal = 1,
-                    NombreSucursal = "L'Avielle San Salvador",
-                    Direccion = "San Salvador",
-                    IdInventario = 1,
-                    Encargado = "Carlos Mendoza",
-                    UltimaActualizacion = UltimaActualizacion,
+            var consultaMovimientos =
+                await ConsultarMovimientosAsync();
 
-                    TotalProductos = productos.Count,
-                    ProductosEnDetalle = productos.Count,
-                    TotalUnidades = productos.Sum(p => p.StockActual),
+            var movimientosPanel = consultaMovimientos.Movimientos
+                .Select(m =>
+                    new InventarioPanelInventario.MovimientoInventario
+                    {
+                        IdMovimiento = (int)Math.Min(
+                            m.IdMovimiento,
+                            int.MaxValue),
 
-                    StockBajo = productos.Count(
-                        p => p.StockActual > 0 &&
-                             p.StockActual < p.StockMinimo),
+                        Fecha = m.FechaMovimiento.LocalDateTime,
+                        Producto = m.NombreProducto,
+                        Tipo = m.TipoMovimiento,
+                        Cantidad = m.Cantidad,
 
-                    SinStock = productos.Count(
-                        p => p.StockActual <= 0),
+                        Responsable =
+                            string.IsNullOrWhiteSpace(m.RegistradoPor)
+                                ? "No especificado"
+                                : m.RegistradoPor
+                    })
+                .ToList();
 
-                    ValorTotal = productos.Sum(
-                        p => p.StockActual * p.Precio),
+            string nombreSucursal;
 
-                    AlertasJson = JsonSerializer.Serialize(alertas),
-                    CategoriasJson = JsonSerializer.Serialize(categorias),
-                    MovimientosJson = JsonSerializer.Serialize(movimientos)
-                };
-
-                return View(modelo);
+            if (!string.IsNullOrWhiteSpace(resultado.Error))
+            {
+                nombreSucursal = "Inventario no cargado";
             }
+            else if (sucursales.Count == 1)
+            {
+                nombreSucursal =
+                    $"Sucursal {sucursales[0]}";
+            }
+            else if (sucursales.Count > 1)
+            {
+                nombreSucursal =
+                    "Todas las sucursales";
+            }
+            else
+            {
+                nombreSucursal = "Sin registros";
+            }
+
+            var modelo = new InventarioPanelInventario
+            {
+                IdSucursal = sucursales.Count == 1
+                    ? sucursales[0]
+                    : 0,
+
+                NombreSucursal = nombreSucursal,
+                Direccion = "",
+
+                IdInventario = inventarios.Count == 1
+                    ? inventarios[0]
+                    : null,
+
+                Encargado = sucursales.Count == 1
+                    ? productos
+                        .Select(p => p.Encargado)
+                        .FirstOrDefault(e =>
+                            !string.IsNullOrWhiteSpace(e))
+                    : null,
+
+                UltimaActualizacion = productos.Count > 0
+                    ? productos.Max(
+                        p => p.UltimaActualizacion)
+                    : null,
+
+                TotalProductos = productos
+                    .Select(p => p.IdProducto)
+                    .Distinct()
+                    .Count(),
+
+                ProductosEnDetalle = productos.Count,
+
+                TotalUnidades = productos.Sum(
+                    p => p.StockActual),
+
+                StockBajo = productos.Count(p =>
+                    p.StockActual > 0 &&
+                    p.StockActual < p.StockMinimo),
+
+                SinStock = productos.Count(p =>
+                    p.StockActual <= 0),
+
+                ValorTotal = productos.Sum(
+                    p => p.StockActual * p.Precio),
+
+                AlertasJson = JsonSerializer.Serialize(alertas),
+                CategoriasJson = JsonSerializer.Serialize(categorias),
+                MovimientosJson = JsonSerializer.Serialize(
+                    movimientosPanel)
+            };
+
+            ViewBag.MensajeError =
+                resultado.Error ?? consultaMovimientos.Error;
+
+            return View(modelo);
         }
 
+        // GESTIÓN DE PRODUCTOS
+
         [HttpGet]
-        public IActionResult GestionProductos(
+        public async Task<IActionResult> GestionProductos(
             string busqueda = "",
             string categoria = "Todos",
             string ordenarPor = "Nombre",
@@ -152,7 +504,7 @@ namespace Lavillemvc.Controllers
             int? editarId = null,
             int? detalleId = null)
         {
-            return CargarVistaGestion(
+            return await CargarGestionAsync(
                 busqueda,
                 categoria,
                 ordenarPor,
@@ -164,186 +516,7 @@ namespace Lavillemvc.Controllers
                 null);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult GuardarProducto(
-            ProductoInventarioItem producto,
-            string busquedaRegreso = "",
-            string categoriaRegreso = "Todos",
-            string ordenarPorRegreso = "Nombre",
-            int paginaRegreso = 1)
-        {
-            if (!Categorias.Contains(producto.Categoria))
-            {
-                ModelState.AddModelError(
-                    nameof(producto.Categoria),
-                    "La categoría seleccionada no es válida.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.MensajeError =
-                    "Revisa los campos marcados antes de guardar.";
-
-                return CargarVistaGestion(
-                    busquedaRegreso,
-                    categoriaRegreso,
-                    ordenarPorRegreso,
-                    paginaRegreso,
-                    true,
-                    producto.Id > 0 ? producto.Id : (int?)null,
-                    null,
-                    producto,
-                    null);
-            }
-
-            lock (Candado)
-            {
-                if (producto.Id == 0)
-                {
-                    producto.Id = Productos.Count == 0
-                        ? 1
-                        : Productos.Max(p => p.Id) + 1;
-
-                    producto.Codigo = $"PRD-{producto.Id:000}";
-
-                    producto.Nombre = producto.Nombre.Trim();
-                    producto.Marca = producto.Marca.Trim();
-
-                    Productos.Add(CopiarProducto(producto));
-
-                    if (producto.StockActual > 0)
-                    {
-                        AgregarMovimiento(
-                            producto.Nombre,
-                            "Entrada",
-                            producto.StockActual,
-                            "Carlos Mendoza");
-                    }
-
-                    TempData["Mensaje"] =
-                        "Producto agregado correctamente.";
-                }
-                else
-                {
-                    var existente = Productos.FirstOrDefault(
-                        p => p.Id == producto.Id);
-
-                    if (existente == null)
-                    {
-                        TempData["Error"] =
-                            "No se encontró el producto que intentas editar.";
-
-                        return RedirectToAction(
-                            nameof(GestionProductos),
-                            new
-                            {
-                                busqueda = busquedaRegreso,
-                                categoria = categoriaRegreso,
-                                ordenarPor = ordenarPorRegreso,
-                                pagina = paginaRegreso
-                            });
-                    }
-
-                    int diferenciaStock =
-                        producto.StockActual - existente.StockActual;
-
-                    existente.Nombre = producto.Nombre.Trim();
-                    existente.Categoria = producto.Categoria;
-                    existente.Marca = producto.Marca.Trim();
-                    existente.StockActual = producto.StockActual;
-                    existente.StockMinimo = producto.StockMinimo;
-                    existente.Precio = producto.Precio;
-
-                    if (diferenciaStock > 0)
-                    {
-                        AgregarMovimiento(
-                            existente.Nombre,
-                            "Entrada",
-                            diferenciaStock,
-                            "Carlos Mendoza");
-                    }
-                    else if (diferenciaStock < 0)
-                    {
-                        AgregarMovimiento(
-                            existente.Nombre,
-                            "Salida",
-                            Math.Abs(diferenciaStock),
-                            "Carlos Mendoza");
-                    }
-
-                    TempData["Mensaje"] =
-                        "Producto actualizado correctamente.";
-                }
-
-                UltimaActualizacion = DateTime.Now;
-            }
-
-            return RedirectToAction(
-                nameof(GestionProductos),
-                new
-                {
-                    busqueda = busquedaRegreso,
-                    categoria = categoriaRegreso,
-                    ordenarPor = ordenarPorRegreso,
-                    pagina = paginaRegreso
-                });
-        }
-
-        // Elimina uno o varios productos seleccionados.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EliminarProductos(
-            List<int> ids,
-            string busquedaRegreso = "",
-            string categoriaRegreso = "Todos",
-            string ordenarPorRegreso = "Nombre",
-            int paginaRegreso = 1)
-        {
-            if (ids == null || ids.Count == 0)
-            {
-                TempData["Error"] =
-                    "Selecciona al menos un producto para eliminar.";
-            }
-            else
-            {
-                int eliminados;
-
-                lock (Candado)
-                {
-                    eliminados = Productos.RemoveAll(
-                        p => ids.Contains(p.Id));
-
-                    if (eliminados > 0)
-                    {
-                        UltimaActualizacion = DateTime.Now;
-                    }
-                }
-
-                if (eliminados > 0)
-                {
-                    TempData["Mensaje"] =
-                        $"Se eliminaron {eliminados} producto(s) correctamente.";
-                }
-                else
-                {
-                    TempData["Error"] =
-                        "No se encontró ningún producto seleccionado.";
-                }
-            }
-
-            return RedirectToAction(
-                nameof(GestionProductos),
-                new
-                {
-                    busqueda = busquedaRegreso,
-                    categoria = categoriaRegreso,
-                    ordenarPor = ordenarPorRegreso,
-                    pagina = paginaRegreso
-                });
-        }
-
-        private IActionResult CargarVistaGestion(
+        private async Task<IActionResult> CargarGestionAsync(
             string busqueda,
             string categoria,
             string ordenarPor,
@@ -351,19 +524,23 @@ namespace Lavillemvc.Controllers
             bool mostrarFormulario,
             int? editarId,
             int? detalleId,
-            ProductoInventarioItem formulario,
-            string mensajeError)
+            ProductoInventarioItem? formulario,
+            string? mensajeError)
         {
-            List<ProductoInventarioItem> todos;
+            var resultado = await ConsultarProductosAsync();
 
-            lock (Candado)
-            {
-                todos = Productos
-                    .Select(CopiarProducto)
-                    .ToList();
-            }
+            var todos = resultado.Productos
+                .Select(ConvertirProducto)
+                .ToList();
 
-            busqueda = (busqueda ?? string.Empty).Trim();
+            var categorias = todos
+                .Select(p => p.Categoria)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c)
+                .ToArray();
+
+            busqueda = (busqueda ?? "").Trim();
 
             categoria = string.IsNullOrWhiteSpace(categoria)
                 ? "Todos"
@@ -375,13 +552,12 @@ namespace Lavillemvc.Controllers
 
             IEnumerable<ProductoInventarioItem> consulta = todos;
 
-            if (!string.Equals(
-                categoria,
+            if (!categoria.Equals(
                 "Todos",
                 StringComparison.OrdinalIgnoreCase))
             {
-                consulta = consulta.Where(
-                    p => p.Categoria.Equals(
+                consulta = consulta.Where(p =>
+                    p.Categoria.Equals(
                         categoria,
                         StringComparison.OrdinalIgnoreCase));
             }
@@ -391,12 +567,10 @@ namespace Lavillemvc.Controllers
                 consulta = consulta.Where(p =>
                     p.Nombre.Contains(
                         busqueda,
-                        StringComparison.OrdinalIgnoreCase)
-                    ||
+                        StringComparison.OrdinalIgnoreCase) ||
                     p.Marca.Contains(
                         busqueda,
-                        StringComparison.OrdinalIgnoreCase)
-                    ||
+                        StringComparison.OrdinalIgnoreCase) ||
                     p.Codigo.Contains(
                         busqueda,
                         StringComparison.OrdinalIgnoreCase));
@@ -404,301 +578,248 @@ namespace Lavillemvc.Controllers
 
             consulta = ordenarPor switch
             {
-                "NombreDesc" => consulta.OrderByDescending(p => p.Nombre),
-                "PrecioAsc" => consulta.OrderBy(p => p.Precio),
-                "PrecioDesc" => consulta.OrderByDescending(p => p.Precio),
-                "StockAsc" => consulta.OrderBy(p => p.StockActual),
-                "StockDesc" => consulta.OrderByDescending(p => p.StockActual),
+                "NombreDesc" =>
+                    consulta.OrderByDescending(p => p.Nombre),
+
+                "PrecioAsc" =>
+                    consulta.OrderBy(p => p.Precio),
+
+                "PrecioDesc" =>
+                    consulta.OrderByDescending(p => p.Precio),
+
+                "StockAsc" =>
+                    consulta.OrderBy(p => p.StockActual),
+
+                "StockDesc" =>
+                    consulta.OrderByDescending(p => p.StockActual),
+
                 _ => consulta.OrderBy(p => p.Nombre)
             };
 
             var filtrados = consulta.ToList();
-
-            const int productosPorPagina = 7;
+            const int porPagina = 7;
 
             int totalPaginas = Math.Max(
                 1,
                 (int)Math.Ceiling(
-                    filtrados.Count / (double)productosPorPagina));
+                    filtrados.Count / (double)porPagina));
 
             pagina = Math.Clamp(pagina, 1, totalPaginas);
 
             var paginaProductos = filtrados
-                .Skip((pagina - 1) * productosPorPagina)
-                .Take(productosPorPagina)
+                .Skip((pagina - 1) * porPagina)
+                .Take(porPagina)
                 .ToList();
 
-            ViewBag.CategoriasDisponibles = Categorias;
+            ViewBag.CategoriasDisponibles = categorias;
             ViewBag.Busqueda = busqueda;
             ViewBag.Categoria = categoria;
             ViewBag.OrdenarPor = ordenarPor;
+
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalFiltrados = filtrados.Count;
 
             ViewBag.MostrarDesde = filtrados.Count == 0
                 ? 0
-                : ((pagina - 1) * productosPorPagina) + 1;
+                : (pagina - 1) * porPagina + 1;
 
             ViewBag.MostrarHasta = Math.Min(
-                pagina * productosPorPagina,
+                pagina * porPagina,
                 filtrados.Count);
 
             ViewBag.TotalProductos = todos.Count;
 
-            ViewBag.StockBajo = todos.Count(
-                p => p.StockActual > 0 &&
-                     p.StockActual < p.StockMinimo);
+            ViewBag.StockBajo = todos.Count(p =>
+                p.StockActual > 0 &&
+                p.StockActual < p.StockMinimo);
 
-            ViewBag.SinStock = todos.Count(
-                p => p.StockActual <= 0);
+            ViewBag.SinStock = todos.Count(p =>
+                p.StockActual <= 0);
+
+            ViewBag.UltimaActualizacion =
+                resultado.Productos.Count > 0
+                    ? resultado.Productos.Max(
+                        p => p.UltimaActualizacion)
+                    : null;
 
             ViewBag.FormularioAbierto = mostrarFormulario;
 
-            ViewBag.ProductoFormulario =
-                formulario ??
+            ViewBag.ProductoFormulario = formulario ??
                 (editarId.HasValue
-                    ? todos.FirstOrDefault(p => p.Id == editarId.Value)
+                    ? todos.FirstOrDefault(p =>
+                        p.Id == editarId.Value)
                     : new ProductoInventarioItem
                     {
-                        Categoria = Categorias[0],
-                        StockMinimo = 5
+                        Categoria =
+                            categorias.FirstOrDefault() ?? ""
                     });
 
             ViewBag.ProductoDetalle = detalleId.HasValue
-                ? todos.FirstOrDefault(p => p.Id == detalleId.Value)
+                ? todos.FirstOrDefault(p =>
+                    p.Id == detalleId.Value)
                 : null;
 
             ViewBag.Mensaje = TempData["Mensaje"];
-            ViewBag.MensajeError = mensajeError ?? TempData["Error"];
 
-            if (editarId.HasValue && ViewBag.ProductoFormulario == null)
+            ViewBag.MensajeError =
+                mensajeError
+                ?? TempData["Error"] as string
+                ?? resultado.Error;
+
+            if (editarId.HasValue &&
+                ViewBag.ProductoFormulario == null)
             {
                 ViewBag.FormularioAbierto = false;
-                ViewBag.MensajeError =
-                    "El producto que intentas editar ya no existe.";
-
                 ViewBag.ProductoFormulario =
-                    new ProductoInventarioItem
-                    {
-                        Categoria = Categorias[0],
-                        StockMinimo = 5
-                    };
+                    new ProductoInventarioItem();
+
+                ViewBag.MensajeError = resultado.Error
+                    ?? "No se encontró el producto.";
             }
 
-            return View("GestionProductos", paginaProductos);
+            return View(
+                "GestionProductos",
+                paginaProductos);
         }
 
-        private static ProductoInventarioItem CopiarProducto(
-            ProductoInventarioItem p)
+        // AGREGAR Y EDITAR
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GuardarProducto(
+            ProductoInventarioItem producto,
+            string busquedaRegreso = "",
+            string categoriaRegreso = "Todos",
+            string ordenarPorRegreso = "Nombre",
+            int paginaRegreso = 1)
         {
-            return new ProductoInventarioItem
+            if (!ModelState.IsValid)
             {
-                Id = p.Id,
-                Codigo = p.Codigo,
-                Nombre = p.Nombre,
-                Categoria = p.Categoria,
-                Marca = p.Marca,
-                StockActual = p.StockActual,
-                StockMinimo = p.StockMinimo,
-                Precio = p.Precio
-            };
-        }
+                return await CargarGestionAsync(
+                    busquedaRegreso,
+                    categoriaRegreso,
+                    ordenarPorRegreso,
+                    paginaRegreso,
+                    true,
+                    producto.Id > 0
+                        ? producto.Id
+                        : (int?)null,
+                    null,
+                    producto,
+                    "Revisa los datos del formulario.");
+            }
 
-        private static InventarioPanelInventario.MovimientoInventario
-            CopiarMovimiento(
-                InventarioPanelInventario.MovimientoInventario m)
-        {
-            return new InventarioPanelInventario.MovimientoInventario
+            int? idInventario =
+                _config.GetValue<int?>(
+                    "Inventario:IdInventario");
+
+            if (producto.Id == 0 && !idInventario.HasValue)
             {
-                IdMovimiento = m.IdMovimiento,
-                Fecha = m.Fecha,
-                Producto = m.Producto,
-                Tipo = m.Tipo,
-                Cantidad = m.Cantidad,
-                Responsable = m.Responsable
-            };
-        }
+                // Si solo hay un inventario, lo identifica
+                // automáticamente. Si hay varios, no elige
+                // una sucursal incorrecta.
+                var consulta = await ConsultarProductosAsync();
 
-        private static void AgregarMovimiento(
-            string producto,
-            string tipo,
-            int cantidad,
-            string responsable)
-        {
-            Movimientos.Add(
-                new InventarioPanelInventario.MovimientoInventario
+                var inventarios = consulta.Productos
+                    .Select(p => p.IdInventario)
+                    .Distinct()
+                    .ToList();
+
+                if (inventarios.Count == 1)
                 {
-                    IdMovimiento = SiguienteMovimientoId++,
-                    Fecha = DateTime.Now,
-                    Producto = producto,
-                    Tipo = tipo,
-                    Cantidad = cantidad,
-                    Responsable = responsable
+                    idInventario = inventarios[0];
+                }
+            }
+
+            var respuesta = await EjecutarRpcAsync(
+                "inv_guardar_producto",
+                new
+                {
+                    p_id_detalle = producto.Id,
+                    p_nombre = producto.Nombre,
+                    p_categoria = producto.Categoria,
+                    p_marca = producto.Marca,
+                    p_stock_actual = producto.StockActual,
+                    p_stock_minimo = producto.StockMinimo,
+                    p_precio = producto.Precio,
+                    p_id_inventario = idInventario
                 });
 
-            if (Movimientos.Count > 30)
+            if (!respuesta.Correcto)
             {
-                Movimientos.RemoveAt(0);
+                return await CargarGestionAsync(
+                    busquedaRegreso,
+                    categoriaRegreso,
+                    ordenarPorRegreso,
+                    paginaRegreso,
+                    true,
+                    producto.Id > 0
+                        ? producto.Id
+                        : (int?)null,
+                    null,
+                    producto,
+                    respuesta.Error);
             }
+
+            TempData["Mensaje"] = producto.Id > 0
+                ? "Producto actualizado en Supabase."
+                : "Producto agregado a Supabase.";
+
+            return RedirectToAction(
+                nameof(GestionProductos));
         }
 
-        private static List<ProductoInventarioItem>
-            CrearProductosIniciales()
+        // ELIMINAR SELECCIONADOS
+        // Retira los detalles del inventario activo,
+        // conservando los movimientos históricos.
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarProductos(
+            List<int> ids,
+            string busquedaRegreso = "",
+            string categoriaRegreso = "Todos",
+            string ordenarPorRegreso = "Nombre",
+            int paginaRegreso = 1)
         {
-            var productos = new List<ProductoInventarioItem>
+            if (ids == null || ids.Count == 0)
             {
-                new ProductoInventarioItem
-                {
-                    Id = 1,
-                    Codigo = "PRD-001",
-                    Nombre = "Tinte L'Oréal Rubio 7.0",
-                    Categoria = "Coloración",
-                    Marca = "L'Oréal",
-                    StockActual = 24,
-                    StockMinimo = 10,
-                    Precio = 35m
-                },
-                new ProductoInventarioItem
-                {
-                    Id = 2,
-                    Codigo = "PRD-002",
-                    Nombre = "Decolorante Premium 500g",
-                    Categoria = "Coloración",
-                    Marca = "Wella",
-                    StockActual = 3,
-                    StockMinimo = 10,
-                    Precio = 55m
-                },
-                new ProductoInventarioItem
-                {
-                    Id = 3,
-                    Codigo = "PRD-003",
-                    Nombre = "Shampoo Kerastase 500ml",
-                    Categoria = "Cuidado Capilar",
-                    Marca = "Kérastase",
-                    StockActual = 18,
-                    StockMinimo = 8,
-                    Precio = 85m
-                },
-                new ProductoInventarioItem
-                {
-                    Id = 4,
-                    Codigo = "PRD-004",
-                    Nombre = "Tratamiento Botox Capilar",
-                    Categoria = "Cuidado Capilar",
-                    Marca = "Cadiveu",
-                    StockActual = 7,
-                    StockMinimo = 5,
-                    Precio = 120m
-                },
-                new ProductoInventarioItem
-                {
-                    Id = 5,
-                    Codigo = "PRD-005",
-                    Nombre = "Papel Aluminio Rollo",
-                    Categoria = "Consumibles",
-                    Marca = "Genérico",
-                    StockActual = 2,
-                    StockMinimo = 5,
-                    Precio = 15m
-                },
-                new ProductoInventarioItem
-                {
-                    Id = 6,
-                    Codigo = "PRD-006",
-                    Nombre = "Secador Profesional",
-                    Categoria = "Herramientas",
-                    Marca = "BaByliss",
-                    StockActual = 4,
-                    StockMinimo = 2,
-                    Precio = 450m
-                },
-                new ProductoInventarioItem
-                {
-                    Id = 7,
-                    Codigo = "PRD-007",
-                    Nombre = "Aceite de Argán 100ml",
-                    Categoria = "Cuidado Capilar",
-                    Marca = "Moroccan",
-                    StockActual = 5,
-                    StockMinimo = 10,
-                    Precio = 95m
-                }
-            };
-
-            for (int id = 8; id <= 156; id++)
+                TempData["Error"] =
+                    "Selecciona al menos un producto.";
+            }
+            else
             {
-                bool stockCritico = id >= 8 && id <= 16;
-                bool sinStock = id == 20 || id == 70 || id == 120;
-
-                int stock = stockCritico
-                    ? 3
-                    : sinStock
-                        ? 0
-                        : 3 + (id % 6);
-
-                int minimo = stockCritico || sinStock ? 10 : 3;
-
-                if (id == 17) stock--;
-                if (id == 19) stock--;
-
-                decimal precio = stockCritico
-                    ? 50m
-                    : 41.23m + (id % 5) * 5m;
-
-                if (id == 156) precio += 1.27m;
-
-                productos.Add(
-                    new ProductoInventarioItem
+                var respuesta = await EjecutarRpcAsync(
+                    "inv_archivar_varios",
+                    new
                     {
-                        Id = id,
-                        Codigo = $"PRD-{id:000}",
-                        Nombre = $"Producto de prueba {id:000}",
-                        Categoria = Categorias[(id - 8) % Categorias.Length],
-                        Marca = "Marca genérica",
-                        StockActual = stock,
-                        StockMinimo = minimo,
-                        Precio = precio
+                        p_ids = ids
+                            .Where(id => id > 0)
+                            .Distinct()
+                            .ToArray()
                     });
+
+                if (respuesta.Correcto)
+                {
+                    TempData["Mensaje"] =
+                        "Productos retirados del inventario.";
+                }
+                else
+                {
+                    TempData["Error"] = respuesta.Error;
+                }
             }
 
-            return productos;
-        }
-
-        private static List<InventarioPanelInventario.MovimientoInventario>
-            CrearMovimientosIniciales()
-        {
-            return new List<InventarioPanelInventario.MovimientoInventario>
-            {
-                new InventarioPanelInventario.MovimientoInventario
+            return RedirectToAction(
+                nameof(GestionProductos),
+                new
                 {
-                    IdMovimiento = 1,
-                    Fecha = DateTime.Now.AddMinutes(-20),
-                    Producto = "Shampoo Kerastase 500ml",
-                    Tipo = "Entrada",
-                    Cantidad = 15,
-                    Responsable = "Carlos Mendoza"
-                },
-                new InventarioPanelInventario.MovimientoInventario
-                {
-                    IdMovimiento = 2,
-                    Fecha = DateTime.Now.AddHours(-2),
-                    Producto = "Tinte L'Oréal Rubio 7.0",
-                    Tipo = "Salida",
-                    Cantidad = 5,
-                    Responsable = "Ana Martínez"
-                },
-                new InventarioPanelInventario.MovimientoInventario
-                {
-                    IdMovimiento = 3,
-                    Fecha = DateTime.Now.AddHours(-4),
-                    Producto = "Tratamiento Botox Capilar",
-                    Tipo = "Entrada",
-                    Cantidad = 20,
-                    Responsable = "Carlos Mendoza"
-                }
-            };
+                    busqueda = busquedaRegreso,
+                    categoria = categoriaRegreso,
+                    ordenarPor = ordenarPorRegreso,
+                    pagina = paginaRegreso
+                });
         }
     }
 }
