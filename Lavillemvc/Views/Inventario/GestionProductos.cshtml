@@ -1,49 +1,68 @@
-﻿@{
+﻿@using System
+@using System.Globalization
+@using Lavillemvc.Controllers
+@model List<Lavillemvc.Controllers.ProductoInventarioItem>
+@{
     Layout = null;
-}
 
+    var busqueda = ViewBag.Busqueda as string ?? "";
+    var categoriaActual = ViewBag.Categoria as string ?? "Todos";
+    var ordenarPor = ViewBag.OrdenarPor as string ?? "Nombre";
+
+    var paginaActual = (int)(ViewBag.PaginaActual ?? 1);
+    var totalPaginas = (int)(ViewBag.TotalPaginas ?? 1);
+    var totalFiltrados = (int)(ViewBag.TotalFiltrados ?? 0);
+    var mostrarDesde = (int)(ViewBag.MostrarDesde ?? 0);
+    var mostrarHasta = (int)(ViewBag.MostrarHasta ?? 0);
+
+    var categorias = ViewBag.CategoriasDisponibles as string[]
+        ?? Array.Empty<string>();
+
+    var formularioAbierto = (bool)(ViewBag.FormularioAbierto ?? false);
+
+    var productoFormulario =
+        ViewBag.ProductoFormulario as ProductoInventarioItem
+        ?? new ProductoInventarioItem
+        {
+            Categoria = "Coloración",
+            StockMinimo = 5
+        };
+
+    var productoDetalle =
+        ViewBag.ProductoDetalle as ProductoInventarioItem;
+
+    var esEdicion = productoFormulario.Id > 0;
+
+    var mensaje = ViewBag.Mensaje as string;
+    var mensajeError = ViewBag.MensajeError as string;
+}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Gestión de Productos - L'Avielle</title>
 
     <link rel="stylesheet" href="~/css/inventario.css" />
-
 </head>
-
 <body>
-
     <div class="page">
-
         <div class="content-wrapper">
 
-            <!-- SIDEBAR -->
             <aside class="sidebar">
-
                 <div class="sidebar-top">
-
                     <div class="brand-group">
-
-                        <div class="brand-logo">
-                            L'Avielle
-                        </div>
+                        <div class="brand-logo">L'Avielle</div>
 
                         <div class="role-badge">
                             Encargado de Inventario — Las Mercedes
                         </div>
-
                     </div>
 
-                    <nav class="nav-list">
-
+                    <nav class="nav-list" aria-label="Navegación de inventario">
                         <a href="@Url.Action("PanelInventario", "Inventario")"
                            class="sidebar-link">
-
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <rect x="4" y="4" width="16" height="16" rx="2"></rect>
@@ -53,16 +72,11 @@
                                 </svg>
                             </span>
 
-                            <span class="tab-text">
-                                Panel de Inventario
-                            </span>
-
+                            <span class="tab-text">Panel de Inventario</span>
                         </a>
-
 
                         <a href="@Url.Action("GestionProductos", "Inventario")"
                            class="sidebar-link active">
-
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M5 7h14"></path>
@@ -74,25 +88,17 @@
                                 </svg>
                             </span>
 
-                            <span class="tab-text">
-                                Gestión de Productos
-                            </span>
-
+                            <span class="tab-text">Gestión de Productos</span>
                             <span class="active-indicator"></span>
-
                         </a>
-
                     </nav>
-
                 </div>
 
-
                 <div class="sidebar-bottom">
-
                     <div class="divider"></div>
 
-                    <a href="#" class="sidebar-link logout-link">
-
+                    <a href="@Url.Action("Index", "Login")"
+                       class="sidebar-link logout-link">
                         <span class="nav-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
@@ -101,39 +107,25 @@
                             </svg>
                         </span>
 
-                        <span class="tab-text">
-                            Cerrar Sesión
-                        </span>
-
+                        <span class="tab-text">Cerrar Sesión</span>
                     </a>
-
                 </div>
-
             </aside>
 
-
-            <!-- CONTENIDO -->
             <main class="main-content">
-
                 <section class="products-header">
-
                     <div class="header-text">
-
-                        <h1>
-                            Gestión de Productos
-                        </h1>
-
+                        <h1>Gestión de Productos</h1>
                         <p>
                             Visualiza, edita y añade productos al catálogo de L'Avielle.
                         </p>
-
                     </div>
 
-
-                    <div class="product-actions">
+                    <form class="product-actions"
+                          method="get"
+                          action="@Url.Action("GestionProductos", "Inventario")">
 
                         <div class="product-search">
-
                             <span class="search-icon">
                                 <svg viewBox="0 0 24 24">
                                     <circle cx="10.5" cy="10.5" r="6"></circle>
@@ -141,604 +133,538 @@
                                 </svg>
                             </span>
 
-                            <span>
-                                Buscar por nombre, marca o código...
-                            </span>
-
+                            <input type="search"
+                                   name="busqueda"
+                                   value="@busqueda"
+                                   placeholder="Buscar por nombre, marca o código..."
+                                   aria-label="Buscar productos" />
                         </div>
 
+                        <input type="hidden"
+                               name="categoria"
+                               value="@categoriaActual" />
 
-                        <a href="#" class="add-product-button">
+                        <input type="hidden"
+                               name="ordenarPor"
+                               value="@ordenarPor" />
+
+                        <button type="submit" class="secondary-button">
+                            Buscar
+                        </button>
+
+                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, mostrarFormulario = true, pagina = paginaActual })"
+                           class="add-product-button">
                             + Agregar Producto
                         </a>
-
-                    </div>
-
+                    </form>
                 </section>
 
+                @if (!string.IsNullOrWhiteSpace(mensaje))
+                {
+                    <div class="inventory-message">
+                        @mensaje
+                    </div>
+                }
 
-                <!-- FILTROS -->
+                @if (!string.IsNullOrWhiteSpace(mensajeError))
+                {
+                    <div class="inventory-message error">
+                        @mensajeError
+                    </div>
+                }
+
+                @if (formularioAbierto)
+                {
+                    <section class="product-form-card">
+                        <div class="section-head">
+                            <h2>
+                                @(esEdicion ? "Editar producto" : "Agregar producto")
+                            </h2>
+
+                            <a class="secondary-button"
+                               href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual })">
+                                Cancelar
+                            </a>
+                        </div>
+
+                        @Html.ValidationSummary(false, "Revisa los siguientes datos:")
+
+                        <form method="post"
+                              action="@Url.Action("GuardarProducto", "Inventario")">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="Id"
+                                   value="@productoFormulario.Id" />
+
+                            <input type="hidden"
+                                   name="busquedaRegreso"
+                                   value="@busqueda" />
+
+                            <input type="hidden"
+                                   name="categoriaRegreso"
+                                   value="@categoriaActual" />
+
+                            <input type="hidden"
+                                   name="ordenarPorRegreso"
+                                   value="@ordenarPor" />
+
+                            <input type="hidden"
+                                   name="paginaRegreso"
+                                   value="@paginaActual" />
+
+                            <div class="product-form-grid">
+                                <div class="product-form-field">
+                                    <label for="Nombre">Nombre del producto</label>
+
+                                    <input id="Nombre"
+                                           name="Nombre"
+                                           maxlength="120"
+                                           required
+                                           value="@productoFormulario.Nombre" />
+
+                                    @Html.ValidationMessage("Nombre")
+                                </div>
+
+                                <div class="product-form-field">
+                                    <label for="Categoria">Categoría</label>
+
+                                    <select id="Categoria"
+                                            name="Categoria"
+                                            required>
+                                        @foreach (var cat in categorias)
+                                        {
+                                            if (productoFormulario.Categoria == cat)
+                                            {
+                                                <option value="@cat" selected>@cat</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@cat">@cat</option>
+                                            }
+                                        }
+                                    </select>
+
+                                    @Html.ValidationMessage("Categoria")
+                                </div>
+
+                                <div class="product-form-field">
+                                    <label for="Marca">Marca</label>
+
+                                    <input id="Marca"
+                                           name="Marca"
+                                           maxlength="80"
+                                           required
+                                           value="@productoFormulario.Marca" />
+
+                                    @Html.ValidationMessage("Marca")
+                                </div>
+
+                                <div class="product-form-field">
+                                    <label for="StockActual">Stock actual</label>
+
+                                    <input id="StockActual"
+                                           name="StockActual"
+                                           type="number"
+                                           min="0"
+                                           max="1000000"
+                                           step="1"
+                                           required
+                                           value="@productoFormulario.StockActual" />
+
+                                    @Html.ValidationMessage("StockActual")
+                                </div>
+
+                                <div class="product-form-field">
+                                    <label for="StockMinimo">Stock mínimo</label>
+
+                                    <input id="StockMinimo"
+                                           name="StockMinimo"
+                                           type="number"
+                                           min="0"
+                                           max="1000000"
+                                           step="1"
+                                           required
+                                           value="@productoFormulario.StockMinimo" />
+
+                                    @Html.ValidationMessage("StockMinimo")
+                                </div>
+
+                                <div class="product-form-field">
+                                    <label for="Precio">Precio unitario ($)</label>
+
+                                    <input id="Precio"
+                                           name="Precio"
+                                           type="number"
+                                           min="0"
+                                           step="0.01"
+                                           required
+                                           value="@productoFormulario.Precio.ToString("0.00", CultureInfo.InvariantCulture)" />
+
+                                    @Html.ValidationMessage("Precio")
+                                </div>
+                            </div>
+
+                            <div class="product-form-actions">
+                                <button class="add-product-button" type="submit">
+                                    @(esEdicion ? "Guardar cambios" : "Guardar producto")
+                                </button>
+
+                                <a class="secondary-button"
+                                   href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual })">
+                                    Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </section>
+                }
+
+                @if (productoDetalle != null)
+                {
+                    <section class="product-form-card">
+                        <div class="section-head">
+                            <h2>Detalle del producto</h2>
+
+                            <a class="secondary-button"
+                               href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual })">
+                                Cerrar
+                            </a>
+                        </div>
+
+                        <div class="product-details-grid">
+                            <div>
+                                <span>Código</span>
+                                <strong>@productoDetalle.Codigo</strong>
+                            </div>
+
+                            <div>
+                                <span>Producto</span>
+                                <strong>@productoDetalle.Nombre</strong>
+                            </div>
+
+                            <div>
+                                <span>Categoría</span>
+                                <strong>@productoDetalle.Categoria</strong>
+                            </div>
+
+                            <div>
+                                <span>Marca</span>
+                                <strong>@productoDetalle.Marca</strong>
+                            </div>
+
+                            <div>
+                                <span>Stock actual</span>
+                                <strong>@productoDetalle.StockActual</strong>
+                            </div>
+
+                            <div>
+                                <span>Stock mínimo</span>
+                                <strong>@productoDetalle.StockMinimo</strong>
+                            </div>
+
+                            <div>
+                                <span>Precio unitario</span>
+                                <strong>$ @productoDetalle.Precio.ToString("N2")</strong>
+                            </div>
+
+                            <div>
+                                <span>Estado</span>
+                                <strong>@productoDetalle.Estado</strong>
+                            </div>
+                        </div>
+                    </section>
+                }
+
                 <section class="filters-row">
-
                     <div class="filter-options">
-
-                        <a href="#" class="filter selected">
+                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = "Todos", ordenarPor, pagina = 1 })"
+                           class="filter @(categoriaActual == "Todos" ? "selected" : "")">
                             Todos
                         </a>
 
-                        <a href="#" class="filter">
-                            Coloración
-                        </a>
-
-                        <a href="#" class="filter">
-                            Cuidado Capilar
-                        </a>
-
-                        <a href="#" class="filter">
-                            Herramientas
-                        </a>
-
-                        <a href="#" class="filter">
-                            Consumibles
-                        </a>
-
-                        <a href="#" class="filter">
-                            Mobiliario
-                        </a>
-
+                        @foreach (var cat in categorias)
+                        {
+                            <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = cat, ordenarPor, pagina = 1 })"
+                               class="filter @(categoriaActual == cat ? "selected" : "")">
+                                @cat
+                            </a>
+                        }
                     </div>
 
+                    <form class="sort-box"
+                          method="get"
+                          action="@Url.Action("GestionProductos", "Inventario")">
 
-                    <div class="sort-box">
+                        <span>Ordenar por:</span>
 
-                        <span>
-                            Ordenar por:
-                        </span>
+                        <input type="hidden"
+                               name="busqueda"
+                               value="@busqueda" />
 
-                        <strong>
-                            Nombre
-                        </strong>
+                        <input type="hidden"
+                               name="categoria"
+                               value="@categoriaActual" />
 
-                        <span>
-                            ▼
-                        </span>
+                        <select name="ordenarPor"
+                                onchange="this.form.submit()"
+                                aria-label="Ordenar productos">
 
-                    </div>
+                            <option value="Nombre"
+                                    selected="@(ordenarPor == "Nombre" ? "selected" : null)">
+                                Nombre A-Z
+                            </option>
 
+                            <option value="NombreDesc"
+                                    selected="@(ordenarPor == "NombreDesc" ? "selected" : null)">
+                                Nombre Z-A
+                            </option>
+
+                            <option value="PrecioAsc"
+                                    selected="@(ordenarPor == "PrecioAsc" ? "selected" : null)">
+                                Precio menor a mayor
+                            </option>
+
+                            <option value="PrecioDesc"
+                                    selected="@(ordenarPor == "PrecioDesc" ? "selected" : null)">
+                                Precio mayor a menor
+                            </option>
+
+                            <option value="StockAsc"
+                                    selected="@(ordenarPor == "StockAsc" ? "selected" : null)">
+                                Stock menor a mayor
+                            </option>
+
+                            <option value="StockDesc"
+                                    selected="@(ordenarPor == "StockDesc" ? "selected" : null)">
+                                Stock mayor a menor
+                            </option>
+                        </select>
+                    </form>
                 </section>
 
+                <form method="post"
+                      action="@Url.Action("EliminarProductos", "Inventario")"
+                      id="eliminarProductosForm">
 
-                <!-- TABLA -->
-                <section class="products-table-card">
+                    @Html.AntiForgeryToken()
 
-                    <div class="products-table-header">
+                    <input type="hidden"
+                           name="busquedaRegreso"
+                           value="@busqueda" />
 
-                        <div>CÓDIGO</div>
-                        <div>PRODUCTO</div>
-                        <div>CATEGORÍA</div>
-                        <div>MARCA</div>
-                        <div>STOCK ACT.</div>
-                        <div>STOCK MÍN.</div>
-                        <div>PRECIO UNIT.</div>
-                        <div>ESTADO</div>
-                        <div>ACCIONES</div>
+                    <input type="hidden"
+                           name="categoriaRegreso"
+                           value="@categoriaActual" />
 
-                    </div>
+                    <input type="hidden"
+                           name="ordenarPorRegreso"
+                           value="@ordenarPor" />
 
+                    <input type="hidden"
+                           name="paginaRegreso"
+                           value="@paginaActual" />
 
-                    <div class="product-row">
+                    <section class="products-table-card">
+                        <div class="product-form-actions">
+                            <button type="submit"
+                                    class="secondary-button"
+                                    onclick="return confirmarEliminacion();">
+                                Eliminar seleccionados
+                            </button>
 
-                        <div class="code">
-                            PRD-001
-                        </div>
-
-                        <div class="product-name">
-                            Tinte L'Oréal Rubio 7.0
-                        </div>
-
-                        <div>
-                            Coloración
-                        </div>
-
-                        <div>
-                            L'Oréal
-                        </div>
-
-                        <div>
-                            24
-                        </div>
-
-                        <div>
-                            10
-                        </div>
-
-                        <div>
-                            Bs. 35
-                        </div>
-
-                        <div>
-                            <span class="stock-status in-stock">
-                                En Stock
+                            <span>
+                                Marca uno o varios productos para eliminarlos.
                             </span>
                         </div>
 
-                        <div class="row-actions">
-                            Ver · Editar
+                        <div class="products-table-header">
+                            <div>
+                                <input type="checkbox"
+                                       id="seleccionarTodos"
+                                       aria-label="Seleccionar todos los productos de esta página" />
+                                CÓDIGO
+                            </div>
+
+                            <div>PRODUCTO</div>
+                            <div>CATEGORÍA</div>
+                            <div>MARCA</div>
+                            <div>STOCK ACT.</div>
+                            <div>STOCK MÍN.</div>
+                            <div>PRECIO UNIT.</div>
+                            <div>ESTADO</div>
+                            <div>ACCIONES</div>
                         </div>
 
-                    </div>
+                        @if (Model == null || Model.Count == 0)
+                        {
+                            <div class="product-empty">
+                                No se encontraron productos con los filtros seleccionados.
+                            </div>
+                        }
+                        else
+                        {
+                            foreach (var producto in Model)
+                            {
+                                var claseEstado =
+                                    producto.Estado == "En Stock"
+                                        ? "in-stock"
+                                        : producto.Estado == "Crítico" ||
+                                          producto.Estado == "Sin stock"
+                                            ? "critical-status"
+                                            : "low-status";
 
+                                <div class="product-row">
+                                    <div class="code">
+                                        <input type="checkbox"
+                                               class="seleccionar-producto"
+                                               name="ids"
+                                               value="@producto.Id"
+                                               aria-label="Seleccionar @producto.Nombre" />
 
-                    <div class="product-row">
+                                        <span>@producto.Codigo</span>
+                                    </div>
 
-                        <div class="code">
-                            PRD-002
-                        </div>
+                                    <div class="product-name">
+                                        @producto.Nombre
+                                    </div>
 
-                        <div class="product-name">
-                            Decolorante Premium 500g
-                        </div>
+                                    <div>@producto.Categoria</div>
+                                    <div>@producto.Marca</div>
 
-                        <div>
-                            Coloración
-                        </div>
+                                    <div class="@(producto.StockActual < producto.StockMinimo ? "warning-text" : "")">
+                                        @producto.StockActual
+                                    </div>
 
-                        <div>
-                            Wella
-                        </div>
+                                    <div>@producto.StockMinimo</div>
 
-                        <div>
-                            3
-                        </div>
+                                    <div>
+                                        $ @producto.Precio.ToString("N2")
+                                    </div>
 
-                        <div class="warning-text">
-                            10
-                        </div>
+                                    <div>
+                                        <span class="stock-status @claseEstado">
+                                            @producto.Estado
+                                        </span>
+                                    </div>
 
-                        <div>
-                            Bs. 55
-                        </div>
+                                    <div class="row-actions">
+                                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual, detalleId = producto.Id })">
+                                            Ver
+                                        </a>
 
-                        <div>
-                            <span class="stock-status critical-status">
-                                Crítico
+                                        <span>·</span>
+
+                                        <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual, editarId = producto.Id })">
+                                            Editar
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <div class="table-bottom">
+                            <span>
+                                Mostrando @mostrarDesde-@mostrarHasta de @totalFiltrados productos
                             </span>
+
+                            <div class="pagination">
+                                @if (paginaActual > 1)
+                                {
+                                    <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual - 1 })">
+                                        Anterior
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span>Anterior</span>
+                                }
+
+                                @for (
+                                    int p = Math.Max(1, paginaActual - 1);
+                                    p <= Math.Min(totalPaginas, paginaActual + 2);
+                                    p++)
+                                {
+                                    <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = p })"
+                                       class="@(p == paginaActual ? "current-page" : "")">
+                                        @p
+                                    </a>
+                                }
+
+                                @if (paginaActual < totalPaginas)
+                                {
+                                    <a href="@Url.Action("GestionProductos", "Inventario", new { busqueda, categoria = categoriaActual, ordenarPor, pagina = paginaActual + 1 })">
+                                        Siguiente
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span>Siguiente</span>
+                                }
+                            </div>
                         </div>
+                    </section>
+                </form>
 
-                        <div class="row-actions">
-                            Ver · Editar
-                        </div>
-
-                    </div>
-
-
-                    <div class="product-row">
-
-                        <div class="code">
-                            PRD-003
-                        </div>
-
-                        <div class="product-name">
-                            Shampoo Kerastase 500ml
-                        </div>
-
-                        <div>
-                            Cuidado Capilar
-                        </div>
-
-                        <div>
-                            Kérastase
-                        </div>
-
-                        <div>
-                            18
-                        </div>
-
-                        <div class="warning-text">
-                            8
-                        </div>
-
-                        <div>
-                            Bs. 85
-                        </div>
-
-                        <div>
-                            <span class="stock-status in-stock">
-                                En Stock
-                            </span>
-                        </div>
-
-                        <div class="row-actions">
-                            Ver · Editar
-                        </div>
-
-                    </div>
-
-
-                    <div class="product-row">
-
-                        <div class="code">
-                            PRD-004
-                        </div>
-
-                        <div class="product-name">
-                            Tratamiento Botox Capilar
-                        </div>
-
-                        <div>
-                            Cuidado Capilar
-                        </div>
-
-                        <div>
-                            Cadiveu
-                        </div>
-
-                        <div>
-                            7
-                        </div>
-
-                        <div class="warning-text">
-                            5
-                        </div>
-
-                        <div>
-                            Bs. 120
-                        </div>
-
-                        <div>
-                            <span class="stock-status in-stock">
-                                En Stock
-                            </span>
-                        </div>
-
-                        <div class="row-actions">
-                            Ver · Editar
-                        </div>
-
-                    </div>
-
-
-                    <div class="product-row">
-
-                        <div class="code">
-                            PRD-005
-                        </div>
-
-                        <div class="product-name">
-                            Papel Aluminio Rollo
-                        </div>
-
-                        <div>
-                            Consumibles
-                        </div>
-
-                        <div>
-                            Genérico
-                        </div>
-
-                        <div>
-                            2
-                        </div>
-
-                        <div class="warning-text">
-                            5
-                        </div>
-
-                        <div>
-                            Bs. 15
-                        </div>
-
-                        <div>
-                            <span class="stock-status critical-status">
-                                Crítico
-                            </span>
-                        </div>
-
-                        <div class="row-actions">
-                            Ver · Editar
-                        </div>
-
-                    </div>
-
-
-                    <div class="product-row">
-
-                        <div class="code">
-                            PRD-006
-                        </div>
-
-                        <div class="product-name">
-                            Secador Profesional
-                        </div>
-
-                        <div>
-                            Herramientas
-                        </div>
-
-                        <div>
-                            BaByliss
-                        </div>
-
-                        <div>
-                            4
-                        </div>
-
-                        <div>
-                            2
-                        </div>
-
-                        <div>
-                            Bs. 450
-                        </div>
-
-                        <div>
-                            <span class="stock-status in-stock">
-                                En Stock
-                            </span>
-                        </div>
-
-                        <div class="row-actions">
-                            Ver · Editar
-                        </div>
-
-                    </div>
-
-
-                    <div class="product-row">
-
-                        <div class="code">
-                            PRD-007
-                        </div>
-
-                        <div class="product-name">
-                            Aceite de Argán 100ml
-                        </div>
-
-                        <div>
-                            Cuidado Capilar
-                        </div>
-
-                        <div>
-                            Moroccan
-                        </div>
-
-                        <div>
-                            5
-                        </div>
-
-                        <div class="warning-text">
-                            10
-                        </div>
-
-                        <div>
-                            Bs. 95
-                        </div>
-
-                        <div>
-                            <span class="stock-status low-status">
-                                Bajo
-                            </span>
-                        </div>
-
-                        <div class="row-actions">
-                            Ver · Editar
-                        </div>
-
-                    </div>
-
-
-                    <!-- PAGINACIÓN -->
-
-                    <div class="table-bottom">
-
-                        <span>
-                            Mostrando 1-7 de 156 productos
-                        </span>
-
-                        <div class="pagination">
-
-                            <a href="#">
-                                Anterior
-                            </a>
-
-                            <a href="#" class="current-page">
-                                1
-                            </a>
-
-                            <a href="#">
-                                2
-                            </a>
-
-                            <a href="#">
-                                3
-                            </a>
-
-                            <a href="#">
-                                Siguiente
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- RESUMEN INFERIOR -->
                 <section class="inventory-summary">
-
                     <div>
-                        <span>
-                            PRODUCTOS REGISTRADOS
-                        </span>
-
-                        <strong>
-                            156
-                        </strong>
+                        <span>PRODUCTOS REGISTRADOS</span>
+                        <strong>@ViewBag.TotalProductos</strong>
                     </div>
 
-
                     <div>
-                        <span>
-                            STOCK BAJO
-                        </span>
-
-                        <strong>
-                            12
-                        </strong>
+                        <span>STOCK BAJO</span>
+                        <strong>@ViewBag.StockBajo</strong>
                     </div>
 
-
                     <div>
-                        <span>
-                            SIN STOCK
-                        </span>
-
-                        <strong>
-                            3
-                        </strong>
+                        <span>SIN STOCK</span>
+                        <strong>@ViewBag.SinStock</strong>
                     </div>
-
 
                     <div class="last-update">
-
-                        Última actualización: Hoy 10:30 AM
-
+                        Última actualización: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
                     </div>
-
                 </section>
-
             </main>
-
         </div>
-
-
-        <!-- FOOTER -->
-        <footer class="footer">
-
-            <div class="footer-upper">
-
-                <div class="footer-about">
-
-                    <div class="footer-logo">
-                        L'Avielle
-                    </div>
-
-                    <p>
-                        Un concepto exclusivo de salón de belleza y spa de bienestar,
-                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
-                    </p>
-
-                    <div class="social-row">
-
-                        <a href="#" class="social-button">
-                            Instagram
-                        </a>
-
-                        <a href="#" class="social-button">
-                            Facebook
-                        </a>
-
-                        <a href="#" class="social-button">
-                            Web
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                <div class="footer-column">
-
-                    <h3>
-                        Navegación
-                    </h3>
-
-                    <div class="footer-links">
-
-                        <a href="@Url.Action("PanelInventario", "Inventario")">
-                            Inicio
-                        </a>
-
-                        <a href="#">
-                            Servicios
-                        </a>
-
-                        <a href="#">
-                            Especialistas
-                        </a>
-
-                        <a href="#">
-                            Perfil
-                        </a>
-
-                        <a href="#">
-                            Iniciar Sesión
-                        </a>
-
-                        <a href="#">
-                            Registrarse
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                <div class="footer-column">
-
-                    <h3>
-                        Contacto &amp; Ubicación
-                    </h3>
-
-                    <div class="contact-list">
-
-                        <div class="contact-item">
-                            Paseo de la Reforma 402, Juárez, CDMX
-                        </div>
-
-                        <div class="contact-item">
-                            +52 55 1234 5678
-                        </div>
-
-                        <div class="contact-item">
-                            contacto&#64;lavielle.com
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="footer-divider"></div>
-
-
-            <div class="footer-bottom">
-
-                <span>
-                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
-                </span>
-
-                <div class="footer-legal">
-
-                    <a href="#">
-                        Política de Privacidad
-                    </a>
-
-                    <a href="#">
-                        Términos del Servicio
-                    </a>
-
-                </div>
-
-            </div>
-
-        </footer>
-
     </div>
 
-</body>
+    <script>
+            const seleccionarTodos = document.getElementById('seleccionarTodos');
 
+            const casillasProducto = () =>
+                Array.from(document.querySelectorAll('.seleccionar-producto'));
+
+            seleccionarTodos?.addEventListener('change', function() {
+                casillasProducto().forEach(casilla => {
+                    casilla.checked = seleccionarTodos.checked;
+                });
+            });
+
+            casillasProducto().forEach(casilla => {
+                casilla.addEventListener('change', function() {
+                    if (seleccionarTodos) {
+                        seleccionarTodos.checked =
+                            casillasProducto().length > 0 &&
+                            casillasProducto().every(item => item.checked);
+                    }
+                });
+            });
+
+            function confirmarEliminacion() {
+                const seleccionados =
+                    casillasProducto().filter(casilla => casilla.checked).length;
+
+                if (seleccionados === 0) {
+                    alert('Selecciona al menos un producto para eliminar.');
+                    return false;
+                }
+
+                return confirm(
+                    `¿Seguro que quieres eliminar ${seleccionados} producto(s)? Esta acción no se puede deshacer.`
+                );
+            }
+    </script>
+</body>
 </html>
