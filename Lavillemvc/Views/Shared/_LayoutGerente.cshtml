@@ -19,6 +19,9 @@
     <!-- DISEÑO DEL DASHBOARD -->
     <link rel="stylesheet"
           href="@Url.Content("~/css/gerente-dashboard.css")" />
+
+    @await RenderSectionAsync("Styles", required: false)
+
 </head>
 
 <body class="pagina-gerente">
@@ -55,10 +58,16 @@
                     <!-- ACTIVAREMOS ESTOS ENLACES CUANDO
                          EXISTAN SUS CONTROLADORES -->
 
-                    <span class="gerente-enlace gerente-enlace-pendiente">
+                    
+                    <a class="gerente-enlace @(menuActivo == "Empleados" ? "activo" : "")"
+                       href="@Url.Action("GestionEmpleados", "GerenteEmpleados")">
+
                         <span class="gerente-icono">♙</span>
+
                         <span>Gestión de Empleados</span>
-                    </span>
+
+                    </a>
+
 
                     <span class="gerente-enlace gerente-enlace-pendiente">
                         <span class="gerente-icono">☆</span>
@@ -129,7 +138,16 @@
                     </a>
                 </p>
 
-                <p>Gestión de Empleados</p>
+                
+                <a class="gerente-enlace @(menuActivo == "Empleados" ? "activo" : "")"
+                   href="@Url.Action("GestionEmpleados", "GerenteEmpleados")">
+
+                    <span class="gerente-icono">♙</span>
+
+                    <span>Gestión de Empleados</span>
+
+                </a>
+
 
                 <p>Gestión de Promociones</p>
 
@@ -164,6 +182,7 @@
     </footer>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 
 </body>
 </html>
