@@ -2406,9 +2406,9 @@ ReservarCita modelo)
                 // PUNTOS QUE GANA
                 // =====================================
 
-                int puntosGanados =
-    (int)Math.Floor(
-        totalFinal / 20m);
+                int puntosGanados = (int)Math.Floor(totalFinal / 10m);
+
+              
 
                 // =====================================
                 // REGISTRAR PAGO
