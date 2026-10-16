@@ -69,10 +69,16 @@
                     </a>
 
 
-                    <span class="gerente-enlace gerente-enlace-pendiente">
+                    
+                    <a class="gerente-enlace @(menuActivo == "Promociones" ? "activo" : "")"
+                       href="@Url.Action("GestionPromociones", "GerentePromociones")">
+
                         <span class="gerente-icono">☆</span>
+
                         <span>Gestión de Promociones</span>
-                    </span>
+
+                    </a>
+
 
                 </nav>
 
@@ -149,7 +155,16 @@
                 </a>
 
 
-                <p>Gestión de Promociones</p>
+                
+                <a class="gerente-enlace @(menuActivo == "Promociones" ? "activo" : "")"
+                   href="@Url.Action("GestionPromociones", "GerentePromociones")">
+
+                    <span class="gerente-icono">☆</span>
+
+                    <span>Gestión de Promociones</span>
+
+                </a>
+
 
             </section>
 
