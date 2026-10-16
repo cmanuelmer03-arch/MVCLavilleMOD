@@ -60,12 +60,11 @@
 
 
 
-                <a asp-controller="Especialista"
-                   asp-action="Disponibilidad">
-
+                
+                <a href="@Url.Action("Disponibilidad", "EspecialistaDisponibilidad")">
                     Disponibilidad
-
                 </a>
+
 
 
                 <a asp-controller="Especialista"
@@ -127,9 +126,10 @@
                 Mi Agenda
             </p>
 
-            <p>
+            <a href="@Url.Action("Disponibilidad", "EspecialistaDisponibilidad")">
                 Disponibilidad
-            </p>
+            </a>
+
 
             <p>
                 Mi Perfil

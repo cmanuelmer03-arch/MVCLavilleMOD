@@ -1,311 +1,223 @@
-﻿@{
-    ViewData["Title"] = "Disponibilidad";
+﻿@model Lavillemvc.Models.EspecialistaDisponibilidad
+@using System.Globalization
+@using System.Linq
+@{
     Layout = "~/Views/Shared/_LayoutEspecialista.cshtml";
+    ViewData["Title"] = "Mi Disponibilidad";
+    var cultura = CultureInfo.GetCultureInfo("es-SV");
+    var fechaMin = Model.FechaHoy.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/css/especialista-disponibilidad-conexion.css")" asp-append-version="true" />
 }
 
 <div class="disponibilidad-page">
+    <header class="disponibilidad-header">
+        <h1>Mi Disponibilidad</h1>
+        <p>Configura tus horarios de atención para que los clientes puedan reservar contigo.</p>
+        <p class="disp-nombre">@Model.NombreEspecialista · @Model.NombreEspecialidad</p>
+    </header>
 
-    <div class="disponibilidad-header">
-
-        <div>
-            <h1>Mi Disponibilidad</h1>
-
-            <p>
-                Configura tus horarios de atención para que los clientes puedan reservar contigo.
-            </p>
-        </div>
-
-    </div>
-
+    @if (ViewBag.ModoPrueba == true)
+    {
+        <p class="disp-mensaje disp-aviso" role="status">
+            Modo de desarrollo: estás viendo los datos del especialista de prueba.
+            Los cambios que guardes se escribirán en Supabase.
+        </p>
+    }
+    @if (TempData["DisponibilidadExito"] is string exito)
+    {
+        <p class="disp-mensaje disp-exito" role="status">@exito</p>
+    }
+    @if (TempData["DisponibilidadError"] is string error)
+    {
+        <p class="disp-mensaje disp-error" role="alert">@error</p>
+    }
 
     <div class="disponibilidad-contenido">
-
-
-        <div class="horarios-card">
-
-            <h2>HORARIOS SEMANALES HABITUALES</h2>
-
-
-            <div class="dia-horario">
-
-                <label class="switch-horario">
-                    <input type="checkbox" checked>
-                    <span></span>
-                </label>
-
-                <strong>Lunes</strong>
-
-                <select>
-                    <option>9:00 AM</option>
-                </select>
-
-                <span>a</span>
-
-                <select>
-                    <option>7:00 PM</option>
-                </select>
-
-                <div class="almuerzo-horario">
-                    <small>ALMUERZO:</small>
-                    <span>1:00 PM - 2:00 PM</span>
-                </div>
-
-            </div>
-
-
-            <div class="dia-horario">
-
-                <label class="switch-horario">
-                    <input type="checkbox" checked>
-                    <span></span>
-                </label>
-
-                <strong>Martes</strong>
-
-                <select>
-                    <option>9:00 AM</option>
-                </select>
-
-                <span>a</span>
-
-                <select>
-                    <option>7:00 PM</option>
-                </select>
-
-                <div class="almuerzo-horario">
-                    <small>ALMUERZO:</small>
-                    <span>1:00 PM - 2:00 PM</span>
-                </div>
-
-            </div>
-
-
-            <div class="dia-horario">
-
-                <label class="switch-horario">
-                    <input type="checkbox" checked>
-                    <span></span>
-                </label>
-
-                <strong>Miércoles</strong>
-
-                <select>
-                    <option>10:00 AM</option>
-                </select>
-
-                <span>a</span>
-
-                <select>
-                    <option>7:00 PM</option>
-                </select>
-
-                <div class="almuerzo-horario">
-                    <small>ALMUERZO:</small>
-                    <span>2:00 PM - 3:00 PM</span>
-                </div>
-
-            </div>
-
-
-            <div class="dia-horario">
-
-                <label class="switch-horario">
-                    <input type="checkbox" checked>
-                    <span></span>
-                </label>
-
-                <strong>Jueves</strong>
-
-                <select>
-                    <option>9:00 AM</option>
-                </select>
-
-                <span>a</span>
-
-                <select>
-                    <option>7:00 PM</option>
-                </select>
-
-                <div class="almuerzo-horario">
-                    <small>ALMUERZO:</small>
-                    <span>1:00 PM - 2:00 PM</span>
-                </div>
-
-            </div>
-
-
-            <div class="dia-horario">
-
-                <label class="switch-horario">
-                    <input type="checkbox" checked>
-                    <span></span>
-                </label>
-
-                <strong>Viernes</strong>
-
-                <select>
-                    <option>9:00 AM</option>
-                </select>
-
-                <span>a</span>
-
-                <select>
-                    <option>6:00 PM</option>
-                </select>
-
-                <div class="almuerzo-horario">
-                    <small>ALMUERZO:</small>
-                    <span>1:00 PM - 2:00 PM</span>
-                </div>
-
-            </div>
-
-
-            <div class="dia-horario">
-
-                <label class="switch-horario">
-                    <input type="checkbox" checked>
-                    <span></span>
-                </label>
-
-                <strong>Sábado</strong>
-
-                <select>
-                    <option>9:00 AM</option>
-                </select>
-
-                <span>a</span>
-
-                <select>
-                    <option>1:00 PM</option>
-                </select>
-
-                <div class="almuerzo-horario">
-                    <small>ALMUERZO:</small>
-                    <span>12:00 PM</span>
-                </div>
-
-            </div>
-
-
-            <div class="dia-horario domingo">
-
-                <label class="switch-horario">
-                    <input type="checkbox">
-                    <span></span>
-                </label>
-
-                <strong>Domingo</strong>
-
-                <span class="descanso-semanal">
-                    Descanso semanal
-                </span>
-
-            </div>
-
-        </div>
-
-
+        <!-- HORARIOS REALES DE SUPABASE -->
+        <section class="horarios-card" aria-labelledby="horarios-titulo">
+            <h2 id="horarios-titulo">HORARIOS SEMANALES HABITUALES</h2>
+            @if (!Model.TieneHorarioConfigurado)
+            {
+                <p class="disp-ayuda">Todavía no has guardado ningún horario semanal. Activa los días que trabajarás y guarda los cambios.</p>
+            }
+            <form id="form-horario" method="post"
+                  action="@Url.Action("GuardarHorario", "EspecialistaDisponibilidad")">
+                @Html.AntiForgeryToken()
+                @for (int i = 0; i < Model.Horarios.Count; i++)
+                {
+                    var d = Model.Horarios[i];
+                    <div class="dia-horario @(d.Habilitado ? "" : "apagado")">
+                        <div class="disp-dia-identidad">
+                            <label class="switch-horario" title="Activar o desactivar @d.NombreDia">
+                                <input type="checkbox"
+                                       name="Horarios[@i].Habilitado"
+                                       value="true"
+                                       checked="@d.Habilitado"
+                                       aria-label="Trabajar el @d.NombreDia" />
+                                <span class="disp-switch-pista"></span>
+                            </label>
+                            <input type="hidden" name="Horarios[@i].Habilitado" value="false" />
+                            <input type="hidden" name="Horarios[@i].DiaSemana" value="@d.DiaSemana" />
+                            <strong>@d.NombreDia</strong>
+                        </div>
+
+                        <div class="disp-horas" aria-label="Jornada de @d.NombreDia">
+                            <label>
+                                <small>Inicio</small>
+                                <input type="time" name="Horarios[@i].HoraInicio"
+                                       value="@(d.HoraInicio ?? "09:00")" step="900"
+                                       aria-label="Inicio de @d.NombreDia" />
+                            </label>
+                            <span class="disp-separador">a</span>
+                            <label>
+                                <small>Fin</small>
+                                <input type="time" name="Horarios[@i].HoraFin"
+                                       value="@(d.HoraFin ?? "18:00")" step="900"
+                                       aria-label="Fin de @d.NombreDia" />
+                            </label>
+                        </div>
+                        <div class="almuerzo-horario">
+                            <small>ALMUERZO (opcional)</small>
+                            <label>
+                                <span class="sr-only">Inicio del almuerzo de @d.NombreDia</span>
+                                <input type="time" name="Horarios[@i].InicioAlmuerzo"
+                                       value="@(d.InicioAlmuerzo ?? "")" step="900" />
+                            </label>
+                            <span class="disp-separador">a</span>
+                            <label>
+                                <span class="sr-only">Fin del almuerzo de @d.NombreDia</span>
+                                <input type="time" name="Horarios[@i].FinAlmuerzo"
+                                       value="@(d.FinAlmuerzo ?? "")" step="900" />
+                            </label>
+                        </div>
+                        @if (!d.Configurado)
+                        {
+                            <small class="disp-sin-guardar">Sin configurar</small>
+                        }
+                    </div>
+                }
+            </form>
+        </section>
+
+        <!-- AUSENCIAS Y RESUMEN REAL -->
         <div class="disponibilidad-derecha">
+            <section class="ausencias-card" aria-labelledby="ausencias-titulo">
+                <h2 id="ausencias-titulo">Días Especiales / Ausencias</h2>
+                @if (!Model.Ausencias.Any())
+                {
+                    <p class="disp-ayuda">No tienes ausencias registradas.</p>
+                }
+                else
+                {
+                    @foreach (var ausencia in Model.Ausencias)
+                    {
+                        <div class="ausencia-item">
+                            <div>
+                                <strong>@ausencia.Titulo</strong>
+                                <small>
+                                    @ausencia.FechaInicio.ToString("dd MMM yyyy", cultura)
+                                    @if (ausencia.FechaFin != ausencia.FechaInicio)
+                                    {
+                                        <text> al @ausencia.FechaFin.ToString("dd MMM yyyy", cultura)</text>
+                                    }
+                                </small>
+                                @if (!string.IsNullOrWhiteSpace(ausencia.Descripcion))
+                                {
+                                    <small>@ausencia.Descripcion</small>
+                                }
+                            </div>
+                            <span class="disp-tipo-ausencia @(ausencia.Tipo.Equals("Vacaciones", StringComparison.OrdinalIgnoreCase) ? "ausencia-vacaciones" : ausencia.Tipo.Equals("Capacitación", StringComparison.OrdinalIgnoreCase) ? "ausencia-capacitacion" : "ausencia-personal")">
+                                @ausencia.Tipo
+                            </span>
+                        </div>
+                    }
+                }
 
+                <details class="disp-nueva-ausencia">
+                    <summary class="agregar-ausencia">+ Agregar Ausencia o Día Especial</summary>
+                    <form method="post" action="@Url.Action("AgregarAusencia", "EspecialistaDisponibilidad")" class="disp-ausencia-form">
+                        @Html.AntiForgeryToken()
+                        <label>
+                            Título
+                            <input type="text" name="Titulo" maxlength="100" minlength="3"
+                                   placeholder="Ej. Vacaciones" required />
+                        </label>
+                        <label>
+                            Tipo
+                            <select name="Tipo" required>
+                                <option value="">Selecciona...</option>
+                                <option value="Vacaciones">Vacaciones</option>
+                                <option value="Capacitación">Capacitación</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </label>
+                        <div class="disp-fechas-ausencia">
+                            <label>
+                                Desde
+                                <input type="date" name="FechaInicio" min="@fechaMin" required />
+                            </label>
+                            <label>
+                                Hasta
+                                <input type="date" name="FechaFin" min="@fechaMin" required />
+                            </label>
+                        </div>
+                        <label>
+                            Descripción (opcional)
+                            <textarea name="Descripcion" rows="2" maxlength="500"
+                                      placeholder="Información adicional"></textarea>
+                        </label>
+                        <p class="disp-ayuda">Si ya tienes citas pendientes o confirmadas durante esas fechas, primero deberás reprogramarlas.</p>
+                        <button type="submit" class="btn-guardar-horario">Registrar ausencia</button>
+                    </form>
+                </details>
+            </section>
 
-            <div class="ausencias-card">
-
-                <h2>Días Especiales / Ausencias</h2>
-
-
-                <div class="ausencia-item">
-
-                    <div>
-                        <strong>Vacaciones</strong>
-                        <small>15 Oct 2026</small>
-                    </div>
-
-                    <span class="ausencia-vacaciones">
-                        VACACIONES
-                    </span>
-
-                </div>
-
-
-                <div class="ausencia-item">
-
-                    <div>
-                        <strong>Capacitación Interna</strong>
-                        <small>20 Oct 2026</small>
-                    </div>
-
-                    <span class="ausencia-capacitacion">
-                        CAPACITACIÓN
-                    </span>
-
-                </div>
-
-
-                <div class="ausencia-item">
-
-                    <div>
-                        <strong>Día Personal</strong>
-                        <small>31 Oct 2026</small>
-                    </div>
-
-                    <span class="ausencia-personal">
-                        PERSONAL
-                    </span>
-
-                </div>
-
-
-                <button type="button" class="agregar-ausencia">
-                    + Agregar Ausencia o Día Especial
-                </button>
-
-            </div>
-
-
-            <div class="resumen-semanal">
-
-                <h2>Resumen Semanal</h2>
-
+            <section class="resumen-semanal" aria-labelledby="resumen-titulo">
+                <h2 id="resumen-titulo">Resumen Semanal</h2>
                 <div>
                     <span>Horas semanales de atención</span>
-                    <strong>44h</strong>
+                    <strong>@(Model.HorasSemanales.HasValue ? Model.HorasSemanales.Value.ToString("0.##", cultura) + " h" : "Sin configurar")</strong>
                 </div>
-
                 <div>
                     <span>Días de atención activos</span>
-                    <strong>6 días</strong>
+                    <strong>@Model.DiasActivos días</strong>
                 </div>
-
                 <div>
                     <span>Descanso semanal</span>
-                    <strong>Domingo</strong>
+                    <strong>@(Model.DescansoSemanal ?? "Sin configurar")</strong>
                 </div>
-
                 <div>
                     <span>Próxima ausencia programada</span>
                     <strong class="proxima-ausencia">
-                        15 Oct (Vacaciones)
+                        @if (Model.ProximaAusenciaInicio.HasValue)
+                        {
+                            @Model.ProximaAusenciaInicio.Value.ToString("dd MMM yyyy", cultura)
+                            <text> (@Model.ProximaAusenciaTitulo)</text>
+                        }
+                        else
+                        {
+                            <text>Sin ausencias próximas</text>
+                        }
                     </strong>
                 </div>
-
-            </div>
-
+            </section>
         </div>
-
     </div>
-
 
     <div class="disponibilidad-acciones">
-
-        <button type="button" class="btn-restablecer">
-            Restablecer Horario
+        <button type="reset" form="form-horario" class="btn-restablecer">
+            Deshacer cambios
         </button>
-
-        <button type="button" class="btn-guardar-horario">
+        <button type="submit" form="form-horario" class="btn-guardar-horario">
             Guardar Cambios
         </button>
-
     </div>
-
 </div>
+
+@section Scripts {
+    <script src="@Url.Content("~/js/especialista-disponibilidad.js")" asp-append-version="true"></script>
+}

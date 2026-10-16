@@ -1,0 +1,562 @@
+﻿/* L'AVIELLE | MI DISPONIBILIDAD
+   CSS aislado para no afectar Mi Agenda ni Mi Perfil.
+   Se carga después de especialista.css / especialista2.css. */
+.disponibilidad-page {
+    --disp-cafe: #604539;
+    --disp-oro: #cba65f;
+    --disp-texto: #45332c;
+    --disp-secundario: #ab8173;
+    --disp-borde: #eee5df;
+    --disp-fondo: #fcf7f3;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 22px 56px;
+    box-sizing: border-box;
+    font-family: 'Montserrat', Arial, sans-serif;
+    color: var(--disp-texto);
+    font-size: 13px;
+}
+
+    .disponibilidad-page *, .disponibilidad-page *::before, .disponibilidad-page *::after {
+        box-sizing: border-box
+    }
+
+    .disponibilidad-page h1, .disponibilidad-page h2 {
+        font-family: Georgia,'Times New Roman',serif;
+        font-weight: 400;
+        color: var(--disp-cafe)
+    }
+
+    .disponibilidad-page .disponibilidad-header {
+        margin-bottom: 22px
+    }
+
+        .disponibilidad-page .disponibilidad-header h1 {
+            font-size: clamp(25px,2.8vw,36px);
+            margin: 0 0 8px
+        }
+
+        .disponibilidad-page .disponibilidad-header p {
+            margin: 0;
+            color: var(--disp-secundario);
+            font-size: 12px;
+            line-height: 1.6
+        }
+
+        .disponibilidad-page .disponibilidad-header .disp-nombre {
+            color: var(--disp-cafe);
+            font-size: 11px;
+            margin-top: 5px
+        }
+
+    .disponibilidad-page .disponibilidad-contenido {
+        display: grid;
+        grid-template-columns: minmax(0,1.75fr) minmax(255px,.88fr);
+        gap: 20px;
+        align-items: start
+    }
+
+    .disponibilidad-page .horarios-card, .disponibilidad-page .ausencias-card, .disponibilidad-page .resumen-semanal {
+        min-width: 0;
+        margin: 0;
+        padding: 21px 20px;
+        border: 1px solid var(--disp-borde);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 3px 13px rgba(67,45,33,.025);
+    }
+
+    .disponibilidad-page .horarios-card {
+        padding: 0 0 4px;
+        overflow: hidden
+    }
+
+        .disponibilidad-page .horarios-card h2 {
+            padding: 18px 18px 16px;
+            margin: 0;
+            background: var(--disp-fondo);
+            font-family: 'Montserrat',Arial,sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .25px
+        }
+
+        .disponibilidad-page .horarios-card .disp-ayuda {
+            padding: 0 18px;
+            margin: 13px 0
+        }
+
+    .disponibilidad-page .disponibilidad-derecha {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 18px
+    }
+
+    .disponibilidad-page .ausencias-card h2, .disponibilidad-page .resumen-semanal h2 {
+        font-size: 19px;
+        margin: 0 0 17px
+    }
+
+    .disponibilidad-page .dia-horario {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(112px,.9fr) minmax(194px,1.4fr) minmax(195px,1.3fr);
+        gap: 12px;
+        align-items: center;
+        padding: 13px 17px;
+        border-bottom: 1px solid #f3ede8;
+        min-width: 0
+    }
+
+        .disponibilidad-page .dia-horario:last-child {
+            border-bottom: 0
+        }
+
+        .disponibilidad-page .dia-horario.apagado {
+            background: #fcfaf8;
+            color: #ae9d93
+        }
+
+    .disponibilidad-page .disp-dia-identidad {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0
+    }
+
+        .disponibilidad-page .disp-dia-identidad strong {
+            font-size: 12px;
+            font-weight: 600
+        }
+
+    .disponibilidad-page .switch-horario {
+        display: block;
+        position: relative;
+        flex: 0 0 36px;
+        width: 36px;
+        height: 20px;
+        cursor: pointer
+    }
+
+        .disponibilidad-page .switch-horario input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            cursor: pointer
+        }
+
+    .disponibilidad-page .disp-switch-pista {
+        display: block;
+        position: absolute;
+        inset: 0;
+        background: #e8dfd9;
+        border-radius: 20px;
+        pointer-events: none;
+        transition: background .18s
+    }
+
+        .disponibilidad-page .disp-switch-pista::before {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px #0002;
+            transition: transform .18s
+        }
+
+    .disponibilidad-page .switch-horario input:checked + .disp-switch-pista {
+        background: var(--disp-oro)
+    }
+
+        .disponibilidad-page .switch-horario input:checked + .disp-switch-pista::before {
+            transform: translateX(16px)
+        }
+
+    .disponibilidad-page .switch-horario input:focus-visible + .disp-switch-pista {
+        outline: 2px solid #4b7fff;
+        outline-offset: 2px
+    }
+
+    .disponibilidad-page .disp-horas {
+        display: flex;
+        align-items: end;
+        justify-content: center;
+        gap: 7px;
+        min-width: 0
+    }
+
+        .disponibilidad-page .disp-horas label {
+            min-width: 0;
+            flex: 1
+        }
+
+            .disponibilidad-page .disp-horas label small {
+                display: block;
+                font-size: 9px;
+                color: var(--disp-secundario);
+                margin-bottom: 3px
+            }
+
+    .disponibilidad-page .disp-separador {
+        color: var(--disp-secundario);
+        font-size: 10px;
+        align-self: center;
+        flex: 0 0 auto
+    }
+
+    .disponibilidad-page input[type="time"], .disponibilidad-page input[type="text"], .disponibilidad-page input[type="date"], .disponibilidad-page select, .disponibilidad-page textarea {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        background: #fff;
+        color: var(--disp-texto);
+        border: 1px solid var(--disp-borde);
+        border-radius: 8px;
+        padding: 8px 7px;
+        font: inherit;
+        font-size: 11px;
+        outline: none
+    }
+
+        .disponibilidad-page input:focus, .disponibilidad-page select:focus, .disponibilidad-page textarea:focus {
+            border-color: var(--disp-oro);
+            box-shadow: 0 0 0 2px rgba(203,166,95,.18)
+        }
+
+    .disponibilidad-page input[type="time"] {
+        padding: 7px 3px
+    }
+
+    .disponibilidad-page .dia-horario.apagado input[type="time"] {
+        color: #b8aaa4;
+        background: #f6f2ef
+    }
+
+    .disponibilidad-page .almuerzo-horario {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-width: 0;
+        border-left: 1px solid var(--disp-borde);
+        padding-left: 10px
+    }
+
+        .disponibilidad-page .almuerzo-horario > small {
+            font-size: 8px;
+            color: #b48974;
+            flex-shrink: 0;
+            max-width: 50px
+        }
+
+        .disponibilidad-page .almuerzo-horario label {
+            min-width: 0;
+            flex: 1
+        }
+
+    .disponibilidad-page .disp-sin-guardar {
+        position: absolute;
+        bottom: 2px;
+        left: 65px;
+        font-size: 8px;
+        color: #b8aaa4
+    }
+
+    .disponibilidad-page .ausencia-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        background: var(--disp-fondo);
+        border-radius: 9px;
+        margin: 0 0 10px;
+        padding: 12px 11px
+    }
+
+        .disponibilidad-page .ausencia-item > div {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0
+        }
+
+        .disponibilidad-page .ausencia-item strong {
+            color: var(--disp-texto);
+            font-size: 11px;
+            font-weight: 600;
+            overflow-wrap: anywhere
+        }
+
+        .disponibilidad-page .ausencia-item small {
+            font-size: 10px;
+            color: var(--disp-secundario)
+        }
+
+    .disponibilidad-page .disp-tipo-ausencia {
+        border-radius: 5px;
+        padding: 5px 6px;
+        white-space: nowrap;
+        text-transform: uppercase;
+        font-size: 8px;
+        font-weight: 600;
+        color: #a76531;
+        background: #fff0e7
+    }
+
+        .disponibilidad-page .disp-tipo-ausencia.ausencia-capacitacion {
+            color: #3871be;
+            background: #edf4ff
+        }
+
+        .disponibilidad-page .disp-tipo-ausencia.ausencia-personal {
+            color: #777;
+            background: #eae8e7
+        }
+
+    .disponibilidad-page .agregar-ausencia {
+        list-style: none;
+        display: block;
+        margin-top: 12px;
+        padding: 7px 0;
+        font-size: 11px;
+        color: #b88f4b;
+        cursor: pointer
+    }
+
+        .disponibilidad-page .agregar-ausencia::-webkit-details-marker {
+            display: none
+        }
+
+        .disponibilidad-page .agregar-ausencia:hover {
+            text-decoration: underline
+        }
+
+    .disponibilidad-page .disp-ausencia-form {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--disp-borde)
+    }
+
+        .disponibilidad-page .disp-ausencia-form label {
+            display: block;
+            font-size: 10px;
+            color: var(--disp-cafe);
+            font-weight: 600
+        }
+
+            .disponibilidad-page .disp-ausencia-form label input, .disponibilidad-page .disp-ausencia-form label select, .disponibilidad-page .disp-ausencia-form label textarea {
+                margin-top: 6px;
+                font-weight: 400
+            }
+
+    .disponibilidad-page .disp-fechas-ausencia {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 9px
+    }
+
+    .disponibilidad-page .resumen-semanal > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 15px;
+        margin: 13px 0
+    }
+
+        .disponibilidad-page .resumen-semanal > div span {
+            color: var(--disp-secundario);
+            font-size: 11px
+        }
+
+        .disponibilidad-page .resumen-semanal > div strong {
+            font-size: 11px;
+            font-weight: 600;
+            text-align: right;
+            overflow-wrap: anywhere
+        }
+
+    .disponibilidad-page .resumen-semanal .proxima-ausencia {
+        color: #c96940
+    }
+
+    .disponibilidad-page .disponibilidad-acciones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 13px;
+        margin-top: 32px;
+        flex-wrap: wrap
+    }
+
+    .disponibilidad-page .btn-restablecer, .disponibilidad-page .btn-guardar-horario {
+        width: auto;
+        background: #fff;
+        color: var(--disp-cafe);
+        padding: 11px 19px;
+        border: 1px solid var(--disp-borde);
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer
+    }
+
+        .disponibilidad-page .btn-restablecer:hover {
+            background: #f4ebe4
+        }
+
+    .disponibilidad-page .btn-guardar-horario {
+        color: #fff;
+        background: var(--disp-oro);
+        border-color: var(--disp-oro)
+    }
+
+        .disponibilidad-page .btn-guardar-horario:hover {
+            background: #b99451
+        }
+
+    .disponibilidad-page .disp-mensaje {
+        padding: 12px 16px;
+        margin: 0 0 18px;
+        border-radius: 8px;
+        font-size: 12px
+    }
+
+    .disponibilidad-page .disp-aviso {
+        background: #fff7e9;
+        border: 1px solid #f1d9b5;
+        color: #785b28
+    }
+
+    .disponibilidad-page .disp-exito {
+        background: #edf7ee;
+        border: 1px solid #c2e0ca;
+        color: #316b3a
+    }
+
+    .disponibilidad-page .disp-error {
+        background: #fff0ed;
+        border: 1px solid #e6b1a5;
+        color: #9d3a2c
+    }
+
+    .disponibilidad-page .disp-ayuda {
+        font-size: 10px;
+        color: var(--disp-secundario);
+        line-height: 1.6
+    }
+
+    .disponibilidad-page .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        white-space: nowrap;
+        border: 0
+    }
+
+@media (max-width: 1200px) {
+    .disponibilidad-page {
+        padding: 24px 16px 45px
+    }
+
+        .disponibilidad-page .disponibilidad-contenido {
+            grid-template-columns: minmax(0,1fr)
+        }
+
+        .disponibilidad-page .disponibilidad-derecha {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            align-items: start
+        }
+}
+
+@media (max-width: 780px) {
+    .disponibilidad-page .dia-horario {
+        grid-template-columns: 1fr 1.3fr;
+        gap: 13px;
+        padding: 16px 14px
+    }
+
+    .disponibilidad-page .almuerzo-horario {
+        grid-column: 1 / -1;
+        border-left: 0;
+        padding-left: 0;
+        padding-top: 5px
+    }
+
+        .disponibilidad-page .almuerzo-horario > small {
+            max-width: none;
+            min-width: 90px
+        }
+
+    .disponibilidad-page .disp-sin-guardar {
+        bottom: auto;
+        top: 2px;
+        left: auto;
+        right: 15px
+    }
+
+    .disponibilidad-page .disponibilidad-derecha {
+        grid-template-columns: 1fr
+    }
+}
+
+@media (max-width: 480px) {
+    .disponibilidad-page {
+        padding: 18px 10px 28px
+    }
+
+        .disponibilidad-page .horarios-card h2 {
+            font-size: 9px
+        }
+
+        .disponibilidad-page .dia-horario {
+            grid-template-columns: 1fr
+        }
+
+        .disponibilidad-page .disp-horas {
+            justify-content: flex-start
+        }
+
+        .disponibilidad-page .almuerzo-horario {
+            grid-column: 1;
+            flex-wrap: wrap
+        }
+
+            .disponibilidad-page .almuerzo-horario > small {
+                flex-basis: 100%
+            }
+
+        .disponibilidad-page .horarios-card, .disponibilidad-page .ausencias-card, .disponibilidad-page .resumen-semanal {
+            border-radius: 12px
+        }
+
+        .disponibilidad-page .ausencias-card, .disponibilidad-page .resumen-semanal {
+            padding: 17px 13px
+        }
+
+        .disponibilidad-page .disp-fechas-ausencia {
+            grid-template-columns: 1fr
+        }
+
+        .disponibilidad-page .disponibilidad-acciones {
+            justify-content: stretch
+        }
+
+            .disponibilidad-page .disponibilidad-acciones button {
+                flex: 1
+            }
+}
