@@ -1,4 +1,5 @@
-﻿/* =========================================
+﻿
+/* =========================================
    CONFIGURACIÓN GENERAL
    ========================================= */
 
@@ -60,7 +61,7 @@ textarea {
     width: 220px;
     height: 100vh;
     padding: 30px 24px;
-    background: #65483d;
+    background: #1b1919;
 }
 
 .sidebar-top {
@@ -78,7 +79,7 @@ textarea {
 }
 
 .brand-logo {
-    color: #d2ad63;
+    color: #cba45b;
     font-family: "Times New Roman", serif;
     font-size: 32px;
     line-height: 1.1;
@@ -110,19 +111,19 @@ textarea {
     min-height: 44px;
     padding: 12px 10px;
     border-radius: 7px;
-    color: #e5d9d4;
+    color: #d4cdca;
     font-size: 13px;
     line-height: 1.4;
     transition: background .2s, color .2s;
 }
 
     .sidebar-link:hover {
-        background: rgba(255, 255, 255, .08);
+        background: #3b3028;
     }
 
     .sidebar-link.active {
-        background: rgba(203, 164, 91, .19);
-        color: #d6b36d;
+        background: #3b3028;
+        color: #d1ad63;
         font-weight: 600;
     }
 
@@ -153,7 +154,7 @@ textarea {
     width: 3px;
     height: 18px;
     border-radius: 2px;
-    background: #d0aa5c;
+    background: #cba45b;
 }
 
 .sidebar-bottom {
@@ -165,11 +166,11 @@ textarea {
 .divider {
     width: 100%;
     height: 1px;
-    background: rgba(255, 255, 255, .12);
+    background: #312d2b;
 }
 
 .logout-link {
-    color: #e5d9d4;
+    color: #d4cdca;
 }
 
 /* =========================================
@@ -932,7 +933,7 @@ textarea {
     }
 
     .product-row .code {
-        color: #c49a4d;
+        color: #cba45b;
         font-size: 11px;
     }
 
@@ -974,7 +975,7 @@ textarea {
 }
 
 .row-actions {
-    color: #c49a4d;
+    color: #cba45b;
     font-size: 11px;
 }
 
@@ -1037,7 +1038,7 @@ textarea {
     min-height: 72px;
     padding: 15px 18px;
     border-radius: 12px;
-    background: #65483d;
+    background: #1b1919;
     color: white;
 }
 
@@ -1053,7 +1054,7 @@ textarea {
     }
 
     .inventory-summary strong {
-        color: #d2ad63;
+        color: #cba45b;
         font-family: "Times New Roman", serif;
         font-size: 24px;
         font-weight: 400;
@@ -1260,6 +1261,7 @@ footer.footer {
 }
 
 /* Búsqueda funcional */
+
 .product-search input {
     flex: 1;
     width: 100%;
@@ -1288,6 +1290,7 @@ footer.footer {
     }
 
 /* Mensajes */
+
 .inventory-message,
 .inventory-error {
     padding: 12px 16px;
@@ -1306,6 +1309,7 @@ footer.footer {
 }
 
 /* Formulario integrado */
+
 .product-form-card {
     width: 100%;
     padding: 24px;
@@ -1396,9 +1400,10 @@ footer.footer {
     }
 
 /* Detalle del producto */
+
 .product-details-code {
     margin-bottom: 8px;
-    color: #c49a4d;
+    color: #cba45b;
     font-size: 12px;
 }
 
