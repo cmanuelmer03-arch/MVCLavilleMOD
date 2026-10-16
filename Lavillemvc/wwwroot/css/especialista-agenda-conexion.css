@@ -1,0 +1,377 @@
+﻿/* Complemento responsivo solo para la agenda, sin alterar otras vistas. */
+.especialista-agenda {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+    .especialista-agenda *, .especialista-agenda *::before, .especialista-agenda *::after {
+        box-sizing: border-box;
+    }
+
+    .especialista-agenda .especialista-header {
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .especialista-agenda .agenda-resumen {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .especialista-agenda .agenda-resumen > div {
+            background: #fff;
+            border: 1px solid #eee6df;
+            border-radius: 11px;
+            padding: 13px 17px;
+            min-width: 128px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .especialista-agenda .agenda-resumen strong {
+            color: #5a4035;
+            font-size: 16px;
+        }
+
+        .especialista-agenda .agenda-resumen small {
+            font-size: 9px;
+            color: #9e8172;
+        }
+
+    .especialista-agenda .agenda-identidad {
+        display: block;
+        margin-top: 5px;
+        color: #9e8172;
+    }
+
+    .especialista-agenda .agenda-filtros {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    .especialista-agenda a.filtro-agenda {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        padding: 10px 16px;
+        background: #f5efeb;
+        border-radius: 8px;
+        color: #977867;
+        font-size: 12px;
+    }
+
+        .especialista-agenda a.filtro-agenda.activo {
+            background: #fff;
+            color: #604338;
+            box-shadow: 0 0 0 1px #e8ded7 inset;
+            font-weight: 700;
+        }
+
+    .especialista-agenda .agenda-fecha-form {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+        margin: 14px 0 22px;
+        color: #81675b;
+    }
+
+        .especialista-agenda .agenda-fecha-form input {
+            padding: 8px;
+            border: 1px solid #e7ddd5;
+            border-radius: 8px;
+            max-width: 100%;
+            background: #fff;
+        }
+
+        .especialista-agenda .agenda-fecha-form button,
+        .especialista-agenda .agenda-confirmar,
+        .especialista-agenda .agenda-confirmar-lateral button {
+            border: 0;
+            background: #c5a060;
+            color: #fff;
+            border-radius: 7px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .especialista-agenda .agenda-fecha-form a,
+        .especialista-agenda .agenda-ver-detalle {
+            color: #9e774b;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+    .especialista-agenda .agenda-rango {
+        margin: -12px 0 18px;
+        font-size: 12px;
+        color: #9e8172;
+    }
+
+    .especialista-agenda .agenda-contenido {
+        display: grid;
+        grid-template-columns: minmax(0,1.5fr) minmax(250px,.85fr);
+        gap: 17px;
+        align-items: start;
+    }
+
+    .especialista-agenda .agenda-lista {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .especialista-agenda .cita-card {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        min-width: 0;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid #eee6df;
+        border-radius: 10px;
+    }
+
+        .especialista-agenda .cita-card.agenda-seleccionada {
+            border-color: #d1b27c;
+        }
+
+    .especialista-agenda .cita-hora {
+        flex: 0 0 127px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+        .especialista-agenda .cita-hora strong {
+            white-space: normal;
+        }
+
+    .especialista-agenda .cita-datos {
+        flex: 1 1 180px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+        .especialista-agenda .cita-datos span, .especialista-agenda .cita-datos small {
+            overflow-wrap: anywhere;
+        }
+
+    .especialista-agenda .agenda-acciones-cita {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+    }
+
+        .especialista-agenda .agenda-acciones-cita form {
+            margin: 0;
+        }
+
+        .especialista-agenda .agenda-acciones-cita .agenda-confirmar {
+            padding: 6px 9px;
+            font-size: 11px;
+        }
+
+    .especialista-agenda .estado-cita.cancelada,
+    .especialista-agenda .estado-cita.otro {
+        color: #7c7472;
+        background: #f1edeb;
+        border-radius: 5px;
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .especialista-agenda .agenda-vacia {
+        background: #fff;
+        padding: 25px;
+        border: 1px solid #eee6df;
+        border-radius: 10px;
+        color: #5a4035;
+    }
+
+        .especialista-agenda .agenda-vacia p {
+            color: #957b6e;
+            margin-bottom: 0;
+        }
+
+    .especialista-agenda .proxima-cita {
+        min-width: 0;
+        background: #fff;
+        border: 1px solid #eee6df;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+        .especialista-agenda .proxima-cita h2 {
+            margin: 0 0 13px;
+        }
+
+    .especialista-agenda .cliente-proxima {
+        display: flex;
+        gap: 11px;
+        align-items: center;
+        margin: 16px 0;
+    }
+
+    .especialista-agenda .cliente-foto {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        border-radius: 50%;
+        background: #e8d8c8;
+        color: #634c3d;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+    }
+
+    .especialista-agenda .cliente-proxima > div:last-child {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 4px;
+    }
+
+    .especialista-agenda .cliente-proxima small {
+        color: #b08e7e;
+    }
+
+    .especialista-agenda .detalle-cita {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+        .especialista-agenda .detalle-cita small {
+            margin-top: 10px;
+            color: #ab8c7b;
+        }
+
+        .especialista-agenda .detalle-cita strong, .especialista-agenda .detalle-cita p {
+            overflow-wrap: anywhere;
+        }
+
+    .especialista-agenda .agenda-confirmar-lateral {
+        margin-top: 16px;
+    }
+
+    .especialista-agenda .resumen-dia {
+        margin-top: 20px;
+        background: #fff;
+        border: 1px solid #eee6df;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .especialista-agenda .resumen-dia-grid {
+        display: grid;
+        grid-template-columns: repeat(4,minmax(0,1fr));
+        gap: 16px;
+    }
+
+        .especialista-agenda .resumen-dia-grid > div {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 0;
+        }
+
+        .especialista-agenda .resumen-dia-grid strong {
+            overflow-wrap: anywhere;
+        }
+
+    .especialista-agenda .agenda-nota {
+        font-size: 11px;
+        margin: 15px 0 0;
+        color: #998276;
+    }
+
+    .especialista-agenda .agenda-aviso, .especialista-agenda .agenda-mensaje {
+        padding: 12px 15px;
+        border-radius: 9px;
+        margin-bottom: 14px;
+        font-size: 12px;
+    }
+
+    .especialista-agenda .agenda-aviso {
+        background: #fff4df;
+        color: #76552a;
+    }
+
+    .especialista-agenda .agenda-exito {
+        background: #e6f5e9;
+        color: #356643;
+    }
+
+    .especialista-agenda .agenda-error {
+        background: #fbe9e8;
+        color: #98463e;
+    }
+
+@media (max-width:1100px) {
+    .especialista-agenda .agenda-contenido {
+        grid-template-columns: minmax(0,1fr);
+    }
+
+    .especialista-agenda .resumen-dia-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+}
+
+@media (max-width:650px) {
+    .especialista-agenda {
+        padding: 15px !important;
+    }
+
+        .especialista-agenda .especialista-header {
+            flex-direction: column;
+        }
+
+        .especialista-agenda .agenda-resumen {
+            width: 100%;
+        }
+
+            .especialista-agenda .agenda-resumen > div {
+                flex: 1 1 120px;
+            }
+
+        .especialista-agenda .cita-hora {
+            flex: 1 1 100%;
+        }
+
+        .especialista-agenda .cita-datos {
+            flex: 1 1 100%;
+        }
+
+        .especialista-agenda .agenda-acciones-cita {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .especialista-agenda .resumen-dia-grid {
+            grid-template-columns: repeat(2,minmax(0,1fr));
+        }
+}
+
+@media (max-width:380px) {
+    .especialista-agenda .resumen-dia-grid {
+        grid-template-columns: 1fr;
+    }
+}

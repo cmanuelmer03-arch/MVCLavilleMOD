@@ -19,6 +19,9 @@
     <link rel="stylesheet"
           href="~/css/especialista.css" />
 
+    @await RenderSectionAsync("Styles", required: false)
+
+
 </head>
 
 
@@ -35,28 +38,25 @@
             </div>
 
 
-            <div class="especialista-datos-menu">
+            
+            <strong>
+                @(ViewBag.NombreEspecialista ?? "Especialista")
+            </strong>
 
-                <strong>
-                    Valentina Rojas
-                </strong>
+            <span>
+                @(ViewBag.RolEspecialista ?? "")
+            </span>
 
-                <span>
-                    Colorista Experta
-                </span>
-
-            </div>
 
 
             <nav class="menu-especialista">
 
 
-                <a asp-controller="Especialista"
-                   asp-action="MiAgenda">
-
+               
+                <a href="@Url.Action("MiAgenda", "EspecialistaAgenda")">
                     Mi Agenda
-
                 </a>
+
 
 
                 <a asp-controller="Especialista"
