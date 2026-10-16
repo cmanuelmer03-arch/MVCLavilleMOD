@@ -134,7 +134,8 @@ namespace Lavillemvc.Controllers
                 "Cliente",
                 "Recepcionista",
                 "Especialista",
-                "Encargado Inventario"
+                "Encargado Inventario",
+                "Administrador"
             };
 
             string? rolValido = rolesPermitidos

@@ -3,14 +3,18 @@
     ViewData["Title"] = "Home Page";
 
     var rolActual = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
     var destinoPanel = rolActual switch
     {
         "Cliente" => (Controlador: "Cliente", Accion: "DashboardCliente"),
         "Recepcionista" => (Controlador: "Gestion", Accion: "PanelPrinciRecepcionista"),
         "Especialista" => (Controlador: "Especialista", Accion: "MiAgenda"),
         "Encargado Inventario" => (Controlador: "Inventario", Accion: "PanelInventario"),
+        "Administrador" => (Controlador: "Admin", Accion: "Dashboard"),
         _ => (Controlador: "", Accion: "")
     };
+}
+
 }
 <!DOCTYPE html>
 <html lang="es">
