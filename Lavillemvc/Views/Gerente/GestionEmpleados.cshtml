@@ -1,0 +1,368 @@
+﻿@model List<Lavillemvc.Models.GerenteGestionEmpleados>
+@using System.Globalization
+@using Lavillemvc.DAL
+
+@{
+    Layout = "~/Views/Shared/_LayoutGerente.cshtml";
+    ViewData["Title"] = "Gestión de Empleados";
+    ViewData["ActiveMenu"] = "Empleados";
+
+    var cultura = CultureInfo.GetCultureInfo("es-SV");
+    string mesActual = DateTime.Now.ToString("MMMM yyyy", cultura);
+    string buscar = ViewBag.Buscar as string ?? "";
+    string categoria = ViewBag.Categoria as string ?? "Todos";
+    int total = (int)(ViewBag.TotalEmpleadosSucursal ?? 0);
+    int completos = (int)(ViewBag.TiempoCompletoSucursal ?? 0);
+    int parciales = (int)(ViewBag.MedioTiempoSucursal ?? 0);
+    bool edicion = (bool)(ViewBag.EdicionHabilitada ?? false);
+    var especialidades = ViewBag.Especialidades as List<GerenteEmpleadosDAL.EspecialidadOpcion>
+        ?? new List<GerenteEmpleadosDAL.EspecialidadOpcion>();
+    var filtros = new[] { "Todos", "Estilistas", "Coloristas", "Nail Artists", "Barberos", "Otros" };
+    var dias = new[] { "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB" };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/css/GestionEmpleados.css")" asp-append-version="true" />
+}
+
+<main class="contenido gerente-empleados">
+    <header class="empleados-header">
+        <div class="empleados-header-texto">
+            <h1>Gestión de Empleados</h1>
+            <p>
+                Administración del Equipo de Estilistas, Coloristas y Técnicos <span>•</span>
+                <strong>@mesActual</strong>
+            </p>
+        </div>
+        <div class="empleados-header-acciones">
+            <form class="buscador" method="get" action="@Url.Action("GestionEmpleados", "GerenteEmpleados")" role="search">
+                <span class="buscador-icono" aria-hidden="true">⌕</span>
+                <input type="search" name="buscar" value="@buscar" placeholder="Buscar especialista..." aria-label="Buscar especialista" />
+                <input type="hidden" name="categoria" value="@categoria" />
+                <button type="submit" aria-label="Buscar">Buscar</button>
+            </form>
+            @if (edicion)
+            {
+                <button type="button" class="btn-agregar" data-abrir="modalAgregar">+ Agregar Empleado</button>
+            }
+        </div>
+    </header>
+
+    @if (ViewBag.Error != null)
+    {
+        <p class="alerta alerta-error" role="alert">@ViewBag.Error</p>
+    }
+    @if (TempData["ErrorEmpleados"] != null)
+    {
+        <p class="alerta alerta-error" role="alert">@TempData["ErrorEmpleados"]</p>
+    }
+    @if (TempData["ExitoEmpleados"] != null)
+    {
+        <p class="alerta alerta-exito" role="status">@TempData["ExitoEmpleados"]</p>
+    }
+
+    <nav class="filtros-empleados" aria-label="Filtrar empleados">
+        @foreach (var filtro in filtros)
+        {
+            <a class="filtro @(categoria == filtro ? "activo" : "")"
+               href="@Url.Action("GestionEmpleados", "GerenteEmpleados", new { buscar, categoria = filtro })">@filtro</a>
+        }
+    </nav>
+
+    <section class="empleados-card" aria-label="Empleados de la sucursal">
+        <div class="tabla-contenedor">
+            <table class="tabla-empleados">
+                <thead>
+                    <tr>
+                        <th>NOMBRE Y APELLIDO</th>
+                        <th>CARGO</th>
+                        <th>ESPECIALIDAD</th>
+                        <th>HORARIO</th>
+                        <th>DISPONIBILIDAD</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="tabla-vacia">
+                                No hay especialistas vinculados a esta sucursal que coincidan con el filtro.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var empleado in Model)
+                    {
+                        var horario = !string.IsNullOrWhiteSpace(empleado.HorarioGeneral)
+                            ? empleado.HorarioGeneral
+                            : empleado.DiasConfigurados.HasValue
+                                ? $"{empleado.DiasActivos ?? 0} días · {empleado.HorasSemanales?.ToString("0.#", cultura) ?? "0"} h/sem"
+                                : "Sin horario configurado";
+                        <tr>
+                            <td class="empleado-nombre">@empleado.NombreCompleto</td>
+                            <td>@(empleado.Cargo ?? "Sin cargo")</td>
+                            <td class="especialidad">@empleado.Especialidad</td>
+                            <td>@horario</td>
+                            <td>
+                                <span class="estado @(empleado.Disponibilidad == true ? "activo" : "inactivo")">
+                                    @(empleado.Disponibilidad == true ? "Disponible" : "No disponible")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="acciones-tabla">
+                                    <button type="button" class="accion-ver"
+                                            data-nombre="@empleado.NombreCompleto"
+                                            data-cargo="@empleado.Cargo"
+                                            data-especialidad="@empleado.Especialidad"
+                                            data-experiencia="@empleado.AniosExperiencia"
+                                            data-horas="@empleado.HorasSemanales"
+                                            data-estado="@empleado.EstadoDisponibilidad">
+                                        Ver
+                                    </button>
+                                    @if (edicion)
+                                    {
+                                        <button type="button" class="accion-editar"
+                                                data-id="@empleado.IdEspecialista"
+                                                data-nombre="@empleado.NombreCompleto"
+                                                data-cargo="@empleado.Cargo"
+                                                data-especialidad="@empleado.IdEspecialidad"
+                                                data-experiencia="@empleado.AniosExperiencia"
+                                                data-disponibilidad="@(empleado.Disponibilidad == true ? "true" : "false")">
+                                            Editar
+                                        </button>
+                                        <button type="button" class="accion-horarios"
+                                                data-id="@empleado.IdEspecialista"
+                                                data-nombre="@empleado.NombreCompleto"
+                                                data-horarios="@empleado.HorarioSemanalJson">
+                                            Horarios
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="sin-edicion">Solo lectura</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="estructura-equipo">
+        <div class="estructura-resumen">
+            <h2>Estructura del Equipo</h2>
+            <div class="estructura-card">
+                <span class="estructura-etiqueta">TOTAL ESPECIALISTAS</span>
+                <strong>@total Especialistas</strong>
+                <small>Vinculados a esta sucursal</small>
+            </div>
+            <div class="estructura-card">
+                <span class="estructura-etiqueta">TIEMPO COMPLETO</span>
+                <strong>@completos Profesionales</strong>
+                <small>40 o más horas configuradas por semana</small>
+            </div>
+            <div class="estructura-card">
+                <span class="estructura-etiqueta">MEDIO TIEMPO</span>
+                <strong>@parciales Especialistas</strong>
+                <small>Menos de 40 horas configuradas</small>
+            </div>
+        </div>
+
+        <div class="vista-semanal" id="calendarioEquipo">
+            <div class="vista-semanal-header">
+                <h2>Vista Semanal del Equipo</h2>
+                <span class="leyenda-horario"><i class="turno disponible"></i> Configurado y habilitado</span>
+            </div>
+            <div class="horario-equipo-contenedor">
+                <div class="horario-equipo">
+                    <div class="horario-fila horario-titulos">
+                        <span>ESPECIALISTA</span>
+                        @foreach (var dia in dias)
+                        {
+                            <span>@dia</span>
+                        }
+                    </div>
+                    @if (Model.Count == 0)
+                    {
+                        <p class="sin-horarios">No hay turnos para mostrar.</p>
+                    }
+                    @foreach (var empleado in Model)
+                    {
+                        <div class="horario-fila">
+                            <strong title="@empleado.NombreCompleto">@empleado.NombreCompleto</strong>
+                            @for (int dia = 1; dia <= 6; dia++)
+                            {
+                                var turno = empleado.Horarios.FirstOrDefault(h => h.DiaSemana == dia);
+                                bool habilitado = turno?.Habilitado == true;
+                                string texto = turno == null ? "Sin configurar"
+                                    : habilitado ? $"{turno.HoraInicio} a {turno.HoraFin}"
+                                    : "No disponible";
+                                <span class="turno @(habilitado ? "disponible" : "vacio")" title="@texto"
+                                      aria-label="@texto"></span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <p class="nota-horarios">Los bloques reflejan los horarios configurados, no la asistencia en tiempo real. El domingo puede editarse desde «Horarios».</p>
+        </div>
+    </section>
+
+    @if (edicion)
+    {
+        <p class="nota-pruebas">Modo de desarrollo: los cambios se guardan en Supabase. Antes de publicar, configura autenticación y el ID de sucursal del gerente.</p>
+    }
+</main>
+
+<dialog id="modalVer" class="modal-empleado">
+    <div class="modal-titulo"><h2>Detalle del Especialista</h2><button type="button" class="modal-cerrar" aria-label="Cerrar">×</button></div>
+    <dl class="detalle-lista">
+        <dt>Nombre</dt>
+        <dd id="verNombre"></dd>
+        <dt>Cargo</dt>
+        <dd id="verCargo"></dd>
+        <dt>Especialidad</dt>
+        <dd id="verEspecialidad"></dd>
+        <dt>Experiencia</dt>
+        <dd id="verExperiencia"></dd>
+        <dt>Horas semanales</dt>
+        <dd id="verHoras"></dd>
+        <dt>Disponibilidad</dt>
+        <dd id="verEstado"></dd>
+    </dl>
+</dialog>
+
+@if (edicion)
+{
+    <dialog id="modalAgregar" class="modal-empleado">
+        <div class="modal-titulo"><h2>Agregar Especialista</h2><button type="button" class="modal-cerrar" aria-label="Cerrar">×</button></div>
+        <form method="post" action="@Url.Action("Agregar", "GerenteEmpleados")" class="form-empleado">
+            @Html.AntiForgeryToken()
+            <label>Nombre <input name="Nombre" maxlength="100" required /></label>
+            <label>Apellido <input name="Apellido" maxlength="100" required /></label>
+            <label>Cargo <input name="Cargo" maxlength="100" placeholder="Ej. Colorista" required /></label>
+            <label>
+                Especialidad
+                <select name="IdEspecialidad" required>
+                    <option value="">Selecciona una especialidad</option>
+                    @foreach (var especialidad in especialidades)
+                    {
+                        <option value="@especialidad.IdEspecialidad">@especialidad.Nombre</option>
+                    }
+                </select>
+            </label>
+            <label>Años de experiencia <input name="AniosExperiencia" type="number" min="0" max="80" /></label>
+            <label class="opcion-check"><input name="Disponibilidad" type="checkbox" value="true" checked /> Disponible</label>
+            <p class="nota-form">Al guardar se registra el especialista y su empleado vinculado a esta sucursal.</p>
+            <button type="submit" class="btn-guardar">Guardar especialista</button>
+        </form>
+    </dialog>
+
+    <dialog id="modalEditar" class="modal-empleado">
+        <div class="modal-titulo"><h2>Editar: <span id="editarNombre"></span></h2><button type="button" class="modal-cerrar" aria-label="Cerrar">×</button></div>
+        <form method="post" action="@Url.Action("Editar", "GerenteEmpleados")" class="form-empleado">
+            @Html.AntiForgeryToken()
+            <input name="IdEspecialista" id="editarId" type="hidden" />
+            <label>Cargo <input name="Cargo" id="editarCargo" maxlength="100" required /></label>
+            <label>
+                Especialidad
+                <select name="IdEspecialidad" id="editarEspecialidad" required>
+                    @foreach (var especialidad in especialidades)
+                    {
+                        <option value="@especialidad.IdEspecialidad">@especialidad.Nombre</option>
+                    }
+                </select>
+            </label>
+            <label>Años de experiencia <input name="AniosExperiencia" id="editarExperiencia" type="number" min="0" max="80" /></label>
+            <label class="opcion-check"><input name="Disponibilidad" id="editarDisponibilidad" type="checkbox" value="true" /> Disponible</label>
+            <button type="submit" class="btn-guardar">Guardar cambios</button>
+        </form>
+    </dialog>
+
+    <dialog id="modalHorario" class="modal-empleado">
+        <div class="modal-titulo"><h2>Horarios: <span id="horarioNombre"></span></h2><button type="button" class="modal-cerrar" aria-label="Cerrar">×</button></div>
+        <form method="post" action="@Url.Action("GuardarHorario", "GerenteEmpleados")" class="form-empleado">
+            @Html.AntiForgeryToken()
+            <input name="IdEspecialista" id="horarioId" type="hidden" />
+            <label>
+                Día de la semana
+                <select name="DiaSemana" id="horarioDia">
+                    <option value="1">Lunes</option>
+                    <option value="2">Martes</option>
+                    <option value="3">Miércoles</option>
+                    <option value="4">Jueves</option>
+                    <option value="5">Viernes</option>
+                    <option value="6">Sábado</option>
+                    <option value="7">Domingo</option>
+                </select>
+            </label>
+            <label class="opcion-check"><input name="Habilitado" id="horarioHabilitado" type="checkbox" value="true" /> Trabaja este día</label>
+            <div class="dos-columnas">
+                <label>Entrada <input name="HoraInicio" id="horarioInicio" type="time" /></label>
+                <label>Salida <input name="HoraFin" id="horarioFin" type="time" /></label>
+                <label>Inicio de almuerzo <input name="InicioAlmuerzo" id="horarioAlmuerzoInicio" type="time" /></label>
+                <label>Fin de almuerzo <input name="FinAlmuerzo" id="horarioAlmuerzoFin" type="time" /></label>
+            </div>
+            <button type="submit" class="btn-guardar">Guardar horario</button>
+        </form>
+    </dialog>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            document.querySelectorAll('.modal-cerrar').forEach(b =>
+                b.addEventListener('click', () => b.closest('dialog').close()));
+            document.querySelectorAll('[data-abrir]').forEach(b =>
+                b.addEventListener('click', () => document.getElementById(b.dataset.abrir).showModal()));
+
+            document.querySelectorAll('.accion-ver').forEach(b => b.addEventListener('click', () => {
+                const d = b.dataset;
+                for (const [campo, valor] of Object.entries({
+                    verNombre:d.nombre, verCargo:d.cargo, verEspecialidad:d.especialidad,
+                    verExperiencia:d.experiencia ? `${d.experiencia} años` : 'Sin registrar',
+                    verHoras:d.horas ? `${d.horas} horas` : 'Sin configurar', verEstado:d.estado
+                })) document.getElementById(campo).textContent = valor || 'Sin registrar';
+                document.getElementById('modalVer').showModal();
+            }));
+
+            document.querySelectorAll('.accion-editar').forEach(b => b.addEventListener('click', () => {
+                const d = b.dataset;
+                document.getElementById('editarNombre').textContent = d.nombre;
+                document.getElementById('editarId').value = d.id;
+                document.getElementById('editarCargo').value = d.cargo || '';
+                document.getElementById('editarEspecialidad').value = d.especialidad;
+                document.getElementById('editarExperiencia').value = d.experiencia || '';
+                document.getElementById('editarDisponibilidad').checked = d.disponibilidad === 'true';
+                document.getElementById('modalEditar').showModal();
+            }));
+
+            let diasEmpleado = [];
+            const diaInput = document.getElementById('horarioDia');
+            const camposHorario = [
+                ['horarioInicio', 'HoraInicio'], ['horarioFin', 'HoraFin'],
+                ['horarioAlmuerzoInicio', 'InicioAlmuerzo'], ['horarioAlmuerzoFin', 'FinAlmuerzo']
+            ];
+            function actualizarDia() {
+                if (!diaInput) return;
+                const fila = diasEmpleado.find(d => Number(d.DiaSemana) === Number(diaInput.value));
+                document.getElementById('horarioHabilitado').checked = !!fila?.Habilitado;
+                camposHorario.forEach(([id, campo]) => {
+                    document.getElementById(id).value = fila?.[campo] || '';
+                });
+            }
+            diaInput?.addEventListener('change', actualizarDia);
+            document.querySelectorAll('.accion-horarios').forEach(b => b.addEventListener('click', () => {
+                document.getElementById('horarioId').value = b.dataset.id;
+                document.getElementById('horarioNombre').textContent = b.dataset.nombre;
+                try { diasEmpleado = JSON.parse(b.dataset.horarios || '[]'); }
+                catch { diasEmpleado = []; }
+                diaInput.value = '1';
+                actualizarDia();
+                document.getElementById('modalHorario').showModal();
+            }));
+        })();
+    </script>
+}

@@ -7,7 +7,7 @@ namespace Lavillemvc.Controllers
         // Views/Especialista/MiAgenda.cshtml
         public IActionResult MiAgenda()
         {
-            return View();
+            return RedirectToAction("MiAgenda", "EspecialistaAgenda");
         }
 
         // Views/Especialista/Disponibilidad.cshtml

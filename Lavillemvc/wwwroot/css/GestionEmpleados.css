@@ -1,0 +1,635 @@
+﻿/* L'AVIELLE | Gestión de Empleados del Gerente
+   CSS aislado: no modifica Admin, Cliente ni el Dashboard. */
+.gerente-empleados {
+    --em-cafe: #5c4035;
+    --em-dorado: #c9a866;
+    --em-texto: #382a25;
+    --em-claro: #fcf7f3;
+    --em-borde: #eee5df;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 35px clamp(16px,3vw,38px) 48px;
+    background: var(--em-claro);
+    color: var(--em-texto);
+    font-family: 'DM Sans','Segoe UI',Arial,sans-serif;
+    font-size: 13px;
+}
+
+    .gerente-empleados *, .gerente-empleados *::before, .gerente-empleados *::after {
+        box-sizing: border-box;
+    }
+
+    .gerente-empleados h1, .gerente-empleados h2, .gerente-empleados p {
+        margin-top: 0;
+    }
+
+    .gerente-empleados h1, .gerente-empleados h2, .gerente-empleados .estructura-card strong {
+        font-family: 'Playfair Display',Georgia,serif;
+        font-weight: 500;
+    }
+
+    .gerente-empleados button, .gerente-empleados input, .gerente-empleados select {
+        font: inherit;
+    }
+
+    .gerente-empleados button {
+        cursor: pointer;
+    }
+
+    /* Cabecera */
+    .gerente-empleados .empleados-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 27px;
+    }
+
+    .gerente-empleados .empleados-header-texto {
+        min-width: 220px;
+        flex: 1;
+    }
+
+    .gerente-empleados h1 {
+        font-size: clamp(26px,2.5vw,37px);
+        line-height: 1.15;
+        color: var(--em-cafe);
+        margin-bottom: 7px;
+    }
+
+    .gerente-empleados .empleados-header-texto p {
+        font-size: 11px;
+        color: #ae8777;
+        line-height: 1.65;
+        margin-bottom: 0;
+    }
+
+        .gerente-empleados .empleados-header-texto p span {
+            margin: 0 5px;
+            color: var(--em-cafe);
+        }
+
+        .gerente-empleados .empleados-header-texto p strong {
+            color: var(--em-cafe);
+            font-weight: 600;
+        }
+
+    .gerente-empleados .empleados-header-acciones {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .gerente-empleados .buscador {
+        display: flex;
+        align-items: center;
+        min-height: 38px;
+        border: 1px solid var(--em-borde);
+        border-radius: 50px;
+        background: #fff;
+        padding: 0 6px 0 12px;
+        gap: 7px;
+    }
+
+    .gerente-empleados .buscador-icono {
+        font-size: 21px;
+        color: #ac7965;
+    }
+
+    .gerente-empleados .buscador input {
+        min-width: 110px;
+        width: 155px;
+        max-width: 35vw;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--em-texto);
+        font-size: 11px;
+    }
+
+    .gerente-empleados .buscador button {
+        border: 0;
+        border-radius: 30px;
+        background: #f5ece6;
+        padding: 5px 10px;
+        color: #765345;
+        font-size: 10px;
+    }
+
+    .gerente-empleados .btn-agregar {
+        background: #c8a768;
+        border: 0;
+        border-radius: 25px;
+        padding: 12px 17px;
+        white-space: nowrap;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .gerente-empleados .btn-agregar:hover {
+            background: #b99655;
+        }
+
+    /* Filtros */
+    .gerente-empleados .filtros-empleados {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        overflow-x: auto;
+        max-width: 100%;
+        border-bottom: 1px solid var(--em-borde);
+        margin-bottom: 24px;
+        scrollbar-width: thin;
+    }
+
+    .gerente-empleados .filtro {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        color: #ae806b;
+        text-decoration: none;
+        font-size: 12px;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+    }
+
+        .gerente-empleados .filtro:hover {
+            color: var(--em-cafe);
+        }
+
+        .gerente-empleados .filtro.activo {
+            color: var(--em-cafe);
+            border-bottom-color: var(--em-cafe);
+            font-weight: 700;
+        }
+
+    /* Tabla principal */
+    .gerente-empleados .empleados-card {
+        background: white;
+        border: 1px solid var(--em-borde);
+        border-radius: 17px;
+        padding: 22px;
+        margin-bottom: 27px;
+    }
+
+    .gerente-empleados .tabla-contenedor {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .gerente-empleados .tabla-empleados {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+        text-align: left;
+        font-size: 11px;
+    }
+
+        .gerente-empleados .tabla-empleados thead {
+            background: #fcf7f3;
+        }
+
+        .gerente-empleados .tabla-empleados th {
+            padding: 12px 11px;
+            font-size: 9px;
+            color: #ac806d;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+            .gerente-empleados .tabla-empleados th:first-child {
+                border-radius: 9px 0 0 9px;
+            }
+
+            .gerente-empleados .tabla-empleados th:last-child {
+                border-radius: 0 9px 9px 0;
+            }
+
+        .gerente-empleados .tabla-empleados tbody tr:nth-child(even) {
+            background: #faf6f2;
+        }
+
+        .gerente-empleados .tabla-empleados td {
+            padding: 15px 11px;
+            border-bottom: 1px solid #f1ebe5;
+            vertical-align: middle;
+        }
+
+    .gerente-empleados .empleado-nombre {
+        font-weight: 700;
+        color: #302724;
+    }
+
+    .gerente-empleados .especialidad {
+        color: #b3816e;
+    }
+
+    .gerente-empleados .estado {
+        display: inline-block;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+        .gerente-empleados .estado.activo {
+            background: #e9f4ed;
+            color: #50855b;
+        }
+
+        .gerente-empleados .estado.inactivo {
+            background: #fff0df;
+            color: #bd781f;
+        }
+
+    .gerente-empleados .acciones-tabla {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+    }
+
+        .gerente-empleados .acciones-tabla button {
+            border: 0;
+            background: none;
+            padding: 4px 0;
+            color: #ad7359;
+            font-size: 10px;
+        }
+
+        .gerente-empleados .acciones-tabla .accion-editar {
+            color: #bc945a;
+        }
+
+        .gerente-empleados .acciones-tabla button:hover {
+            text-decoration: underline;
+        }
+
+    .gerente-empleados .sin-edicion {
+        font-size: 10px;
+        color: #aaa;
+    }
+
+    .gerente-empleados .tabla-vacia {
+        padding: 30px;
+        text-align: center;
+        color: #92786b;
+    }
+
+    /* Parte inferior, tal como Figma */
+    .gerente-empleados .estructura-equipo {
+        display: grid;
+        grid-template-columns: minmax(235px,.85fr) minmax(0,1.65fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .gerente-empleados .estructura-resumen h2, .gerente-empleados .vista-semanal h2 {
+        font-size: 18px;
+        color: var(--em-cafe);
+        margin-bottom: 13px;
+    }
+
+    .gerente-empleados .estructura-card {
+        background: #fff;
+        border: 1px solid var(--em-borde);
+        border-radius: 12px;
+        padding: 14px 17px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .gerente-empleados .estructura-etiqueta {
+        color: #ad806b;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .gerente-empleados .estructura-card strong {
+        font-size: 18px;
+        color: var(--em-cafe);
+    }
+
+    .gerente-empleados .estructura-card small {
+        color: #b28c78;
+        font-size: 10px;
+    }
+
+    .gerente-empleados .vista-semanal {
+        background: #fff;
+        border: 1px solid var(--em-borde);
+        border-radius: 17px;
+        padding: 20px 18px;
+        min-width: 0;
+    }
+
+    .gerente-empleados .vista-semanal-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 13px;
+    }
+
+        .gerente-empleados .vista-semanal-header h2 {
+            margin: 0;
+        }
+
+    .gerente-empleados .leyenda-horario {
+        font-size: 10px;
+        color: #a98368;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .gerente-empleados .horario-equipo-contenedor {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .gerente-empleados .horario-equipo {
+        min-width: 530px;
+    }
+
+    .gerente-empleados .horario-fila {
+        display: grid;
+        grid-template-columns: minmax(130px,1.75fr) repeat(6,minmax(40px,1fr));
+        gap: 10px;
+        align-items: center;
+        margin: 11px 0;
+    }
+
+        .gerente-empleados .horario-fila strong {
+            font-size: 10px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .gerente-empleados .horario-titulos {
+        font-size: 9px;
+        color: #a77868;
+        font-weight: 700;
+    }
+
+        .gerente-empleados .horario-titulos span:not(:first-child) {
+            text-align: center;
+        }
+
+    .gerente-empleados .turno {
+        display: block;
+        height: 12px;
+        width: 100%;
+        border-radius: 3px;
+        background: #f3f1ef;
+    }
+
+        .gerente-empleados .turno.disponible {
+            background: #7da582;
+        }
+
+        .gerente-empleados .turno.vacio {
+            background: #f2eeee;
+        }
+
+    .gerente-empleados .leyenda-horario .turno {
+        width: 18px;
+        height: 8px;
+        display: inline-block;
+    }
+
+    .gerente-empleados .sin-horarios, .gerente-empleados .nota-horarios {
+        font-size: 10px;
+        color: #ab8c7e;
+        margin: 12px 0 0;
+    }
+
+    .gerente-empleados .alerta {
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 12px;
+    }
+
+    .gerente-empleados .alerta-error {
+        background: #fff0ec;
+        color: #9c342b;
+    }
+
+    .gerente-empleados .alerta-exito {
+        background: #eaf5ed;
+        color: #286b3c;
+    }
+
+    .gerente-empleados .nota-pruebas {
+        margin: 18px 0 0;
+        color: #9b806e;
+        font-size: 11px;
+    }
+
+/* Modal de acciones */
+.modal-empleado {
+    box-sizing: border-box;
+    width: min(480px,calc(100vw - 32px));
+    max-height: 88vh;
+    overflow: auto;
+    margin: auto;
+    border: 1px solid #eaddd3;
+    border-radius: 18px;
+    background: #fffaf7;
+    color: #4b382f;
+    padding: 24px;
+    box-shadow: 0 16px 55px #24181433;
+    font-family: 'DM Sans',Arial,sans-serif;
+}
+
+    .modal-empleado::backdrop {
+        background: rgba(32,20,15,.6);
+    }
+
+    .modal-empleado .modal-titulo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 17px;
+    }
+
+        .modal-empleado .modal-titulo h2 {
+            font: 500 23px 'Playfair Display',Georgia,serif;
+            margin: 0;
+            color: #5c4035;
+        }
+
+    .modal-empleado .modal-cerrar {
+        font-size: 26px;
+        border: 0;
+        background: transparent;
+        color: #9f7c6d;
+        cursor: pointer;
+    }
+
+    .modal-empleado .form-empleado {
+        display: grid;
+        gap: 12px;
+    }
+
+        .modal-empleado .form-empleado label {
+            display: grid;
+            gap: 6px;
+            font-size: 12px;
+            color: #8b6657;
+        }
+
+    .modal-empleado input:not([type=checkbox]), .modal-empleado select {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        padding: 10px 11px;
+        border: 1px solid #e5d8cf;
+        border-radius: 8px;
+        background: white;
+        color: #362620;
+        font-size: 13px;
+    }
+
+    .modal-empleado .opcion-check {
+        display: flex !important;
+        align-items: center;
+        flex-direction: row;
+        gap: 8px !important;
+    }
+
+        .modal-empleado .opcion-check input {
+            width: auto;
+        }
+
+    .modal-empleado .dos-columnas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .modal-empleado .btn-guardar {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        background: #c9a866;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+        .modal-empleado .btn-guardar:hover {
+            background: #af8b4b;
+        }
+
+    .modal-empleado .nota-form {
+        color: #947b6b;
+        font-size: 11px;
+        margin: 0;
+    }
+
+    .modal-empleado .detalle-lista {
+        display: grid;
+        grid-template-columns: 125px 1fr;
+        gap: 12px;
+        font-size: 13px;
+        margin: 0;
+    }
+
+        .modal-empleado .detalle-lista dt {
+            color: #a67f6e;
+            font-weight: 700;
+        }
+
+        .modal-empleado .detalle-lista dd {
+            margin: 0;
+        }
+
+/* Ajuste al layout lateral del gerente */
+@media (max-width:1200px) {
+    .gerente-empleados .estructura-equipo {
+        grid-template-columns: minmax(190px,1fr) minmax(0,1.65fr);
+    }
+
+    .gerente-empleados .tabla-empleados {
+        min-width: 690px;
+    }
+}
+
+@media (max-width:960px) {
+    .gerente-empleados .estructura-equipo {
+        grid-template-columns: 1fr;
+    }
+
+    .gerente-empleados .estructura-resumen {
+        display: grid;
+        grid-template-columns: repeat(3,minmax(0,1fr));
+        gap: 10px;
+    }
+
+        .gerente-empleados .estructura-resumen h2 {
+            grid-column: 1/-1;
+        }
+
+    .gerente-empleados .estructura-card {
+        margin: 0;
+    }
+}
+
+@media (max-width:650px) {
+    .gerente-empleados {
+        padding: 20px 14px 30px;
+    }
+
+        .gerente-empleados .empleados-header {
+            align-items: flex-start;
+        }
+
+        .gerente-empleados .empleados-header-acciones {
+            width: 100%;
+        }
+
+        .gerente-empleados .buscador {
+            flex: 1;
+            min-width: 150px;
+        }
+
+            .gerente-empleados .buscador input {
+                width: 100%;
+                max-width: none;
+            }
+
+        .gerente-empleados .empleados-card {
+            padding: 12px;
+        }
+
+        .gerente-empleados .filtros-empleados {
+            gap: 16px;
+        }
+
+        .gerente-empleados .estructura-resumen {
+            grid-template-columns: 1fr;
+        }
+
+            .gerente-empleados .estructura-resumen h2 {
+                grid-column: auto;
+            }
+
+        .gerente-empleados .vista-semanal {
+            padding: 15px 12px;
+        }
+
+    .modal-empleado .dos-columnas {
+        grid-template-columns: 1fr;
+    }
+}

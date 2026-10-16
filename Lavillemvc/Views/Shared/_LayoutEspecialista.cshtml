@@ -3,6 +3,12 @@
 <html lang="es">
 
 <head>
+    
+
+
+    <link rel="stylesheet"
+          href="~/css/accesibilidad-lavielle.css"
+          asp-append-version="true" />
 
     <meta charset="utf-8" />
 
@@ -19,6 +25,25 @@
     <link rel="stylesheet"
           href="~/css/especialista.css" />
 
+          
+<!-- ESTILOS DEL ESPECIALISTA -->
+<link rel="stylesheet"
+      href="~/css/especialista2.css" />
+
+<link rel="stylesheet"
+      href="~/css/especialista.css" />
+
+<!-- MENÚ DE ACCESIBILIDAD -->
+<link rel="stylesheet"
+      href="~/css/accesibilidad-lavielle.css" />
+
+<!-- ESTILOS PARTICULARES DE CADA VISTA -->
+@await RenderSectionAsync("Styles", required: false)
+
+<!-- TEMA OSCURO DEL ESPECIALISTA -->
+<link rel="stylesheet"
+      href="~/css/accesibilidad-especialista-temas.css"
+      asp-append-version="true" />
 </head>
 
 
@@ -35,36 +60,33 @@
             </div>
 
 
-            <div class="especialista-datos-menu">
+            
+            <strong>
+                @(ViewBag.NombreEspecialista ?? "Especialista")
+            </strong>
 
-                <strong>
-                    Valentina Rojas
-                </strong>
+            <span>
+                @(ViewBag.RolEspecialista ?? "")
+            </span>
 
-                <span>
-                    Colorista Experta
-                </span>
-
-            </div>
 
 
             <nav class="menu-especialista">
 
 
-                <a asp-controller="Especialista"
+               
+                <a asp-controller="EspecialistaAgenda"
                    asp-action="MiAgenda">
-
                     Mi Agenda
-
                 </a>
 
 
-                <a asp-controller="Especialista"
-                   asp-action="Disponibilidad">
 
+                
+                <a href="@Url.Action("Disponibilidad", "EspecialistaDisponibilidad")">
                     Disponibilidad
-
                 </a>
+
 
 
                 <a asp-controller="Especialista"
@@ -126,9 +148,10 @@
                 Mi Agenda
             </p>
 
-            <p>
+            <a href="@Url.Action("Disponibilidad", "EspecialistaDisponibilidad")">
                 Disponibilidad
-            </p>
+            </a>
+
 
             <p>
                 Mi Perfil
@@ -159,9 +182,19 @@
         </div>
 
     </footer>
+    
 
+    <!-- MENÚ DE ACCESIBILIDAD -->
+    @await Html.PartialAsync(
+        "~/Views/Shared/_MenuAccesibilidad.cshtml"
+    )
+
+    <!-- JAVASCRIPT DE ACCESIBILIDAD -->
+    <script src="@Url.Content("~/js/accesibilidad-lavielle.js")"
+            defer></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 
 </body>
 

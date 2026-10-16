@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Lavillemvc.styles.css" asp-append-version="true" />
+
+   <link rel="stylesheet"
+      href="@Url.Content("~/css/especialista2.css")" />
+
+<link rel="stylesheet"
+      href="@Url.Content("~/css/especialista.css")" />
+
+<link rel="stylesheet"
+      href="@Url.Content("~/css/accesibilidad-lavielle.css")" />
+
+@await RenderSectionAsync("Styles", required: false)
+
 </head>
 <body>
     <header>
@@ -45,5 +57,17 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    
+  <!-- MENÚ DE ACCESIBILIDAD -->
+    @await Html.PartialAsync(
+        "~/Views/Shared/_MenuAccesibilidad.cshtml"
+    )
+
+    <!-- JAVASCRIPT DE ACCESIBILIDAD -->
+    <script src="@Url.Content("~/js/accesibilidad-lavielle.js")"
+            defer></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

@@ -19,6 +19,9 @@
     <!-- DISEÑO DEL DASHBOARD -->
     <link rel="stylesheet"
           href="@Url.Content("~/css/gerente-dashboard.css")" />
+
+    @await RenderSectionAsync("Styles", required: false)
+
 </head>
 
 <body class="pagina-gerente">
@@ -33,9 +36,12 @@
 
             <div class="gerente-sidebar-superior">
 
-                <div class="gerente-logo">
+                
+                <a href="@Url.Action("Index", "Login")"
+                   class="gerente-logo gerente-logo-enlace">
                     L'Avielle
-                </div>
+                </a>
+
 
                 <div class="gerente-subtitulo">
                     Gerente de Sucursal
@@ -55,15 +61,27 @@
                     <!-- ACTIVAREMOS ESTOS ENLACES CUANDO
                          EXISTAN SUS CONTROLADORES -->
 
-                    <span class="gerente-enlace gerente-enlace-pendiente">
-                        <span class="gerente-icono">♙</span>
-                        <span>Gestión de Empleados</span>
-                    </span>
+                    
+                    <a class="gerente-enlace @(menuActivo == "Empleados" ? "activo" : "")"
+                       href="@Url.Action("GestionEmpleados", "GerenteEmpleados")">
 
-                    <span class="gerente-enlace gerente-enlace-pendiente">
+                        <span class="gerente-icono">♙</span>
+
+                        <span>Gestión de Empleados</span>
+
+                    </a>
+
+
+                    
+                    <a class="gerente-enlace @(menuActivo == "Promociones" ? "activo" : "")"
+                       href="@Url.Action("GestionPromociones", "GerentePromociones")">
+
                         <span class="gerente-icono">☆</span>
+
                         <span>Gestión de Promociones</span>
-                    </span>
+
+                    </a>
+
 
                 </nav>
 
@@ -129,9 +147,27 @@
                     </a>
                 </p>
 
-                <p>Gestión de Empleados</p>
+                
+                <a class="gerente-enlace @(menuActivo == "Empleados" ? "activo" : "")"
+                   href="@Url.Action("GestionEmpleados", "GerenteEmpleados")">
 
-                <p>Gestión de Promociones</p>
+                    <span class="gerente-icono">♙</span>
+
+                    <span>Gestión de Empleados</span>
+
+                </a>
+
+
+                
+                <a class="gerente-enlace @(menuActivo == "Promociones" ? "activo" : "")"
+                   href="@Url.Action("GestionPromociones", "GerentePromociones")">
+
+                    <span class="gerente-icono">☆</span>
+
+                    <span>Gestión de Promociones</span>
+
+                </a>
+
 
             </section>
 
@@ -164,6 +200,7 @@
     </footer>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 
 </body>
 </html>

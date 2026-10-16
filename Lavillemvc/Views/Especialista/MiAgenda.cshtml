@@ -1,322 +1,210 @@
-﻿@{
-    ViewData["Title"] = "Mi Agenda";
+﻿@model Lavillemvc.Models.EspecialistaAgenda
+@using System
+@using System.Globalization
+@using System.Linq
+@{
     Layout = "~/Views/Shared/_LayoutEspecialista.cshtml";
+    ViewData["Title"] = "Mi Agenda";
+
+    var cultura = CultureInfo.GetCultureInfo("es-SV");
+    var horaCultura = CultureInfo.GetCultureInfo("en-US");
+    string periodo = ViewBag.Periodo as string ?? "hoy";
+
+    DateOnly fechaHoy = Model?.FechaHoy
+        ?? DateOnly.FromDateTime(DateTime.Today);
+
+    string fechaIso = ViewBag.FechaSeleccionada as string
+        ?? fechaHoy.ToString("yyyy-MM-dd");
+
+    DateOnly fechaActual = ViewBag.FechaActual is DateOnly x
+        ? x
+        : DateOnly.FromDateTime(DateTime.Today);
+
+    var detalle = Model?.ProximaCita;
+    string etiquetaPeriodo = periodo == "mes" ? "del mes" : periodo == "semana" ? "de la semana" : "del día";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/css/especialista-agenda-conexion.css")" />
+}
 
-<div class="especialista-page">
+<div class="especialista-page especialista-agenda">
+    @if (ViewBag.EsDesarrollo == true)
+    {
+        <div class="agenda-aviso">Modo de prueba: mostrando la agenda del especialista con ID 1. Para producción, el inicio de sesión debe incluir el claim IdEspecialista.</div>
+    }
 
-    <div class="especialista-header">
+    @if (TempData["AgendaExito"] != null)
+    {
+        <div class="agenda-mensaje agenda-exito" role="status">@TempData["AgendaExito"]</div>
+    }
+    @if (TempData["AgendaError"] != null)
+    {
+        <div class="agenda-mensaje agenda-error" role="alert">@TempData["AgendaError"]</div>
+    }
 
+    <header class="especialista-header">
         <div>
             <h1>Mi Agenda</h1>
-
-            <p>
-                Viernes, 26 de Septiembre 2026
-            </p>
+            <p>@fechaHoy.ToDateTime(TimeOnly.MinValue).ToString("dddd, dd 'de' MMMM 'de' yyyy", cultura)</p>
+            <small class="agenda-identidad">@Model.NombreEspecialista · @Model.NombreEspecialidad</small>
         </div>
-
-
         <div class="agenda-resumen">
-
             <div>
-                <strong>5 Citas</strong>
-                <small>PROGRAMADAS HOY</small>
+                <strong>@Model.CitasHoy Citas</strong>
+                <small>PROGRAMADAS @etiquetaPeriodo.ToUpperInvariant()</small>
             </div>
-
             <div>
-                <strong>2 Pendientes</strong>
-                <small>POR CONFIRMAR</small>
+                <strong>@Model.PendientesHoy Pendientes</strong>
+                <small>POR CONFIRMAR @etiquetaPeriodo.ToUpperInvariant()</small>
             </div>
-
         </div>
+    </header>
 
-    </div>
+    <nav class="agenda-filtros" aria-label="Período de agenda">
+        <a class="filtro-agenda @(periodo == "hoy" ? "activo" : "")"
+           href="@Url.Action("MiAgenda", "EspecialistaAgenda", new { periodo = "hoy", fecha = fechaIso })">Día</a>
+        <a class="filtro-agenda @(periodo == "semana" ? "activo" : "")"
+           href="@Url.Action("MiAgenda", "EspecialistaAgenda", new { periodo = "semana", fecha = fechaIso })">Semana</a>
+        <a class="filtro-agenda @(periodo == "mes" ? "activo" : "")"
+           href="@Url.Action("MiAgenda", "EspecialistaAgenda", new { periodo = "mes", fecha = fechaIso })">Mes</a>
+    </nav>
 
+    <form method="get" action="@Url.Action("MiAgenda", "EspecialistaAgenda")" class="agenda-fecha-form">
+        <input type="hidden" name="periodo" value="@periodo" />
+        <label for="fechaAgenda">Seleccionar fecha</label>
+        <input id="fechaAgenda" type="date" name="fecha" value="@fechaIso" required />
+        <button type="submit">Ver agenda</button>
+        <a href="@Url.Action("MiAgenda", "EspecialistaAgenda", new { periodo = "hoy" })">Ir a hoy</a>
+    </form>
 
-    <div class="agenda-filtros">
-
-        <button class="filtro-agenda activo">
-            Hoy
-        </button>
-
-        <button class="filtro-agenda">
-            Semana
-        </button>
-
-        <button class="filtro-agenda">
-            Mes
-        </button>
-
-    </div>
-
+    @if (periodo == "semana" || periodo == "mes")
+    {
+        DateOnly inicio = ViewBag.InicioPeriodo;
+        DateOnly fin = ViewBag.FinPeriodo;
+        <p class="agenda-rango">Mostrando citas desde @inicio.ToString("dd/MM/yyyy") hasta @fin.ToString("dd/MM/yyyy")</p>
+    }
 
     <div class="agenda-contenido">
-
-
-        <!-- CITAS -->
-
-        <div class="agenda-lista">
-
-
-            <div class="cita-card">
-
-                <div class="cita-hora">
-                    <strong>9:00 AM - 11:00 AM</strong>
-                    <small>2h</small>
+        <section class="agenda-lista" aria-label="Citas del especialista">
+            @if (Model.Citas.Count == 0)
+            {
+                <div class="agenda-vacia">
+                    <strong>No hay citas registradas en este período.</strong>
+                    <p>Puedes seleccionar otra fecha o consultar toda la semana o el mes.</p>
                 </div>
+            }
+            else
+            {
+                @foreach (var cita in Model.Citas)
+                {
+                    string claseEstado = cita.EstadoNormalizado switch
+                    {
+                        "confirmada" => "confirmada",
+                        "pendiente" => "pendiente",
+                        "cancelada" => "cancelada",
+                        _ => "otro"
+                    };
 
-                <div class="cita-datos">
-
-                    <strong>
-                        María García
-                    </strong>
-
-                    <span>
-                        Balayage Completo · L'Avielle Las Mercedes
-                    </span>
-
-                    <small>
-                        Nota: Primera vez con balayage, cabello castaño oscuro
-                    </small>
-
-                </div>
-
-                <span class="estado-cita confirmada">
-                    Confirmada
-                </span>
-
-            </div>
-
-
-            <div class="cita-card">
-
-                <div class="cita-hora">
-                    <strong>11:30 AM - 12:30 PM</strong>
-                    <small>1h</small>
-                </div>
-
-                <div class="cita-datos">
-
-                    <strong>
-                        Laura Pérez
-                    </strong>
-
-                    <span>
-                        Retoque de Raíz · L'Avielle Las Mercedes
-                    </span>
-
-                </div>
-
-                <span class="estado-cita confirmada">
-                    Confirmada
-                </span>
-
-            </div>
-
-
-            <div class="cita-card descanso">
-
-                <div class="cita-hora">
-                    <strong>1:00 PM - 2:00 PM</strong>
-                </div>
-
-                <div class="cita-datos">
-
-                    <strong>
-                        ALMUERZO
-                    </strong>
-
-                    <span>
-                        No reservable
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="cita-card">
-
-                <div class="cita-hora">
-                    <strong>2:30 PM - 3:30 PM</strong>
-                    <small>1h</small>
-                </div>
-
-                <div class="cita-datos">
-
-                    <strong>
-                        Carmen Silva
-                    </strong>
-
-                    <span>
-                        Mechas Fantasía · L'Avielle Las Mercedes
-                    </span>
-
-                </div>
-
-                <span class="estado-cita pendiente">
-                    Pendiente
-                </span>
-
-            </div>
-
-
-            <div class="cita-card">
-
-                <div class="cita-hora">
-                    <strong>4:00 PM - 5:00 PM</strong>
-                    <small>1h</small>
-                </div>
-
-                <div class="cita-datos">
-
-                    <strong>
-                        Isabel Torres
-                    </strong>
-
-                    <span>
-                        Corrección de Color · L'Avielle Las Mercedes
-                    </span>
-
-                </div>
-
-                <span class="estado-cita confirmada">
-                    Confirmada
-                </span>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- PRÓXIMA CITA -->
+                    <article class="cita-card @(detalle?.IdCita == cita.IdCita ? "agenda-seleccionada" : "")">
+                        <div class="cita-hora">
+                            @if (periodo != "hoy")
+                            {
+                                <small class="agenda-dia-cita">@cita.FechaCita.ToString("dd MMM", cultura)</small>
+                            }
+                            <strong>@cita.HoraCita.ToString("hh:mm tt", horaCultura)</strong>
+                            <small>Fin no registrado</small>
+                        </div>
+                        <div class="cita-datos">
+                            <strong>@cita.NombreCliente</strong>
+                            <span>@cita.Servicio · @(cita.NombreSucursal ?? "Sucursal sin especificar")</span>
+                            <small>@(string.IsNullOrWhiteSpace(cita.NotasDiagnostico) ? "Sin notas de diagnóstico registradas" : cita.NotasDiagnostico)</small>
+                        </div>
+                        <div class="agenda-acciones-cita">
+                            <span class="estado-cita @claseEstado">@cita.Estado</span>
+                            <a class="agenda-ver-detalle"
+                               href="@Url.Action("MiAgenda", "EspecialistaAgenda", new { periodo, fecha = fechaIso, idCita = cita.IdCita })">Detalles</a>
+                            @if (cita.EstadoNormalizado == "pendiente" && cita.FechaCita >= fechaActual)
+                            {
+                                <form method="post" action="@Url.Action("ConfirmarCita", "EspecialistaAgenda")">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idCita" value="@cita.IdCita" />
+                                    <input type="hidden" name="periodo" value="@periodo" />
+                                    <input type="hidden" name="fecha" value="@fechaIso" />
+                                    <button class="agenda-confirmar" type="submit">Confirmar</button>
+                                </form>
+                            }
+                        </div>
+                    </article>
+                }
+            }
+        </section>
 
         <aside class="proxima-cita">
-
-            <h2>
-                Próxima Cita
-            </h2>
-
-            <span class="estado-cita confirmada">
-                Confirmada
-            </span>
-
-
-            <div class="cliente-proxima">
-
-                <div class="cliente-foto">
-                    MG
+            <h2>Detalles de cita</h2>
+            @if (detalle == null)
+            {
+                <p class="agenda-sin-detalle">No hay una próxima cita registrada. Selecciona otra fecha o período para consultar las reservas.</p>
+            }
+            else
+            {
+                <span class="estado-cita @(detalle.EstadoNormalizado == "confirmada" ? "confirmada" : detalle.EstadoNormalizado == "pendiente" ? "pendiente" : "otro")">@detalle.Estado</span>
+                <div class="cliente-proxima">
+                    <div class="cliente-foto">@(string.Concat(detalle.NombreCliente.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => s.Substring(0, 1))).ToUpperInvariant())</div>
+                    <div>
+                        <strong>@detalle.NombreCliente</strong>
+                        <small>@(string.IsNullOrWhiteSpace(detalle.TipoCliente) ? "Cliente registrado" : $"Cliente {detalle.TipoCliente}")</small>
+                    </div>
                 </div>
-
-                <div>
-                    <strong>
-                        María García
-                    </strong>
-
-                    <small>
-                        Cliente VIP Gold
-                    </small>
+                <hr />
+                <div class="detalle-cita">
+                    <small>SERVICIO</small>
+                    <strong>@detalle.Servicio</strong>
+                    <small>FECHA</small>
+                    <strong>@detalle.FechaCita.ToString("dd/MM/yyyy")</strong>
+                    <small>HORARIO</small>
+                    <strong>@detalle.HoraCita.ToString("hh:mm tt", horaCultura) · Duración sin registrar</strong>
+                    <small>SUCURSAL</small>
+                    <strong>@(detalle.NombreSucursal ?? "Sin asignación de sucursal")</strong>
+                    <small>FÓRMULA Y PRODUCTOS NECESARIOS</small>
+                    <p>@(string.IsNullOrWhiteSpace(detalle.ProductosNecesarios) ? "No registrados en la base de datos." : detalle.ProductosNecesarios)</p>
+                    <small>NOTAS DE DIAGNÓSTICO</small>
+                    <p>@(string.IsNullOrWhiteSpace(detalle.NotasDiagnostico) ? "No hay notas registradas." : detalle.NotasDiagnostico)</p>
                 </div>
-
-            </div>
-
-
-            <hr />
-
-
-            <div class="detalle-cita">
-
-                <small>
-                    SERVICIO
-                </small>
-
-                <strong>
-                    Balayage Completo
-                </strong>
-
-
-                <small>
-                    HORARIO
-                </small>
-
-                <strong>
-                    9:00 AM - 11:00 AM (2h)
-                </strong>
-
-
-                <small>
-                    FÓRMULA Y PRODUCTOS NECESARIOS
-                </small>
-
-                <div class="etiquetas-productos">
-
-                    <span>
-                        Decolorante
-                    </span>
-
-                    <span>
-                        Toner rubio cenizo
-                    </span>
-
-                    <span>
-                        Tratamiento post-color
-                    </span>
-
-                </div>
-
-
-                <small>
-                    NOTAS DE DIAGNÓSTICO
-                </small>
-
-                <p>
-                    Cabello virgen, primera decoloración.
-                    Realizar prueba de mechón antes de aplicar
-                    la mezcla completa.
-                </p>
-
-            </div>
-
+                @if (detalle.EstadoNormalizado == "pendiente" && detalle.FechaCita >= fechaActual)
+                {
+                    <form method="post" action="@Url.Action("ConfirmarCita", "EspecialistaAgenda")" class="agenda-confirmar-lateral">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idCita" value="@detalle.IdCita" />
+                        <input type="hidden" name="periodo" value="@periodo" />
+                        <input type="hidden" name="fecha" value="@fechaIso" />
+                        <button type="submit">Confirmar esta cita</button>
+                    </form>
+                }
+            }
         </aside>
-
     </div>
 
-
-    <!-- RESUMEN DEL DÍA -->
-
-    <div class="resumen-dia">
-
-        <h2>
-            Resumen del Día
-        </h2>
-
-
+    <section class="resumen-dia">
+        <h2>Resumen de la Agenda</h2>
         <div class="resumen-dia-grid">
-
             <div>
-                <small>Citas Programadas</small>
-                <strong>5 servicios</strong>
+                <small>Citas programadas @etiquetaPeriodo</small>
+                <strong>@Model.CitasHoy servicios</strong>
             </div>
-
             <div>
-                <small>Horas de Atención</small>
-                <strong>7.0 horas</strong>
+                <small>Horas de atención planificadas para el día seleccionado</small>
+                <strong>@(Model.HorasAtencion.HasValue ? $"{Model.HorasAtencion.Value:N1} horas" : "Sin horario")</strong>
             </div>
-
             <div>
-                <small>Hora de Descanso</small>
-                <strong>1.0 hora (Almuerzo)</strong>
+                <small>Descanso registrado para el día seleccionado</small>
+                <strong>@(Model.HorasDescanso.HasValue ? $"{Model.HorasDescanso.Value:N1} horas" : "Sin horario")</strong>
             </div>
-
             <div>
-                <small>Horas Disponibles</small>
-                <strong>1.5 horas libres</strong>
+                <small>Horas libres reales</small>
+                <strong>@(Model.HorasDisponibles.HasValue ? $"{Model.HorasDisponibles.Value:N1} horas" : "No calculables")</strong>
             </div>
-
         </div>
-
-    </div>
-
+        <p class="agenda-nota">La base original no registra duración por servicio/cita, hora de finalización, fórmulas ni notas diagnósticas. Las horas libres no se estiman hasta disponer de esos datos.</p>
+    </section>
 </div>

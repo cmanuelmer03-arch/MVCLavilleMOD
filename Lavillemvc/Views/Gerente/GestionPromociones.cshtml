@@ -1,0 +1,340 @@
+﻿@model Lavillemvc.Models.GerentePromocionesPagina
+@using System
+@using System.Globalization
+@using System.Linq
+
+@{
+    Layout = "~/Views/Shared/_LayoutGerente.cshtml";
+    ViewData["Title"] = "Gestión de Promociones";
+    ViewData["ActiveMenu"] = "Promociones";
+    var cultura = CultureInfo.GetCultureInfo("es-SV");
+    var activas = Model.Promociones.Where(p => p.Estado == "Activa").ToList();
+    var programadas = Model.Promociones.Where(p => p.Estado == "Programada").ToList();
+    var finalizadas = Model.Promociones.Where(p => p.Estado == "Finalizada").ToList();
+    var pausadas = Model.Promociones.Where(p => p.Estado == "Pausada").ToList();
+    var archivadas = Model.Promociones.Where(p => p.Estado == "Archivada").ToList();
+    var otras = Model.Promociones.Where(p => p.Estado != "Activa" && p.Estado != "Programada" && p.Estado != "Finalizada" && p.Estado != "Pausada" && p.Estado != "Archivada").ToList();
+    string Fecha(DateTime? d) => d?.ToString("dd MMM yyyy", cultura) ?? "Sin fecha";
+    string Periodo(DateTime? inicio, DateTime? fin) => $"{Fecha(inicio)} – {Fecha(fin)}";
+    string Moneda(decimal valor) => "$ " + valor.ToString("N2", cultura);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/css/GestionPromociones.css")" />
+}
+
+<main class="contenido promociones-contenido">
+    <header class="promociones-header">
+        <div class="promociones-header-texto">
+            <h1>Gestión de Promociones</h1>
+            <p>
+                @Model.NombreSucursal <span>—</span> Panel de Control de Ofertas
+                <span>•</span> <strong>@DateTime.Today.ToString("MMMM yyyy", cultura)</strong>
+            </p>
+        </div>
+        @if (Model.PuedeEditar)
+        {
+            <button type="button" class="btn-nueva-promocion" id="abrir-nueva-promo">+ Crear Nueva Promoción</button>
+        }
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
+    {
+        <div class="promo-aviso promo-aviso-error" role="alert">@Model.MensajeError</div>
+    }
+    @if (TempData["ErrorPromociones"] != null)
+    {
+        <div class="promo-aviso promo-aviso-error" role="alert">@TempData["ErrorPromociones"]</div>
+    }
+    @if (TempData["ExitoPromociones"] != null)
+    {
+        <div class="promo-aviso promo-aviso-exito" role="status">@TempData["ExitoPromociones"]</div>
+    }
+
+    <section class="resumen-promociones" aria-label="Indicadores de promociones">
+        <div class="resumen-promo-card"><small>ACTIVAS</small><strong>@Model.TotalActivas Promos</strong></div>
+        <div class="resumen-promo-card"><small>PROGRAMADAS</small><strong>@Model.TotalProgramadas Promos</strong></div>
+        <div class="resumen-promo-card">
+            <small>CLIENTES BENEFICIADOS</small>
+            <strong>@(Model.ClientesBeneficiadosMes?.ToString("N0", cultura) ?? "Sin registro")</strong>
+            <span class="resumen-descripcion">Este mes</span>
+        </div>
+        <div class="resumen-promo-card">
+            <small>INGRESOS POR PROMOS</small>
+            <strong class="valor-verde">@(Model.IngresosPromocionesMes.HasValue ? Moneda(Model.IngresosPromocionesMes.Value) : "Sin registro")</strong>
+            <span class="resumen-descripcion">Este mes</span>
+        </div>
+    </section>
+
+    <section class="barra-promociones" aria-label="Filtros de promociones">
+        <div class="filtros-promociones" role="group" aria-label="Estado">
+            <button type="button" class="filtro-promo activo" data-filtro-promo="Todas" aria-pressed="true">Todas</button>
+            <button type="button" class="filtro-promo" data-filtro-promo="Activa" aria-pressed="false">Activas</button>
+            <button type="button" class="filtro-promo" data-filtro-promo="Programada" aria-pressed="false">Programadas</button>
+            <button type="button" class="filtro-promo" data-filtro-promo="Finalizada" aria-pressed="false">Finalizadas</button>
+            <button type="button" class="filtro-promo" data-filtro-promo="Pausada" aria-pressed="false">Pausadas</button>
+            <button type="button" class="filtro-promo" data-filtro-promo="Archivada" aria-pressed="false">Archivadas</button>
+            <button type="button" class="filtro-promo" data-filtro-promo="Otros" aria-pressed="false">Otras</button>
+        </div>
+        <label class="buscador-promocion">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" id="buscar-promociones" placeholder="Buscar promoción..." aria-label="Buscar promoción" />
+        </label>
+    </section>
+
+    <div id="promo-sin-resultados" class="promo-aviso" hidden>No hay promociones que coincidan con la búsqueda o el filtro.</div>
+
+    <section class="seccion-promociones" data-seccion-promo="Activa">
+        <h2>Promociones Activas</h2>
+        <div class="promociones-activas-grid">
+            @foreach (var promo in activas)
+            {
+                <article class="promo-card promo-item" data-estado="Activa" data-busqueda="@(promo.Datos.Nombre + " " + promo.Datos.Descripcion + " " + promo.Datos.ServiciosRelacionadosTexto)">
+                    <div class="promo-imagen-contenedor">
+                        @if (!string.IsNullOrEmpty(promo.ImagenParaMostrar))
+                        {
+                            <img src="@promo.ImagenParaMostrar" alt="Imagen de @promo.Datos.Nombre" class="promo-imagen" loading="lazy" onerror="this.style.display='none'" />
+                        }
+                    </div>
+                    <div class="promo-card-contenido">
+                        <div class="promo-etiquetas">
+                            <span class="descuento">@(promo.Datos.Descuento is > 0 ? $"-{promo.Datos.Descuento.Value:0.##}%" : "Oferta")</span>
+                            <span class="estado-promo">Activa</span>
+                        </div>
+                        <h3>@promo.Datos.Nombre</h3>
+                        <p>@(promo.Datos.Descripcion ?? "Sin descripción")</p>
+                        <div class="promo-detalles">
+                            <span>▣ &nbsp; Válido: @Periodo(promo.Datos.FechaInicio, promo.Datos.FechaFin)</span>
+                            <span>♙ &nbsp; Usos: @(promo.Datos.TotalUsos.HasValue ? promo.Datos.TotalUsos.ToString() : "Sin registro")</span>
+                            @if (promo.Datos.TotalServiciosRelacionados > 0)
+                            {
+                                <span>Servicios: @promo.Datos.ServiciosRelacionadosTexto</span>
+                            }
+                        </div>
+                        @if (Model.PuedeEditar)
+                        {
+                            <div class="promo-acciones">
+                                <button type="button" class="accion-normal promo-editar"
+                                        data-id="@promo.Datos.IdPromocion" data-nombre="@promo.Datos.Nombre"
+                                        data-descripcion="@promo.Datos.Descripcion" data-descuento="@(promo.Datos.Descuento?.ToString(CultureInfo.InvariantCulture))"
+                                        data-inicio="@(promo.Datos.FechaInicio?.ToString("yyyy-MM-dd"))" data-fin="@(promo.Datos.FechaFin?.ToString("yyyy-MM-dd"))"
+                                        data-imagen="@promo.ImagenPersonalizada">Editar</button>
+                                <form method="post" action="@Url.Action("Pausar", "GerentePromociones")">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                                    <input type="hidden" name="pausada" value="true" />
+                                    <button class="accion-normal" type="submit">Pausar</button>
+                                </form>
+                                <form method="post" action="@Url.Action("Archivar", "GerentePromociones")" data-confirm="¿Archivar esta promoción? No se eliminará de Supabase.">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                                    <input type="hidden" name="archivada" value="true" />
+                                    <button class="accion-eliminar" type="submit">Archivar</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+        @if (activas.Count == 0) { <p class="promo-vacio">No hay promociones activas registradas.</p> }
+    </section>
+
+    <section class="seccion-promociones" data-seccion-promo="Programada">
+        <h2>Próximas Promociones</h2>
+        <div class="proximas-promociones-grid">
+            @foreach (var promo in programadas)
+            {
+                <article class="proxima-promo promo-item" data-estado="Programada" data-busqueda="@(promo.Datos.Nombre + " " + promo.Datos.Descripcion)">
+                    <div class="proxima-promo-imagen">
+                        @if (!string.IsNullOrEmpty(promo.ImagenParaMostrar))
+                        {
+                            <img src="@promo.ImagenParaMostrar" alt="Imagen de @promo.Datos.Nombre" loading="lazy" onerror="this.style.display='none'" />
+                        }
+                    </div>
+                    <div class="proxima-promo-info">
+                        <span class="programada">Programada</span>
+                        <h3>@promo.Datos.Nombre</h3>
+                        <p>@(promo.Datos.Descripcion ?? "Sin descripción")</p>
+                        <small>▣ &nbsp; Inicia: @Fecha(promo.Datos.FechaInicio)</small>
+                        @if (Model.PuedeEditar)
+                        {
+                            <div class="promo-acciones">
+                                <button type="button" class="accion-normal promo-editar"
+                                        data-id="@promo.Datos.IdPromocion" data-nombre="@promo.Datos.Nombre"
+                                        data-descripcion="@promo.Datos.Descripcion" data-descuento="@(promo.Datos.Descuento?.ToString(CultureInfo.InvariantCulture))"
+                                        data-inicio="@(promo.Datos.FechaInicio?.ToString("yyyy-MM-dd"))" data-fin="@(promo.Datos.FechaFin?.ToString("yyyy-MM-dd"))"
+                                        data-imagen="@promo.ImagenPersonalizada">Editar</button>
+                                <form method="post" action="@Url.Action("Pausar", "GerentePromociones")">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                                    <input type="hidden" name="pausada" value="true" />
+                                    <button class="accion-normal" type="submit">Pausar</button>
+                                </form>
+                                <form method="post" action="@Url.Action("Archivar", "GerentePromociones")" data-confirm="¿Archivar esta promoción sin borrar los datos?">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                                    <input type="hidden" name="archivada" value="true" />
+                                    <button class="accion-eliminar" type="submit">Archivar</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+        @if (programadas.Count == 0) { <p class="promo-vacio">No hay próximas promociones.</p> }
+    </section>
+
+    <section class="seccion-promociones promociones-finalizadas" data-seccion-promo="Finalizada">
+        <h2>Promociones Finalizadas</h2>
+        <div class="tabla-finalizadas-contenedor">
+            <table class="tabla-finalizadas">
+                <thead><tr><th>PROMOCIÓN</th><th>PERÍODO</th><th>TOTAL USOS</th><th>INGRESOS GENERADOS</th><th>ACCIONES</th></tr></thead>
+                <tbody>
+                    @foreach (var promo in finalizadas)
+                    {
+                        <tr class="promo-item" data-estado="Finalizada" data-busqueda="@(promo.Datos.Nombre + " " + promo.Datos.Descripcion)">
+                            <td><strong>@promo.Datos.Nombre</strong></td>
+                            <td>@Periodo(promo.Datos.FechaInicio, promo.Datos.FechaFin)</td>
+                            <td>@(promo.Datos.TotalUsos.HasValue ? $"{promo.Datos.TotalUsos} usos" : "Sin registro")</td>
+                            <td class="ingreso-tabla">@(promo.Datos.IngresosGenerados.HasValue ? Moneda(promo.Datos.IngresosGenerados.Value) : "Sin registro")</td>
+                            <td>
+                                @if (Model.PuedeEditar)
+                                {
+                                    <div class="promo-acciones">
+                                        <button type="button" class="accion-normal promo-editar"
+                                                data-id="@promo.Datos.IdPromocion" data-nombre="@promo.Datos.Nombre"
+                                                data-descripcion="@promo.Datos.Descripcion" data-descuento="@(promo.Datos.Descuento?.ToString(CultureInfo.InvariantCulture))"
+                                                data-inicio="@(promo.Datos.FechaInicio?.ToString("yyyy-MM-dd"))" data-fin="@(promo.Datos.FechaFin?.ToString("yyyy-MM-dd"))"
+                                                data-imagen="@promo.ImagenPersonalizada">Editar</button>
+                                        <form method="post" action="@Url.Action("Archivar", "GerentePromociones")" data-confirm="¿Archivar esta promoción sin borrar registros?">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                                            <input type="hidden" name="archivada" value="true" />
+                                            <button class="accion-eliminar" type="submit">Archivar</button>
+                                        </form>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (finalizadas.Count == 0) { <p class="promo-vacio">No hay promociones finalizadas.</p> }
+    </section>
+
+    <section class="seccion-promociones" data-seccion-promo="Pausada">
+        <h2>Promociones Pausadas</h2>
+        <div class="promo-listado-estados">
+            @foreach (var promo in pausadas)
+            {
+                <article class="promo-estado-fila promo-item" data-estado="Pausada" data-busqueda="@(promo.Datos.Nombre + " " + promo.Datos.Descripcion)">
+                    <div><strong>@promo.Datos.Nombre</strong><small>@Periodo(promo.Datos.FechaInicio, promo.Datos.FechaFin)</small></div>
+                    <span class="promo-chip-pausada">Pausada</span>
+                    @if (Model.PuedeEditar)
+                    {
+                        <form method="post" action="@Url.Action("Pausar", "GerentePromociones")">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                            <input type="hidden" name="pausada" value="false" />
+                            <button type="submit" class="accion-normal">Reanudar</button>
+                        </form>
+                    }
+                </article>
+            }
+        </div>
+        @if (pausadas.Count == 0) { <p class="promo-vacio">No hay promociones pausadas.</p> }
+    </section>
+
+    <section class="seccion-promociones" data-seccion-promo="Archivada">
+        <h2>Promociones Archivadas</h2>
+        <div class="promo-listado-estados">
+            @foreach (var promo in archivadas)
+            {
+                <article class="promo-estado-fila promo-item" data-estado="Archivada" data-busqueda="@(promo.Datos.Nombre + " " + promo.Datos.Descripcion)">
+                    <div><strong>@promo.Datos.Nombre</strong><small>Conservada en Supabase; no eliminada</small></div>
+                    <span class="promo-chip-archivada">Archivada</span>
+                    @if (Model.PuedeEditar)
+                    {
+                        <form method="post" action="@Url.Action("Archivar", "GerentePromociones")">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="idPromocion" value="@promo.Datos.IdPromocion" />
+                            <input type="hidden" name="archivada" value="false" />
+                            <button type="submit" class="accion-normal">Restaurar</button>
+                        </form>
+                    }
+                </article>
+            }
+        </div>
+        @if (archivadas.Count == 0) { <p class="promo-vacio">No hay promociones archivadas.</p> }
+    </section>
+
+    <section class="seccion-promociones" data-seccion-promo="Otros">
+        <h2>Promociones con fechas pendientes de revisión</h2>
+        <div class="promo-listado-estados">
+            @foreach (var promo in otras)
+            {
+                <article class="promo-estado-fila promo-item" data-estado="Otros" data-busqueda="@(promo.Datos.Nombre + " " + promo.Datos.Descripcion)">
+                    <div>
+                        <strong>@promo.Datos.Nombre</strong>
+                        <small>@promo.Estado · @Periodo(promo.Datos.FechaInicio, promo.Datos.FechaFin)</small>
+                    </div>
+                    @if (Model.PuedeEditar)
+                    {
+                        <button type="button" class="accion-normal promo-editar"
+                                data-id="@promo.Datos.IdPromocion" data-nombre="@promo.Datos.Nombre"
+                                data-descripcion="@promo.Datos.Descripcion" data-descuento="@(promo.Datos.Descuento?.ToString(CultureInfo.InvariantCulture))"
+                                data-inicio="@(promo.Datos.FechaInicio?.ToString("yyyy-MM-dd"))" data-fin="@(promo.Datos.FechaFin?.ToString("yyyy-MM-dd"))"
+                                data-imagen="@promo.ImagenPersonalizada">Editar</button>
+                    }
+                </article>
+            }
+        </div>
+        @if (otras.Count == 0) { <p class="promo-vacio">No hay promociones con fechas pendientes.</p> }
+    </section>
+</main>
+
+@if (Model.PuedeEditar)
+{
+    <dialog id="dialogo-promocion" class="dialogo-promocion" aria-labelledby="titulo-dialogo-promocion">
+        <form method="post" action="@Url.Action("Guardar", "GerentePromociones")" id="form-promocion">
+            @Html.AntiForgeryToken()
+            <div class="dialogo-header">
+                <h2 id="titulo-dialogo-promocion">Crear Nueva Promoción</h2>
+                <button type="button" class="dialogo-cerrar" id="cerrar-dialogo-promo" aria-label="Cerrar formulario">×</button>
+            </div>
+            <input type="hidden" name="IdPromocion" id="promocion-id" />
+            <div class="form-promocion-grid">
+                <label class="campo campo-ancho">Nombre de la promoción
+                    <input name="Nombre" id="promocion-nombre" maxlength="100" required />
+                </label>
+                <label class="campo campo-ancho">Descripción
+                    <textarea name="Descripcion" id="promocion-descripcion" maxlength="300" rows="3"></textarea>
+                </label>
+                <label class="campo">Descuento (%) <small>Opcional, entre 0 y 100</small>
+                    <input type="number" name="Descuento" id="promocion-descuento" min="0" max="100" step="0.01" inputmode="decimal" />
+                </label>
+                <label class="campo">Inicio
+                    <input type="date" name="FechaInicio" id="promocion-inicio" required />
+                </label>
+                <label class="campo">Finalización
+                    <input type="date" name="FechaFin" id="promocion-fin" required />
+                </label>
+                <label class="campo campo-ancho">URL de imagen (opcional)
+                    <input type="text" name="ImagenUrl" id="promocion-imagen" maxlength="500" placeholder="/images/mi-promocion.jpg o https://..." />
+                </label>
+            </div>
+            <p class="nota-form">Las promociones se crean para la sucursal del gerente. No se eliminan registros al archivar.</p>
+            <div class="dialogo-acciones">
+                <button type="button" class="accion-normal" id="cancelar-dialogo-promo">Cancelar</button>
+                <button type="submit" class="btn-nueva-promocion">Guardar promoción</button>
+            </div>
+        </form>
+    </dialog>
+}
+
+@section Scripts {
+    <script src="@Url.Content("~/js/GestionPromociones.js")"></script>
+}

@@ -1,0 +1,748 @@
+﻿/* L'Avielle | Gestión de Promociones - estilos exclusivos del módulo.
+   Mantener _LayoutGerente.css separado para sidebar/footer. */
+.promociones-contenido {
+    --gp-cafe: #5c4035;
+    --gp-dorado: #c9a866;
+    --gp-texto: #382e2a;
+    --gp-sec: #ad806b;
+    --gp-fondo: #fcf7f3;
+    --gp-borde: #eee7e1;
+    --gp-verde: #5b8c63;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 36px 34px 54px;
+    background: var(--gp-fondo);
+    color: var(--gp-texto);
+    font-family: 'DM Sans','Segoe UI',Arial,sans-serif;
+    font-size: 13px;
+}
+
+    .promociones-contenido *, .promociones-contenido *::before, .promociones-contenido *::after {
+        box-sizing: border-box;
+    }
+
+    .promociones-contenido button, .dialogo-promocion button {
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .promociones-contenido h1, .promociones-contenido h2, .promociones-contenido h3, .dialogo-promocion h2 {
+        font-family: 'Playfair Display',Georgia,serif;
+        color: var(--gp-cafe);
+        font-weight: 500;
+    }
+
+    .promociones-contenido h1, .promociones-contenido h2, .promociones-contenido h3, .promociones-contenido p {
+        margin-top: 0;
+    }
+
+.promociones-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 26px;
+}
+
+    .promociones-header h1 {
+        font-size: clamp(26px,2.7vw,38px);
+        line-height: 1.2;
+        letter-spacing: -.6px;
+        margin: 0 0 7px;
+    }
+
+    .promociones-header p {
+        font-size: 11px;
+        color: var(--gp-sec);
+        margin: 0;
+    }
+
+        .promociones-header p span {
+            margin: 0 4px;
+            color: var(--gp-cafe);
+        }
+
+        .promociones-header p strong {
+            font-weight: 600;
+            color: var(--gp-cafe);
+        }
+
+.btn-nueva-promocion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 9px;
+    background: #c9a866;
+    color: white;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-decoration: none;
+    transition: background .2s;
+}
+
+    .btn-nueva-promocion:hover {
+        background: #b5924e;
+    }
+
+.resumen-promociones {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 14px;
+    margin-bottom: 25px;
+}
+
+.resumen-promo-card {
+    min-width: 0;
+    min-height: 94px;
+    background: #fff;
+    border: 1px solid var(--gp-borde);
+    border-radius: 14px;
+    padding: 17px 18px;
+    box-shadow: 0 4px 15px #5c403508;
+}
+
+    .resumen-promo-card small {
+        display: block;
+        margin-bottom: 11px;
+        color: #ad806b;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: .1px;
+    }
+
+    .resumen-promo-card strong {
+        display: block;
+        color: #382c28;
+        font-size: clamp(17px,1.8vw,23px);
+        font-family: 'Playfair Display',Georgia,serif;
+        font-weight: 500;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+        .resumen-promo-card strong.valor-verde {
+            color: #5b8c63;
+        }
+
+.resumen-descripcion {
+    display: block;
+    font-size: 10px;
+    color: #b29687;
+    margin-top: 4px;
+}
+
+.barra-promociones {
+    border-bottom: 1px solid var(--gp-borde);
+    padding-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 27px;
+}
+
+.filtros-promociones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+}
+
+.filtro-promo {
+    border: 1px solid #efe7df;
+    background: #fff;
+    border-radius: 99px;
+    color: #684b3e;
+    padding: 8px 13px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+    .filtro-promo:hover {
+        background: #f7ede7;
+    }
+
+    .filtro-promo.activo {
+        color: #fff;
+        background: #5c4035;
+        border-color: #5c4035;
+    }
+
+.buscador-promocion {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 170px;
+    width: min(270px,100%);
+    height: 35px;
+    background: white;
+    border: 1px solid var(--gp-borde);
+    border-radius: 9px;
+    color: #a47a69;
+    padding: 0 11px;
+}
+
+    .buscador-promocion span {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .buscador-promocion input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        font-size: 11px;
+        color: #382e2a;
+        background: transparent;
+    }
+
+        .buscador-promocion input::placeholder {
+            color: #bb9a8b;
+        }
+
+.seccion-promociones {
+    margin-bottom: 31px;
+}
+
+    .seccion-promociones h2 {
+        font-size: 21px;
+        margin: 0 0 17px;
+    }
+
+.promociones-activas-grid {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+.promo-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid var(--gp-borde);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 3px 15px #5c403508;
+}
+
+.promo-imagen-contenedor, .proxima-promo-imagen {
+    background: linear-gradient(135deg,#e4d2c4 0%,#b89a84 56%,#d0b68b 100%);
+    overflow: hidden;
+    position: relative;
+}
+
+.promo-imagen-contenedor {
+    height: 158px;
+    flex-shrink: 0;
+}
+
+.promo-imagen, .proxima-promo-imagen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.promo-card-contenido {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    padding: 17px 17px 15px;
+}
+
+.promo-etiquetas {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 9px;
+}
+
+.descuento {
+    background: #f8edd9;
+    border-radius: 5px;
+    padding: 4px 7px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #816343;
+}
+
+.estado-promo {
+    background: #eaf4ed;
+    color: #5b8c63;
+    border-radius: 5px;
+    padding: 4px 7px;
+    font-size: 10px;
+}
+
+.promo-card h3 {
+    font-size: 18px;
+    margin: 0 0 8px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.promo-card p {
+    font-size: 11px;
+    line-height: 1.55;
+    margin: 0 0 13px;
+    color: #544640;
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.promo-detalles {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    border-top: 1px solid #f2ece7;
+    padding-top: 13px;
+    font-size: 10px;
+    color: #b68b76;
+    line-height: 1.4;
+}
+
+.promo-acciones {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 13px;
+}
+
+    .promo-acciones form {
+        margin: 0;
+        display: inline;
+    }
+
+.accion-normal, .accion-eliminar {
+    display: inline-block;
+    border: 1px solid #efe7df;
+    background: #fbf5f1;
+    color: #674d40;
+    border-radius: 7px;
+    font-size: 10px !important;
+    padding: 7px 10px;
+    text-decoration: none;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+    .accion-normal:hover {
+        background: #f3e7de;
+    }
+
+.accion-eliminar {
+    border-color: #fff0e2;
+    background: #fff1e4;
+    color: #cf7a20;
+}
+
+    .accion-eliminar:hover {
+        background: #ffdfc1;
+    }
+
+.proximas-promociones-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 17px;
+}
+
+.proxima-promo {
+    display: flex;
+    min-width: 0;
+    min-height: 146px;
+    background: #fff;
+    border: 1px solid var(--gp-borde);
+    border-radius: 13px;
+    overflow: hidden;
+}
+
+.proxima-promo-imagen {
+    width: 37%;
+    max-width: 180px;
+    min-width: 116px;
+    flex-shrink: 0;
+}
+
+.proxima-promo-info {
+    padding: 13px 14px;
+    min-width: 0;
+    flex: 1;
+}
+
+.programada {
+    display: inline-block;
+    margin-bottom: 9px;
+    color: #2568a8;
+    background: #e6f1ff;
+    border-radius: 5px;
+    padding: 4px 7px;
+    font-size: 10px;
+}
+
+.proxima-promo h3 {
+    font-size: 17px;
+    margin: 0 0 7px;
+    line-height: 1.25;
+}
+
+.proxima-promo p {
+    color: #514742;
+    line-height: 1.4;
+    font-size: 10.5px;
+    margin: 0 0 9px;
+}
+
+.proxima-promo small {
+    font-size: 10px;
+    color: #b68873;
+}
+
+.proxima-promo .promo-acciones {
+    margin-top: 10px;
+    justify-content: flex-start;
+}
+
+.tabla-finalizadas-contenedor {
+    border: 1px solid #ece4de;
+    border-radius: 13px;
+    background: #fff;
+    overflow-x: auto;
+}
+
+.tabla-finalizadas {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 690px;
+    text-align: left;
+    font-size: 11px;
+}
+
+    .tabla-finalizadas thead {
+        background: #fcf8f5;
+        color: #ac806e;
+    }
+
+    .tabla-finalizadas th {
+        padding: 12px 13px;
+        font-size: 9px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .tabla-finalizadas td {
+        padding: 12px 13px;
+        border-top: 1px solid #f2ece8;
+        vertical-align: middle;
+    }
+
+    .tabla-finalizadas tbody tr:hover {
+        background: #fffdfb;
+    }
+
+    .tabla-finalizadas .ingreso-tabla {
+        color: var(--gp-verde);
+        font-weight: 600;
+    }
+
+    .tabla-finalizadas .promo-acciones {
+        margin: 0;
+        justify-content: flex-start;
+    }
+
+.promo-listado-estados {
+    display: grid;
+    gap: 8px;
+}
+
+.promo-estado-fila {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 14px 17px;
+    background: #fff;
+    border: 1px solid var(--gp-borde);
+    border-radius: 10px;
+}
+
+    .promo-estado-fila > div:first-child {
+        flex: 1;
+        min-width: 160px;
+        display: grid;
+        gap: 5px;
+    }
+
+    .promo-estado-fila strong {
+        font-size: 12px;
+    }
+
+    .promo-estado-fila small {
+        font-size: 10px;
+        color: #a5897d;
+    }
+
+    .promo-estado-fila form {
+        margin: 0;
+    }
+
+.promo-chip-pausada, .promo-chip-archivada {
+    font-size: 10px;
+    padding: 5px 9px;
+    border-radius: 6px;
+}
+
+.promo-chip-pausada {
+    background: #fff2de;
+    color: #a56c21;
+}
+
+.promo-chip-archivada {
+    background: #f0eeee;
+    color: #786d67;
+}
+
+.promo-aviso {
+    background: #fff;
+    border: 1px solid #eaded2;
+    border-radius: 9px;
+    padding: 12px 15px;
+    margin: 0 0 18px;
+    font-size: 12px;
+}
+
+.promo-aviso-error {
+    background: #fff3ee;
+    color: #943a32;
+    border-color: #f0cfc7;
+}
+
+.promo-aviso-exito {
+    background: #edf7ee;
+    color: #3d7448;
+    border-color: #cfe6d3;
+}
+
+.promo-vacio {
+    color: #b28b7c;
+    font-size: 12px;
+    padding: 12px 0;
+    margin: 0;
+}
+
+[hidden] {
+    display: none !important;
+}
+/* Formulario modal */
+.dialogo-promocion {
+    width: min(580px,calc(100vw - 30px));
+    max-height: calc(100dvh - 36px);
+    border: 1px solid #eadfd7;
+    border-radius: 16px;
+    padding: 23px;
+    box-shadow: 0 20px 60px #21191358;
+    background: #fffaf7;
+    color: #3b2d26;
+    overflow: auto;
+    font-family: 'DM Sans',Arial,sans-serif;
+}
+
+    .dialogo-promocion::backdrop {
+        background: #231a16aa;
+    }
+
+.dialogo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+    .dialogo-header h2 {
+        font-size: 24px;
+        margin: 0;
+    }
+
+.dialogo-cerrar {
+    font-size: 27px !important;
+    background: transparent;
+    border: 0;
+    color: #725b50;
+    padding: 0 8px;
+}
+
+.form-promocion-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 14px;
+}
+
+.campo {
+    display: grid;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #674e43;
+    min-width: 0;
+}
+
+.campo-ancho {
+    grid-column: 1/-1;
+}
+
+.campo small {
+    font-size: 10px;
+    font-weight: 400;
+    color: #ac8a7a;
+}
+
+.campo input, .campo textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border: 1px solid #dfd0c4;
+    border-radius: 8px;
+    padding: 10px 11px;
+    font: inherit;
+    color: #352a25;
+    background: #fff;
+    outline-color: #c9a866;
+}
+
+.campo textarea {
+    resize: vertical;
+}
+
+.nota-form {
+    font-size: 11px;
+    color: #91766a;
+    margin: 16px 0;
+}
+
+.dialogo-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+@media(max-width:1200px) {
+    .promociones-contenido {
+        padding: 28px 24px 38px;
+    }
+
+    .promociones-activas-grid {
+        gap: 12px;
+    }
+
+    .promo-card-contenido {
+        padding: 14px;
+    }
+
+    .resumen-promo-card {
+        padding: 14px;
+    }
+}
+
+@media(max-width:980px) {
+    .resumen-promociones {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .promociones-activas-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .barra-promociones {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .buscador-promocion {
+        width: min(380px,100%);
+    }
+}
+
+@media(max-width:750px) {
+    .promociones-activas-grid, .proximas-promociones-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .promociones-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .proxima-promo-imagen {
+        max-width: 190px;
+    }
+}
+
+@media(max-width:480px) {
+    .promociones-contenido {
+        padding: 20px 14px 28px;
+    }
+
+    .promociones-header h1 {
+        font-size: 27px;
+    }
+
+    .resumen-promociones {
+        gap: 9px;
+    }
+
+    .resumen-promo-card {
+        padding: 13px 11px;
+        min-height: 82px;
+    }
+
+        .resumen-promo-card strong {
+            font-size: 17px;
+        }
+
+        .resumen-promo-card small {
+            font-size: 8px;
+        }
+
+    .filtros-promociones {
+        gap: 5px;
+    }
+
+    .filtro-promo {
+        padding: 7px 10px;
+    }
+
+    .proxima-promo-imagen {
+        min-width: 100px;
+        width: 31%;
+    }
+
+    .proxima-promo-info {
+        padding: 12px;
+    }
+
+    .form-promocion-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-ancho {
+        grid-column: auto;
+    }
+
+    .dialogo-promocion {
+        padding: 16px;
+    }
+}

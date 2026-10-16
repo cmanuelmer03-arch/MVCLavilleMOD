@@ -1,0 +1,32 @@
+﻿@* Menú independiente: no requiere modelo, base de datos ni controladores. *@
+<div class="la-a11y" id="la-a11y">
+    <details class="la-a11y__details">
+        <summary class="la-a11y__trigger" aria-label="Abrir opciones de accesibilidad">
+            <span aria-hidden="true">⚙</span> Accesibilidad
+        </summary>
+
+        <div class="la-a11y__content" aria-label="Opciones de accesibilidad">
+            <p class="la-a11y__heading">Personalizar visualización</p>
+
+            <fieldset class="la-a11y__fieldset">
+                <legend>Tamaño del texto</legend>
+                <div class="la-a11y__choices" role="group" aria-label="Tamaño del texto">
+                    <button type="button" data-la-font="normal" aria-pressed="true">Normal</button>
+                    <button type="button" data-la-font="large" aria-pressed="false">Grande</button>
+                    <button type="button" data-la-font="xlarge" aria-pressed="false">Muy grande</button>
+                </div>
+            </fieldset>
+
+            <fieldset class="la-a11y__fieldset">
+                <legend>Apariencia</legend>
+                <div class="la-a11y__choices" role="group" aria-label="Apariencia">
+                    <button type="button" data-la-theme="light" aria-pressed="true">Claro</button>
+                    <button type="button" data-la-theme="dark" aria-pressed="false">Oscuro</button>
+                </div>
+            </fieldset>
+
+            <p class="la-a11y__note">Tus preferencias se guardan en este navegador.</p>
+            <button type="button" class="la-a11y__reset" data-la-reset>Restablecer preferencias</button>
+        </div>
+    </details>
+</div>
