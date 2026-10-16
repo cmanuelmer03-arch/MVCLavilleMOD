@@ -1,4 +1,9 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Security.Claims;
 using Lavillemvc.DAL;
 using Lavillemvc.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -6,7 +11,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Npgsql;
 
 namespace Lavillemvc.Controllers
@@ -49,6 +53,7 @@ namespace Lavillemvc.Controllers
             string txtPassword,
             bool chkRecordarme = false)
         {
+            // Validar campos obligatorios
             if (string.IsNullOrWhiteSpace(txtEmail) ||
                 string.IsNullOrWhiteSpace(txtPassword))
             {
@@ -63,6 +68,7 @@ namespace Lavillemvc.Controllers
 
             CuentaUsuario? cuenta;
 
+            // Consultar cuenta en Supabase
             try
             {
                 cuenta = await _cuentas.BuscarPorCorreoAsync(
@@ -86,6 +92,7 @@ namespace Lavillemvc.Controllers
                 return View();
             }
 
+            // Verificar contraseña protegida
             PasswordVerificationResult resultado;
 
             try
@@ -122,7 +129,7 @@ namespace Lavillemvc.Controllers
             }
 
             // ==========================================
-            // 3. IDENTIFICAR ROL
+            // 3. IDENTIFICAR ROL DEL USUARIO
             // ==========================================
 
             string rol = cuenta.TipoCuenta == "cliente"
@@ -135,7 +142,8 @@ namespace Lavillemvc.Controllers
                 "Recepcionista",
                 "Especialista",
                 "Encargado Inventario",
-                "Administrador"
+                "Administrador",
+                "Gerente"
             };
 
             string? rolValido = rolesPermitidos
@@ -160,46 +168,91 @@ namespace Lavillemvc.Controllers
 
             var claims = new List<Claim>
             {
+                // ID único de la cuenta
                 new Claim(
                     ClaimTypes.NameIdentifier,
                     $"{cuenta.TipoCuenta}:{cuenta.IdUsuario}"
                 ),
 
+                // Nombre completo
                 new Claim(
                     ClaimTypes.Name,
                     cuenta.NombreCompleto
                 ),
 
+                // Correo electrónico
                 new Claim(
                     ClaimTypes.Email,
                     cuenta.Correo
                 ),
 
+                // Rol del usuario
                 new Claim(
                     ClaimTypes.Role,
                     rolValido
                 ),
 
+                // Origen de la cuenta
                 new Claim(
                     "TipoCuenta",
                     cuenta.TipoCuenta
                 )
             };
 
+            // ==========================================
+            // 5. GUARDAR ID DE SUCURSAL
+            // ==========================================
+
+            // Permite identificar la sucursal del empleado
+            // para Gerente y otros módulos del sistema.
+
+            if (cuenta.TipoCuenta == "empleado" &&
+                cuenta.IdSucursal.HasValue)
+            {
+                claims.Add(
+                    new Claim(
+                        "IdSucursal",
+                        cuenta.IdSucursal.Value.ToString()
+                    )
+                );
+            }
+
+            // ==========================================
+            // 6. GUARDAR ID DEL ESPECIALISTA
+            // ==========================================
+
+            // Este claim permite que EspecialistaAgenda
+            // identifique al especialista autenticado.
+
+            if (rolValido == "Especialista" &&
+                cuenta.TipoCuenta == "empleado" &&
+                cuenta.IdEspecialista.HasValue &&
+                cuenta.IdEspecialista.Value > 0)
+            {
+                claims.Add(
+                    new Claim(
+                        "IdEspecialista",
+                        cuenta.IdEspecialista.Value.ToString()
+                    )
+                );
+            }
+
+            // ==========================================
+            // 7. CREAR COOKIE DE AUTENTICACIÓN
+            // ==========================================
+
             var identity = new ClaimsIdentity(
                 claims,
-                CookieAuthenticationDefaults
-                    .AuthenticationScheme
+                CookieAuthenticationDefaults.AuthenticationScheme
             );
 
             var principal = new ClaimsPrincipal(identity);
 
-            var propiedades =
-                new AuthenticationProperties
-                {
-                    IsPersistent = chkRecordarme,
-                    AllowRefresh = true
-                };
+            var propiedades = new AuthenticationProperties
+            {
+                IsPersistent = chkRecordarme,
+                AllowRefresh = true
+            };
 
             if (chkRecordarme)
             {
@@ -208,22 +261,18 @@ namespace Lavillemvc.Controllers
             }
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults
-                    .AuthenticationScheme,
+                CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,
                 propiedades
             );
 
-            // ==========================================
-            // 5. REDIRIGIR A INICIO TRAS AUTENTICARSE
+            // Todos los usuarios llegan a Inicio.
             // El botón "Ir al panel" dirige según el rol.
-            // ==========================================
-
             return RedirectToAction("Index", "Home");
         }
 
         // ==========================================
-        // 6. REGISTRO - GET
+        // 8. REGISTRO DE CLIENTE - GET
         // ==========================================
 
         [HttpGet]
@@ -238,7 +287,7 @@ namespace Lavillemvc.Controllers
         }
 
         // ==========================================
-        // 7. REGISTRO - POST
+        // 9. REGISTRO DE CLIENTE - POST
         // ==========================================
 
         [HttpPost]
@@ -263,7 +312,7 @@ namespace Lavillemvc.Controllers
                 return View();
             }
 
-            // Validar formato de correo
+            // Validar correo
             try
             {
                 var direccion =
@@ -287,7 +336,7 @@ namespace Lavillemvc.Controllers
                 return View();
             }
 
-            // Confirmar contraseñas
+            // Validar confirmación de contraseña
             if (txtPassword != txtConfirmPassword)
             {
                 ViewBag.Error =
@@ -305,7 +354,7 @@ namespace Lavillemvc.Controllers
                 return View();
             }
 
-            // Validar aceptación de términos
+            // Validar términos
             if (!chkTerminos)
             {
                 ViewBag.Error =
@@ -313,6 +362,10 @@ namespace Lavillemvc.Controllers
 
                 return View();
             }
+
+            // ==========================================
+            // REGISTRAR CLIENTE EN SUPABASE
+            // ==========================================
 
             try
             {
@@ -339,17 +392,35 @@ namespace Lavillemvc.Controllers
                     "Login"
                 );
             }
-
-
-            catch (Npgsql.PostgresException ex)
+            catch (PostgresException ex)
             {
-                Console.WriteLine("========== ERROR POSTGRESQL ==========");
-                Console.WriteLine("Código SQLSTATE: " + ex.SqlState);
-                Console.WriteLine("Mensaje: " + ex.MessageText);
-                Console.WriteLine("Tabla: " + ex.TableName);
-                Console.WriteLine("Columna: " + ex.ColumnName);
-                Console.WriteLine("Restricción: " + ex.ConstraintName);
-                Console.WriteLine("======================================");
+                Console.WriteLine(
+                    "========== ERROR POSTGRESQL =========="
+                );
+
+                Console.WriteLine(
+                    "Código SQLSTATE: " + ex.SqlState
+                );
+
+                Console.WriteLine(
+                    "Mensaje: " + ex.MessageText
+                );
+
+                Console.WriteLine(
+                    "Tabla: " + ex.TableName
+                );
+
+                Console.WriteLine(
+                    "Columna: " + ex.ColumnName
+                );
+
+                Console.WriteLine(
+                    "Restricción: " + ex.ConstraintName
+                );
+
+                Console.WriteLine(
+                    "======================================"
+                );
 
                 ViewBag.Error =
                     "No fue posible registrar la cuenta. " +
@@ -357,31 +428,36 @@ namespace Lavillemvc.Controllers
 
                 return View();
             }
-
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(
-                    "========== ERROR DE REGISTRO ==========");
+                    "========== ERROR DE REGISTRO =========="
+                );
 
                 System.Diagnostics.Debug.WriteLine(
-                    "TIPO: " + ex.GetType().FullName);
+                    "TIPO: " + ex.GetType().FullName
+                );
 
-                if (ex is Npgsql.PostgresException errorSql)
+                if (ex is PostgresException errorSql)
                 {
                     System.Diagnostics.Debug.WriteLine(
-                        "SQLSTATE: " + errorSql.SqlState);
+                        "SQLSTATE: " + errorSql.SqlState
+                    );
 
                     System.Diagnostics.Debug.WriteLine(
-                        "MENSAJE: " + errorSql.MessageText);
+                        "MENSAJE: " + errorSql.MessageText
+                    );
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine(
-                        "MENSAJE: " + ex.Message);
+                        "MENSAJE: " + ex.Message
+                    );
                 }
 
                 System.Diagnostics.Debug.WriteLine(
-                    "=======================================");
+                    "======================================="
+                );
 
                 ViewBag.Error =
                     "Ocurrió un problema al registrar tu cuenta. " +
@@ -389,14 +465,10 @@ namespace Lavillemvc.Controllers
 
                 return View();
             }
-
-
-
         }
 
-
         // ==========================================
-        // 8. CERRAR SESIÓN
+        // 10. CERRAR SESIÓN
         // ==========================================
 
         [HttpPost]
@@ -405,8 +477,7 @@ namespace Lavillemvc.Controllers
         public async Task<IActionResult> CerrarSesion()
         {
             await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults
-                    .AuthenticationScheme
+                CookieAuthenticationDefaults.AuthenticationScheme
             );
 
             return RedirectToAction(
@@ -416,7 +487,7 @@ namespace Lavillemvc.Controllers
         }
 
         // ==========================================
-        // 9. ACCESO DENEGADO
+        // 11. ACCESO DENEGADO
         // ==========================================
 
         [HttpGet]

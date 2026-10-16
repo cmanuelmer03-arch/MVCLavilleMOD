@@ -43,7 +43,8 @@ namespace Lavillemvc.DAL
                     correo,
                     ""contraseña"" AS password_hash,
                     'Cliente' AS cargo,
-                    NULL::integer AS id_sucursal
+                    NULL::integer AS id_sucursal,
+                    NULL::integer AS id_especialista
                 FROM public.cliente
                 WHERE LOWER(TRIM(correo)) = @correo
 
@@ -51,15 +52,18 @@ namespace Lavillemvc.DAL
 
                 SELECT
                     'empleado' AS tipo_cuenta,
-                    id_empleado AS id_usuario,
-                    nombre,
-                    apellido,
-                    correo,
-                    ""contraseña"" AS password_hash,
-                    cargo,
-                    id_sucursal
-                FROM public.empleado
-                WHERE LOWER(TRIM(correo)) = @correo
+                    e.id_empleado AS id_usuario,
+                    e.nombre,
+                    e.apellido,
+                    e.correo,
+                    e.""contraseña"" AS password_hash,
+                    e.cargo,
+                    e.id_sucursal,
+                    s.id_especialista
+                FROM public.empleado e
+                LEFT JOIN public.especialista s
+                    ON s.id_empleado = e.id_empleado
+                WHERE LOWER(TRIM(e.correo)) = @correo
 
                 LIMIT 2;
             ";
@@ -67,7 +71,10 @@ namespace Lavillemvc.DAL
             await using var comando =
                 new NpgsqlCommand(sql, conexion);
 
-            comando.Parameters.AddWithValue("correo", correo);
+            comando.Parameters.AddWithValue(
+                "correo",
+                correo
+            );
 
             await using var lector =
                 await comando.ExecuteReaderAsync();
@@ -103,7 +110,11 @@ namespace Lavillemvc.DAL
 
                 IdSucursal = lector.IsDBNull(7)
                     ? null
-                    : lector.GetInt32(7)
+                    : lector.GetInt32(7),
+
+                IdEspecialista = lector.IsDBNull(8)
+                    ? null
+                    : lector.GetInt32(8)
             };
 
             // Rechazar correos duplicados
@@ -160,7 +171,7 @@ namespace Lavillemvc.DAL
                 );
             }
 
-            // Separar nombre completo en nombre y apellido
+            // Separar nombre completo
             string[] partes = nombreCompleto.Split(
                 ' ',
                 2,

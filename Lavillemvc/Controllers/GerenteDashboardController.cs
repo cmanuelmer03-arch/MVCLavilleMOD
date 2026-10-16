@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Lavillemvc.DAL;
 using Lavillemvc.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Lavillemvc.Controllers
 {
@@ -24,22 +26,25 @@ namespace Lavillemvc.Controllers
         // DASHBOARD DEL GERENTE
         // =========================================
 
+
+        [Authorize(Roles = "Gerente")]
         [HttpGet]
         public async Task<IActionResult> DashboardSucursal()
         {
+            // Obtener la sucursal del gerente autenticado
+            string? sucursalClaim = User.FindFirst("IdSucursal")?.Value;
+
+            if (!int.TryParse(sucursalClaim, out int idSucursal)
+                || idSucursal <= 0)
+            {
+                return Forbid();
+            }
+
             try
             {
-                // SUCURSAL DE PRUEBA
-                // 2 = L'Avielle Las Mercedes
-                int idSucursal = 2;
-
-                // CONSULTAR SUPABASE DESDE LA DAL
                 GerenteDashboardSucursal? modelo =
-                    await _dashboardDAL.ObtenerDashboardAsync(
-                        idSucursal
-                    );
+                    await _dashboardDAL.ObtenerDashboardAsync(idSucursal);
 
-                // COMPROBAR SI EXISTE LA SUCURSAL
                 if (modelo == null)
                 {
                     return NotFound(
@@ -47,7 +52,6 @@ namespace Lavillemvc.Controllers
                     );
                 }
 
-                // ABRIR LA VISTA EN SU UBICACIÓN REAL
                 return View(
                     "~/Views/Gerente/Dashboard.cshtml",
                     modelo

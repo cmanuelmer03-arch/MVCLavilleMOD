@@ -24,6 +24,8 @@ namespace Lavillemvc.Models
         // Datos de acceso
         public string Correo { get; set; } = "";
 
+        public int? IdEspecialista { get; set; }
+
         // Hash de contraseña almacenado en Supabase
         public string PasswordHash { get; set; } = "";
 
