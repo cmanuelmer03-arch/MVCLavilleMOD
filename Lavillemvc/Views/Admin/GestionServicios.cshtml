@@ -1,15 +1,269 @@
-﻿<!DOCTYPE html>
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
 
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
     <title>Gestión de Servicios - L'Avielle</title>
 
-    <!-- conexion con css -->
-    <link href="~/css/gestionservicios.css" rel="stylesheet" />
+    <!-- CSS ORIGINAL -->
+    <link href="~/css/gestionservicios.css"
+          rel="stylesheet" />
+
+    <style>
+            /* ELEMENTOS FUNCIONALES ADICIONALES */
+
+            .services-section[hidden],
+            .memberships-section[hidden],
+            .service-card[hidden],
+            .membership-card[hidden] {
+                display: none !important;
+            }
+
+            .search-bar input {
+                width: 100%;
+                min-width: 0;
+                background: transparent;
+                color: inherit;
+                border: none;
+                outline: none;
+                font: inherit;
+            }
+
+                .search-bar input::placeholder {
+                    color: inherit;
+                    opacity: .75;
+                }
+
+            .service-actions,
+            .membership-actions {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .lv-delete {
+                color: #a64e47 !important;
+                cursor: pointer;
+            }
+
+                .lv-delete:hover {
+                    text-decoration: underline;
+                }
+
+            .lv-state {
+                cursor: pointer;
+            }
+
+            .lv-message {
+                margin: 16px 0;
+                padding: 13px 17px;
+                border-radius: 9px;
+                background: #f4eee7;
+                color: #63483b;
+                font-size: 14px;
+            }
+
+                .lv-message.error {
+                    background: #fff0ed;
+                    color: #9c4038;
+                }
+
+            .lv-empty {
+                padding: 25px;
+                text-align: center;
+                color: #806e65;
+                font-size: 14px;
+            }
+
+            /* VENTANAS MODALES */
+
+            .lv-modal-background {
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, .48);
+                padding: 16px;
+            }
+
+                .lv-modal-background.open {
+                    display: flex;
+                }
+
+            .lv-modal-box {
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 570px;
+                max-height: 90vh;
+                overflow-y: auto;
+                background: #fff;
+                color: #60483e;
+                border-radius: 15px;
+                padding: 28px;
+                box-shadow: 0 15px 50px rgba(0,0,0,.18);
+            }
+
+                .lv-modal-box h2 {
+                    font-size: 23px;
+                    margin: 0 0 18px;
+                    color: #60483e;
+                }
+
+            .lv-form-field {
+                margin-bottom: 15px;
+            }
+
+                .lv-form-field label {
+                    display: block;
+                    margin-bottom: 7px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #705448;
+                }
+
+                .lv-form-field input,
+                .lv-form-field select,
+                .lv-form-field textarea {
+                    box-sizing: border-box;
+                    width: 100%;
+                    padding: 11px 12px;
+                    border: 1px solid #decfc4;
+                    border-radius: 8px;
+                    background: white;
+                    color: #60483e;
+                    font: inherit;
+                    font-size: 14px;
+                    outline: none;
+                }
+
+                    .lv-form-field input:focus,
+                    .lv-form-field select:focus,
+                    .lv-form-field textarea:focus {
+                        border-color: #a78370;
+                    }
+
+                .lv-form-field textarea {
+                    resize: vertical;
+                    min-height: 90px;
+                }
+
+            .lv-form-actions {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 10px;
+                margin-top: 22px;
+            }
+
+                .lv-form-actions button {
+                    padding: 11px 18px;
+                    border: 0;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font: inherit;
+                    font-size: 13px;
+                }
+
+            .lv-btn-cancel {
+                background: #eee6df;
+                color: #60483e;
+            }
+
+            .lv-btn-save {
+                background: #755546;
+                color: white;
+            }
+
+            .lv-btn-danger {
+                background: #a64e47;
+                color: white;
+            }
+
+            .lv-modal-description {
+                font-size: 14px;
+                line-height: 1.7;
+                color: #76665d;
+            }
+
+            .lv-member-entry {
+                padding: 13px 0;
+                border-bottom: 1px solid #ede5df;
+            }
+
+                .lv-member-entry strong {
+                    display: block;
+                    margin-bottom: 5px;
+                    font-size: 14px;
+                }
+
+                .lv-member-entry span {
+                    display: block;
+                    font-size: 13px;
+                    color: #806f65;
+                    margin-top: 3px;
+                }
+
+            .lv-member-active {
+                color: #397c54 !important;
+            }
+
+            .lv-member-inactive {
+                color: #a64e47 !important;
+            }
+
+            .lv-plan-state {
+                font-size: 12px;
+                margin-top: 6px;
+                color: #806f65;
+            }
+
+                .lv-plan-state.inactive {
+                    color: #a64e47;
+                }
+
+            .lv-benefit-empty {
+                color: #938177;
+                font-size: 13px;
+            }
+
+            .lv-loading {
+                padding: 30px;
+                text-align: center;
+                color: #806f65;
+            }
+
+            .lv-help {
+                font-size: 12px;
+                color: #8c7a70;
+                line-height: 1.6;
+                margin-top: 6px;
+            }
+
+            .lv-membership-action {
+                font-size: 13px;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+                .lv-membership-action:hover {
+                    text-decoration: underline;
+                }
+
+            .lv-benefits-list {
+                max-height: 270px;
+                overflow-y: auto;
+            }
+    </style>
 
 </head>
 
@@ -19,7 +273,10 @@
 
         <div class="content-wrapper">
 
-            <!-- sidebar -->
+            <!-- ================================== -->
+            <!-- SIDEBAR ORIGINAL -->
+            <!-- ================================== -->
+
             <aside class="sidebar">
 
                 <div class="sidebar-top">
@@ -36,17 +293,32 @@
 
                     </div>
 
-                    <!-- conexion entre frames -->
                     <nav class="nav-list">
 
-                        <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link">
+                        <!-- DASHBOARD -->
+
+                        <a href="@Url.Action("Dashboard", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+
+                                    <rect x="3" y="3"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+
+                                    <rect x="14" y="3"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+
+                                    <rect x="3" y="14"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+
+                                    <rect x="14" y="14"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+
                                 </svg>
                             </span>
 
@@ -56,14 +328,22 @@
 
                         </a>
 
+                        <!-- USUARIOS -->
 
-                        <a href="@Url.Action("GestionUsuarios", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionUsuarios", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <circle cx="9" cy="8" r="3"></circle>
+
+                                    <circle cx="9"
+                                            cy="8"
+                                            r="3"></circle>
+
                                     <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
+
                                     <path d="M16 11c2.8 0 5 1.5 5 4"></path>
+
                                 </svg>
                             </span>
 
@@ -73,16 +353,26 @@
 
                         </a>
 
+                        <!-- SUCURSALES -->
 
-                        <a href="@Url.Action("GestionSucursales", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionSucursales", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+
+                                    <rect x="4" y="3"
+                                          width="16" height="18"
+                                          rx="1"></rect>
+
                                     <path d="M8 7h1M12 7h1M16 7h1"></path>
+
                                     <path d="M8 11h1M12 11h1M16 11h1"></path>
+
                                     <path d="M8 15h1M12 15h1M16 15h1"></path>
+
                                     <path d="M10 21v-3h4v3"></path>
+
                                 </svg>
                             </span>
 
@@ -92,13 +382,18 @@
 
                         </a>
 
+                        <!-- SERVICIOS -->
 
-                        <a href="@Url.Action("GestionServicios", "Admin")" class="sidebar-link active">
+                        <a href="@Url.Action("GestionServicios", "Admin")"
+                           class="sidebar-link active">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
+
                                     <path d="M12 3l1.3 4.7L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-1.3z"></path>
+
                                     <path d="m19 14 .7 2.3L22 17l-.7-2.3L19 20l-.7-2.3L16 17l2.3-.7z"></path>
+
                                 </svg>
                             </span>
 
@@ -110,15 +405,22 @@
 
                         </a>
 
+                        <!-- REPORTES -->
 
-                        <a href="@Url.Action("ReportesGenerales", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("ReportesGenerales", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
+
                                     <path d="M4 19V9"></path>
+
                                     <path d="M10 19V5"></path>
+
                                     <path d="M16 19v-7"></path>
+
                                     <path d="M22 19V3"></path>
+
                                 </svg>
                             </span>
 
@@ -132,18 +434,24 @@
 
                 </div>
 
-                <!-- cerrar sesion -->
+                <!-- CERRAR SESIÓN -->
+
                 <div class="sidebar-bottom">
 
                     <div class="divider"></div>
 
-                    <a href="#" class="sidebar-link logout-link">
+                    <a href="@Url.Action("Index", "Login")"
+                       class="sidebar-link logout-link">
 
                         <span class="nav-icon">
                             <svg viewBox="0 0 24 24">
+
                                 <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
+
                                 <path d="M14 8l4 4-4 4"></path>
+
                                 <path d="M10 12h8"></path>
+
                             </svg>
                         </span>
 
@@ -157,11 +465,14 @@
 
             </aside>
 
+            <!-- ================================== -->
+            <!-- CONTENIDO PRINCIPAL -->
+            <!-- ================================== -->
 
-            <!-- contenido -->
             <main class="main-content">
 
-                <!-- encabezado -->
+                <!-- ENCABEZADO -->
+
                 <section class="welcome-header">
 
                     <div class="header-text">
@@ -178,8 +489,8 @@
 
                             <span class="sub-dot"></span>
 
-                            <span class="date">
-                                Septiembre 2026
+                            <span class="date" id="fechaActual">
+                                Cargando fecha...
                             </span>
 
                         </div>
@@ -188,23 +499,27 @@
 
                 </section>
 
+                <!-- ================================== -->
+                <!-- PESTAÑAS Y CONTROLES -->
+                <!-- ================================== -->
 
-                <!-- controles -->
                 <section class="controls-row">
 
-                    <!-- pestañas -->
                     <div class="service-tabs">
 
-                        <a href="#" class="service-tab selected">
+                        <a href="#"
+                           class="service-tab selected"
+                           id="tabServicios">
                             Servicios
                         </a>
 
-                        <a href="#" class="service-tab">
+                        <a href="#"
+                           class="service-tab"
+                           id="tabMembresias">
                             Membresías
                         </a>
 
                     </div>
-
 
                     <div class="header-actions">
 
@@ -213,20 +528,25 @@
                             <span class="search-icon">
 
                                 <svg viewBox="0 0 24 24">
-                                    <circle cx="10.5" cy="10.5" r="6"></circle>
+                                    <circle cx="10.5"
+                                            cy="10.5"
+                                            r="6"></circle>
+
                                     <path d="m15 15 5 5"></path>
                                 </svg>
 
                             </span>
 
-                            <span class="search-text">
-                                Buscar servicio o membresía...
-                            </span>
+                            <input type="search"
+                                   id="buscarRegistro"
+                                   placeholder="Buscar servicio o membresía..."
+                                   aria-label="Buscar servicio o membresía" />
 
                         </div>
 
-
-                        <a href="#" class="add-button">
+                        <a href="#"
+                           class="add-button"
+                           id="botonAgregarServicio">
                             + Agregar Servicio
                         </a>
 
@@ -234,325 +554,61 @@
 
                 </section>
 
+                <!-- MENSAJES DE SUPABASE -->
+                @if (TempData["MensajeServicios"] != null)
+                {
+                    <div class="lv-message">
+                        @TempData["MensajeServicios"]
+                    </div>
+                }
 
-                <!-- servicios -->
-                <section class="services-section">
+                @if (TempData["ErrorServicios"] != null)
+                {
+                    <div class="lv-message error">
+                        @TempData["ErrorServicios"]
+                    </div>
+                }
+
+                <div id="mensajeCarga"
+                     class="lv-message error"
+                     hidden>
+                </div>
+
+                <!-- ================================== -->
+                <!-- SERVICIOS -->
+                <!-- ================================== -->
+
+                <section class="services-section"
+                         id="seccionServicios">
 
                     <h2 class="section-title">
                         Servicios Disponibles
                     </h2>
 
-
-                    <!-- lista de servicios -->
-                    <div class="services-grid">
-
-
-                        <div class="service-card">
-
-                            <div class="service-header">
-
-                                <h3>
-                                    Tintes y Decoloración
-                                </h3>
-
-                                <span class="status-badge active-service">
-                                    <span class="status-dot"></span>
-                                    Activo
-                                </span>
-
-                            </div>
-
-                            <p>
-                                Coloración profesional, balayage, mechas y decoloración con productos premium.
-                            </p>
-
-                            <div class="service-info">
-
-                                <div class="info-row">
-                                    <span>Precio:</span>
-                                    <strong>Bs. 850 – 2,500</strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Duración:</span>
-                                    <b>2-4 horas</b>
-                                </div>
-
-                            </div>
-
-                            <div class="service-divider"></div>
-
-                            <div class="service-actions">
-
-                                <a href="#" class="edit-button">
-                                    Editar
-                                </a>
-
-                                <a href="#" class="text-action">
-                                    Desactivar
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="service-card">
-
-                            <div class="service-header">
-
-                                <h3>
-                                    Manicura
-                                </h3>
-
-                                <span class="status-badge active-service">
-                                    <span class="status-dot"></span>
-                                    Activo
-                                </span>
-
-                            </div>
-
-                            <p>
-                                Manicura clásica, gel, acrílico y nail art con diseños personalizados.
-                            </p>
-
-                            <div class="service-info">
-
-                                <div class="info-row">
-                                    <span>Precio:</span>
-                                    <strong>Bs. 350 – 1,200</strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Duración:</span>
-                                    <b>1-2 horas</b>
-                                </div>
-
-                            </div>
-
-                            <div class="service-divider"></div>
-
-                            <div class="service-actions">
-
-                                <a href="#" class="edit-button">
-                                    Editar
-                                </a>
-
-                                <a href="#" class="text-action">
-                                    Desactivar
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="service-card">
-
-                            <div class="service-header">
-
-                                <h3>
-                                    Pedicura
-                                </h3>
-
-                                <span class="status-badge active-service">
-                                    <span class="status-dot"></span>
-                                    Activo
-                                </span>
-
-                            </div>
-
-                            <p>
-                                Pedicura spa, tratamiento hidratante y esmaltado profesional.
-                            </p>
-
-                            <div class="service-info">
-
-                                <div class="info-row">
-                                    <span>Precio:</span>
-                                    <strong>Bs. 400 – 900</strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Duración:</span>
-                                    <b>1-1.5 horas</b>
-                                </div>
-
-                            </div>
-
-                            <div class="service-divider"></div>
-
-                            <div class="service-actions">
-
-                                <a href="#" class="edit-button">
-                                    Editar
-                                </a>
-
-                                <a href="#" class="text-action">
-                                    Desactivar
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="service-card">
-
-                            <div class="service-header">
-
-                                <h3>
-                                    Cortes de Pelo
-                                </h3>
-
-                                <span class="status-badge active-service">
-                                    <span class="status-dot"></span>
-                                    Activo
-                                </span>
-
-                            </div>
-
-                            <p>
-                                Cortes modernos para dama y caballero, incluye lavado y secado.
-                            </p>
-
-                            <div class="service-info">
-
-                                <div class="info-row">
-                                    <span>Precio:</span>
-                                    <strong>Bs. 250 – 800</strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Duración:</span>
-                                    <b>45 min – 1.5 horas</b>
-                                </div>
-
-                            </div>
-
-                            <div class="service-divider"></div>
-
-                            <div class="service-actions">
-
-                                <a href="#" class="edit-button">
-                                    Editar
-                                </a>
-
-                                <a href="#" class="text-action">
-                                    Desactivar
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="service-card">
-
-                            <div class="service-header">
-
-                                <h3>
-                                    Tratamientos Capilares
-                                </h3>
-
-                                <span class="status-badge active-service">
-                                    <span class="status-dot"></span>
-                                    Activo
-                                </span>
-
-                            </div>
-
-                            <p>
-                                Keratina, botox capilar, hidratación profunda y reconstrucción.
-                            </p>
-
-                            <div class="service-info">
-
-                                <div class="info-row">
-                                    <span>Precio:</span>
-                                    <strong>Bs. 1,200 – 3,500</strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Duración:</span>
-                                    <b>2-3 horas</b>
-                                </div>
-
-                            </div>
-
-                            <div class="service-divider"></div>
-
-                            <div class="service-actions">
-
-                                <a href="#" class="edit-button">
-                                    Editar
-                                </a>
-
-                                <a href="#" class="text-action">
-                                    Desactivar
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="service-card">
-
-                            <div class="service-header">
-
-                                <h3>
-                                    Servicios para Hombres
-                                </h3>
-
-                                <span class="status-badge paused-service">
-                                    <span class="status-dot"></span>
-                                    Pausado
-                                </span>
-
-                            </div>
-
-                            <p>
-                                Barbería, corte clásico, afeitado y tratamiento facial masculino.
-                            </p>
-
-                            <div class="service-info">
-
-                                <div class="info-row">
-                                    <span>Precio:</span>
-                                    <strong>Bs. 200 – 650</strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Duración:</span>
-                                    <b>30 min – 1 hora</b>
-                                </div>
-
-                            </div>
-
-                            <div class="service-divider"></div>
-
-                            <div class="service-actions">
-
-                                <a href="#" class="edit-button">
-                                    Editar
-                                </a>
-
-                                <a href="#" class="activate-action">
-                                    Activar
-                                </a>
-
-                            </div>
-
+                    <div class="services-grid"
+                         id="contenedorServicios">
+
+                        <div class="lv-loading">
+                            Cargando servicios desde Supabase...
                         </div>
 
                     </div>
 
+                    <p class="lv-empty"
+                       id="sinServicios"
+                       hidden>
+                        No se encontraron servicios.
+                    </p>
+
                 </section>
 
+                <!-- ================================== -->
+                <!-- MEMBRESÍAS -->
+                <!-- ================================== -->
 
-                <!-- membresias -->
-                <section class="memberships-section">
+                <section class="memberships-section"
+                         id="seccionMembresias"
+                         hidden>
 
                     <div class="membership-heading">
 
@@ -560,274 +616,28 @@
                             Planes de Membresía
                         </h2>
 
-                        <a href="#" class="create-plan-button">
+                        <a href="#"
+                           class="create-plan-button"
+                           id="botonCrearPlan">
                             + Crear Plan
                         </a>
 
                     </div>
 
-
-                    <!-- lista de membresias -->
-                    <div class="memberships-grid">
-
-
-                        <div class="membership-card">
-
-                            <div class="membership-top">
-
-                                <h3>
-                                    Plan Básico
-                                </h3>
-
-                                <div class="membership-price">
-                                    Bs. 1,500/mes
-                                </div>
-
-                            </div>
-
-
-                            <div class="benefits-section">
-
-                                <span class="benefits-title">
-                                    BENEFICIOS INCLUIDOS
-                                </span>
-
-                                <div class="benefits-list">
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>10% descuento en todos los servicios</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Reserva prioritaria</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Acumulación de puntos</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="membership-divider"></div>
-
-
-                            <div class="membership-bottom">
-
-                                <div class="members-count">
-
-                                    <span>
-                                        MIEMBROS ACTIVOS
-                                    </span>
-
-                                    <strong>
-                                        245
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="membership-actions">
-
-                                    <a href="#" class="small-edit">
-                                        Editar
-                                    </a>
-
-                                    <a href="#" class="members-button">
-                                        Ver Miembros
-                                    </a>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="membership-card">
-
-                            <div class="membership-top">
-
-                                <h3>
-                                    Plan Premium
-                                </h3>
-
-                                <div class="membership-price">
-                                    Bs. 3,200/mes
-                                </div>
-
-                            </div>
-
-
-                            <div class="benefits-section">
-
-                                <span class="benefits-title">
-                                    BENEFICIOS INCLUIDOS
-                                </span>
-
-                                <div class="benefits-list">
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>25% descuento en todos los servicios</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Reserva prioritaria VIP</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Servicio de cortesía mensual</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Acceso a eventos exclusivos</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="membership-divider"></div>
-
-
-                            <div class="membership-bottom">
-
-                                <div class="members-count">
-
-                                    <span>
-                                        MIEMBROS ACTIVOS
-                                    </span>
-
-                                    <strong>
-                                        128
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="membership-actions">
-
-                                    <a href="#" class="small-edit">
-                                        Editar
-                                    </a>
-
-                                    <a href="#" class="members-button">
-                                        Ver Miembros
-                                    </a>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="membership-card vip-card">
-
-                            <div class="membership-top">
-
-                                <div class="vip-title-row">
-
-                                    <h3>
-                                        Plan VIP
-                                    </h3>
-
-                                    <span class="popular-badge">
-                                        POPULAR
-                                    </span>
-
-                                </div>
-
-                                <div class="membership-price">
-                                    Bs. 5,800/mes
-                                </div>
-
-                            </div>
-
-
-                            <div class="benefits-section">
-
-                                <span class="benefits-title">
-                                    BENEFICIOS INCLUIDOS
-                                </span>
-
-                                <div class="benefits-list">
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>40% descuento en todos los servicios</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Atención personalizada</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>2 servicios de cortesía mensuales</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Productos premium incluidos</p>
-                                    </div>
-
-                                    <div class="benefit">
-                                        <span>✓</span>
-                                        <p>Acceso ilimitado a eventos</p>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="membership-divider"></div>
-
-
-                            <div class="membership-bottom">
-
-                                <div class="members-count">
-
-                                    <span>
-                                        MIEMBROS ACTIVOS
-                                    </span>
-
-                                    <strong>
-                                        47
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="membership-actions">
-
-                                    <a href="#" class="small-edit">
-                                        Editar
-                                    </a>
-
-                                    <a href="#" class="members-button">
-                                        Ver Miembros
-                                    </a>
-
-                                </div>
-
-                            </div>
-
+                    <div class="memberships-grid"
+                         id="contenedorMembresias">
+
+                        <div class="lv-loading">
+                            Cargando membresías desde Supabase...
                         </div>
 
                     </div>
+
+                    <p class="lv-empty"
+                       id="sinMembresias"
+                       hidden>
+                        No se encontraron membresías.
+                    </p>
 
                 </section>
 
@@ -835,11 +645,12 @@
 
         </div>
 
+        <!-- ================================== -->
+        <!-- FOOTER -->
+        <!-- ================================== -->
 
-        <!-- footer -->
         <footer class="footer">
 
-            <!-- informacion del footer -->
             <div class="footer-upper">
 
                 <div class="footer-about">
@@ -849,42 +660,66 @@
                     </div>
 
                     <p>
-                        Un concepto exclusivo de salón de belleza y spa de bienestar,
-                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                        Un concepto exclusivo de salón de belleza y spa
+                        de bienestar, donde el lujo se traduce en calma,
+                        elegancia y atención de nivel internacional.
                     </p>
 
-                    <!-- redes sociales -->
                     <div class="social-row">
 
-                        <a href="#" class="social-button">Instagram</a>
-                        <a href="#" class="social-button">Facebook</a>
-                        <a href="#" class="social-button">Web</a>
+                        <a href="#"
+                           class="social-button">
+                            Instagram
+                        </a>
+
+                        <a href="#"
+                           class="social-button">
+                            Facebook
+                        </a>
+
+                        <a href="#"
+                           class="social-button">
+                            Web
+                        </a>
 
                     </div>
 
                 </div>
 
-
-                <!-- navegacion del footer -->
                 <div class="footer-column">
 
                     <h3>Navegación</h3>
 
                     <div class="footer-links">
 
-                        <a href="@Url.Action("Dashboard", "Admin")">Inicio</a>
-                        <a href="#">Servicios</a>
-                        <a href="#">Especialistas</a>
-                        <a href="#">Perfil</a>
-                        <a href="#">Iniciar Sesión</a>
-                        <a href="#">Registrarse</a>
+                        <a href="@Url.Action("Dashboard", "Admin")">
+                            Inicio
+                        </a>
+
+                        <a href="@Url.Action("GestionServicios", "Admin")">
+                            Servicios
+                        </a>
+
+                        <a href="#">
+                            Especialistas
+                        </a>
+
+                        <a href="#">
+                            Perfil
+                        </a>
+
+                        <a href="@Url.Action("Index", "Login")">
+                            Iniciar Sesión
+                        </a>
+
+                        <a href="#">
+                            Registrarse
+                        </a>
 
                     </div>
 
                 </div>
 
-
-                <!-- contacto -->
                 <div class="footer-column">
 
                     <h3>Contacto &amp; Ubicación</h3>
@@ -892,15 +727,16 @@
                     <div class="contact-list">
 
                         <div class="contact-item">
-                            Paseo de la Reforma 402, Juárez, CDMX
+                            Colonia Escalón,
+                            San Salvador, El Salvador
                         </div>
 
                         <div class="contact-item">
-                            +52 55 1234 5678
+                            +503 2200-0101
                         </div>
 
                         <div class="contact-item">
-                            contacto@@lavielle.com
+                            contacto&#64;lavielle.com
                         </div>
 
                     </div>
@@ -909,21 +745,24 @@
 
             </div>
 
-
             <div class="footer-divider"></div>
 
-
-            <!-- parte final del footer -->
             <div class="footer-bottom">
 
                 <span>
-                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                    © 2026 L'Avielle Salón de Belleza.
+                    Todos los derechos reservados.
                 </span>
 
                 <div class="footer-legal">
 
-                    <a href="#">Política de Privacidad</a>
-                    <a href="#">Términos del Servicio</a>
+                    <a href="#">
+                        Política de Privacidad
+                    </a>
+
+                    <a href="#">
+                        Términos del Servicio
+                    </a>
 
                 </div>
 
@@ -932,6 +771,1974 @@
         </footer>
 
     </div>
+
+    <!-- ================================== -->
+    <!-- MODAL: AGREGAR / EDITAR SERVICIO -->
+    <!-- ================================== -->
+
+    <div class="lv-modal-background"
+         id="modalServicio"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloModalServicio">
+
+        <div class="lv-modal-box">
+
+            <h2 id="tituloModalServicio">
+                Agregar Servicio
+            </h2>
+
+            <form id="formServicio"
+                  method="post"
+                  action="@Url.Action("AgregarServicio", "AdminServicios")">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       id="idServicio"
+                       name="IdServicio"
+                       value="0" />
+
+                <div class="lv-form-field">
+
+                    <label for="nombreServicio">
+                        Nombre del servicio
+                    </label>
+
+                    <input id="nombreServicio"
+                           name="Nombre"
+                           maxlength="150"
+                           required />
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="descripcionServicio">
+                        Descripción
+                    </label>
+
+                    <textarea id="descripcionServicio"
+                              name="Descripcion"
+                              rows="3"></textarea>
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="costoServicio">
+                        Precio en dólares (USD)
+                    </label>
+
+                    <input id="costoServicio"
+                           name="Costo"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           placeholder="25.00"
+                           required />
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="duracionServicio">
+                        Duración en minutos
+                    </label>
+
+                    <input id="duracionServicio"
+                           name="DuracionMinutos"
+                           type="number"
+                           min="1"
+                           step="1"
+                           placeholder="60" />
+
+                    <div class="lv-help">
+                        Ejemplo: 60 equivale a una hora.
+                    </div>
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="especialidadServicio">
+                        Especialidad
+                    </label>
+
+                    <select id="especialidadServicio"
+                            name="IdEspecialidad">
+
+                        <option value="">
+                            Sin especialidad asignada
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="estadoServicio">
+                        Estado del servicio
+                    </label>
+
+                    <select id="estadoServicio"
+                            name="Disponible">
+
+                        <option value="true">
+                            Activo
+                        </option>
+
+                        <option value="false">
+                            Inactivo
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="lv-form-actions">
+
+                    <button type="button"
+                            class="lv-btn-cancel"
+                            data-cerrar>
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="lv-btn-save">
+                        Guardar Servicio
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ================================== -->
+    <!-- MODAL: AGREGAR / EDITAR MEMBRESÍA -->
+    <!-- ================================== -->
+
+    <div class="lv-modal-background"
+         id="modalMembresia"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloModalMembresia">
+
+        <div class="lv-modal-box">
+
+            <h2 id="tituloModalMembresia">
+                Crear Plan de Membresía
+            </h2>
+
+            <form id="formMembresia"
+                  method="post"
+                  action="@Url.Action("AgregarMembresia", "AdminServicios")">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       id="idMembresia"
+                       name="IdMembresia"
+                       value="0" />
+
+                <div class="lv-form-field">
+
+                    <label for="nombreMembresia">
+                        Nombre del plan
+                    </label>
+
+                    <input id="nombreMembresia"
+                           name="Nombre"
+                           maxlength="150"
+                           required />
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="beneficiosMembresia">
+                        Beneficios del plan
+                    </label>
+
+                    <textarea id="beneficiosMembresia"
+                              name="Beneficios"
+                              rows="5"
+                              placeholder="Descuento en servicios, reserva prioritaria, acumulación de puntos"></textarea>
+
+                    <div class="lv-help">
+                        Separa los beneficios con comas.
+                    </div>
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="duracionMembresia">
+                        Duración del plan
+                    </label>
+
+                    <input id="duracionMembresia"
+                           name="Duracion"
+                           maxlength="100"
+                           placeholder="1 mes" />
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="precioMembresia">
+                        Precio mensual en dólares (USD)
+                    </label>
+
+                    <input id="precioMembresia"
+                           name="PrecioMensual"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           placeholder="Sin configurar" />
+
+                    <div class="lv-help">
+                        Si el plan no tiene precio definido,
+                        puedes dejar este campo vacío.
+                    </div>
+
+                </div>
+
+                <div class="lv-form-field">
+
+                    <label for="estadoMembresia">
+                        Estado del plan
+                    </label>
+
+                    <select id="estadoMembresia"
+                            name="Activo">
+
+                        <option value="true">
+                            Activa
+                        </option>
+
+                        <option value="false">
+                            Inactiva
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="lv-form-actions">
+
+                    <button type="button"
+                            class="lv-btn-cancel"
+                            data-cerrar>
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="lv-btn-save">
+                        Guardar Membresía
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ================================== -->
+    <!-- MODAL: VER MIEMBROS -->
+    <!-- ================================== -->
+
+    <div class="lv-modal-background"
+         id="modalMiembros"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloModalMiembros">
+
+        <div class="lv-modal-box">
+
+            <h2 id="tituloModalMiembros">
+                Miembros del Plan
+            </h2>
+
+            <div id="contenidoMiembros">
+            </div>
+
+            <div class="lv-form-actions">
+
+                <button type="button"
+                        class="lv-btn-cancel"
+                        data-cerrar>
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================================== -->
+    <!-- MODAL: CONFIRMAR ACCIONES -->
+    <!-- ================================== -->
+
+    <div class="lv-modal-background"
+         id="modalConfirmar"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloConfirmar">
+
+        <div class="lv-modal-box">
+
+            <h2 id="tituloConfirmar">
+                Confirmar acción
+            </h2>
+
+            <p class="lv-modal-description"
+               id="textoConfirmar">
+            </p>
+
+            <form id="formConfirmar"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div id="camposConfirmar"></div>
+
+                <div class="lv-form-actions">
+
+                    <button type="button"
+                            class="lv-btn-cancel"
+                            data-cerrar>
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="lv-btn-danger"
+                            id="botonConfirmar">
+                        Confirmar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ================================== -->
+
+    <script>
+
+            // =========================================
+            // RUTAS DEL CONTROLADOR
+            // =========================================
+
+            const rutas = {
+
+                datos:
+                    '@Url.Action("Datos", "AdminServicios")',
+
+                agregarServicio:
+                    '@Url.Action("AgregarServicio", "AdminServicios")',
+
+                editarServicio:
+                    '@Url.Action("EditarServicio", "AdminServicios")',
+
+                estadoServicio:
+                    '@Url.Action("CambiarEstadoServicio", "AdminServicios")',
+
+                eliminarServicio:
+                    '@Url.Action("EliminarServicio", "AdminServicios")',
+
+                agregarMembresia:
+                    '@Url.Action("AgregarMembresia", "AdminServicios")',
+
+                editarMembresia:
+                    '@Url.Action("EditarMembresia", "AdminServicios")',
+
+                estadoMembresia:
+                    '@Url.Action("CambiarEstadoMembresia", "AdminServicios")',
+
+                eliminarMembresia:
+                    '@Url.Action("EliminarMembresia", "AdminServicios")'
+            };
+
+            // =========================================
+            // VARIABLES
+            // =========================================
+
+            let servicios = [];
+            let membresias = [];
+            let miembros = [];
+            let especialidades = [];
+
+            let pestañaActual = 'servicios';
+
+            const contenedorServicios =
+                document.getElementById('contenedorServicios');
+
+            const contenedorMembresias =
+                document.getElementById('contenedorMembresias');
+
+            const campoBusqueda =
+                document.getElementById('buscarRegistro');
+
+            const formServicio =
+                document.getElementById('formServicio');
+
+            const formMembresia =
+                document.getElementById('formMembresia');
+
+            const formConfirmar =
+                document.getElementById('formConfirmar');
+
+            // =========================================
+            // UTILIDADES
+            // =========================================
+
+            function obtener(objeto, propiedad, alternativa) {
+
+                if (!objeto) {
+                    return alternativa;
+                }
+
+                const inicialMinuscula =
+                    propiedad.charAt(0).toLowerCase()
+                    + propiedad.slice(1);
+
+                if (objeto[inicialMinuscula] !== undefined) {
+                    return objeto[inicialMinuscula];
+                }
+
+                if (objeto[propiedad] !== undefined) {
+                    return objeto[propiedad];
+                }
+
+                return alternativa;
+            }
+
+            function dineroUSD(valor) {
+
+                const numero = Number(valor);
+
+                if (!Number.isFinite(numero)) {
+                    return 'Precio no configurado';
+                }
+
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(numero);
+            }
+
+            function duracionServicio(minutos) {
+
+                if (minutos === null ||
+                    minutos === undefined ||
+                    minutos === '') {
+                    return 'Duración no configurada';
+                }
+
+                const total = Number(minutos);
+
+                if (!Number.isFinite(total) || total <= 0) {
+                    return 'Duración no configurada';
+                }
+
+                const horas = Math.floor(total / 60);
+                const resto = total % 60;
+
+                if (horas > 0 && resto > 0) {
+                    return horas + ' h ' + resto + ' min';
+                }
+
+                if (horas > 0) {
+                    return horas + ' h';
+                }
+
+                return resto + ' min';
+            }
+
+            function normalizar(texto) {
+
+                return String(texto ?? '')
+                    .toLocaleLowerCase('es')
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+            }
+
+            function elemento(etiqueta, clase, texto) {
+
+                const nodo = document.createElement(etiqueta);
+
+                if (clase) {
+                    nodo.className = clase;
+                }
+
+                if (texto !== undefined && texto !== null) {
+                    nodo.textContent = String(texto);
+                }
+
+                return nodo;
+            }
+
+            function enlace(texto, clase, funcion) {
+
+                const a = elemento('a', clase, texto);
+
+                a.href = '#';
+
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    funcion();
+                });
+
+                return a;
+            }
+
+            function mostrarError(mensaje) {
+
+                const aviso = document.getElementById('mensajeCarga');
+
+                aviso.textContent = mensaje;
+                aviso.hidden = false;
+            }
+
+            function cerrarModales() {
+
+                document.querySelectorAll('.lv-modal-background')
+                    .forEach(function(modal) {
+                        modal.classList.remove('open');
+                    });
+            }
+
+            function abrirModal(id) {
+
+                cerrarModales();
+
+                document.getElementById(id)
+                    .classList.add('open');
+            }
+
+            document.querySelectorAll('[data-cerrar]')
+                .forEach(function(boton) {
+
+                    boton.addEventListener(
+                        'click',
+                        cerrarModales
+                    );
+                });
+
+            document.querySelectorAll('.lv-modal-background')
+                .forEach(function(modal) {
+
+                    modal.addEventListener('click', function(e) {
+
+                        if (e.target === modal) {
+                            cerrarModales();
+                        }
+                    });
+                });
+
+            document.addEventListener('keydown', function(e) {
+
+                if (e.key === 'Escape') {
+                    cerrarModales();
+                }
+            });
+
+            // =========================================
+            // FECHA ACTUAL
+            // =========================================
+
+            const fechaActual = new Date();
+
+            const fechaTexto = fechaActual.toLocaleDateString(
+                'es-SV',
+                {
+                    month: 'long',
+                    year: 'numeric'
+                }
+            );
+
+            document.getElementById('fechaActual')
+                .textContent =
+                fechaTexto.charAt(0).toUpperCase()
+                + fechaTexto.slice(1);
+
+            // =========================================
+            // PESTAÑAS
+            // =========================================
+
+            function recordarPestaña(valor) {
+
+                try {
+                    sessionStorage.setItem(
+                        'lavielle_pestana_admin_servicios',
+                        valor
+                    );
+                }
+                catch (e) {
+                    // La pantalla también funciona sin almacenamiento.
+                }
+            }
+
+            function pestañaRecordada() {
+
+                try {
+                    return sessionStorage.getItem(
+                        'lavielle_pestana_admin_servicios'
+                    );
+                }
+                catch (e) {
+                    return null;
+                }
+            }
+
+            function seleccionarPestaña(nombre) {
+
+                pestañaActual = nombre;
+
+                const esServicios = nombre === 'servicios';
+
+                document.getElementById('seccionServicios')
+                    .hidden = !esServicios;
+
+                document.getElementById('seccionMembresias')
+                    .hidden = esServicios;
+
+                document.getElementById('tabServicios')
+                    .classList.toggle('selected', esServicios);
+
+                document.getElementById('tabMembresias')
+                    .classList.toggle('selected', !esServicios);
+
+                document.getElementById('botonAgregarServicio')
+                    .textContent = esServicios
+                        ? '+ Agregar Servicio'
+                        : '+ Crear Plan';
+
+                campoBusqueda.placeholder = esServicios
+                    ? 'Buscar servicio...'
+                    : 'Buscar membresía...';
+
+                campoBusqueda.value = '';
+
+                filtrarRegistros();
+
+                recordarPestaña(nombre);
+            }
+
+            document.getElementById('tabServicios')
+                .addEventListener('click', function(e) {
+
+                    e.preventDefault();
+
+                    seleccionarPestaña('servicios');
+                });
+
+            document.getElementById('tabMembresias')
+                .addEventListener('click', function(e) {
+
+                    e.preventDefault();
+
+                    seleccionarPestaña('membresias');
+                });
+
+            // =========================================
+            // CARGAR DATOS REALES DESDE SUPABASE
+            // =========================================
+
+            async function cargarDatos() {
+
+                try {
+
+                    const respuesta = await fetch(
+                        rutas.datos,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            cache: 'no-store'
+                        }
+                    );
+
+                    if (!respuesta.ok) {
+
+                        let detalle = '';
+
+                        try {
+                            const error = await respuesta.json();
+
+                            detalle = obtener(
+                                error,
+                                'mensaje',
+                                ''
+                            );
+                        }
+                        catch (e) {
+                            detalle = '';
+                        }
+
+                        throw new Error(
+                            detalle ||
+                            'El servidor no pudo consultar los registros.'
+                        );
+                    }
+
+                    const resultado = await respuesta.json();
+
+                    servicios = obtener(
+                        resultado,
+                        'Servicios',
+                        []
+                    ) || [];
+
+                    membresias = obtener(
+                        resultado,
+                        'Membresias',
+                        []
+                    ) || [];
+
+                    miembros = obtener(
+                        resultado,
+                        'Miembros',
+                        []
+                    ) || [];
+
+                    especialidades = obtener(
+                        resultado,
+                        'Especialidades',
+                        []
+                    ) || [];
+
+                    llenarEspecialidades();
+
+                    renderizarServicios();
+
+                    renderizarMembresias();
+
+                    const recordada = pestañaRecordada();
+
+                    seleccionarPestaña(
+                        recordada === 'membresias'
+                            ? 'membresias'
+                            : 'servicios'
+                    );
+
+                }
+                catch (error) {
+
+                    contenedorServicios.replaceChildren();
+
+                    contenedorMembresias.replaceChildren();
+
+                    mostrarError(
+                        'No se pudieron cargar los datos de Supabase: '
+                        + error.message
+                    );
+                }
+            }
+
+            // =========================================
+            // ESPECIALIDADES
+            // =========================================
+
+            function llenarEspecialidades() {
+
+                const selector =
+                    document.getElementById('especialidadServicio');
+
+                selector.replaceChildren();
+
+                const sinEspecialidad = elemento(
+                    'option',
+                    '',
+                    'Sin especialidad asignada'
+                );
+
+                sinEspecialidad.value = '';
+
+                selector.appendChild(sinEspecialidad);
+
+                especialidades.forEach(function(especialidad) {
+
+                    const id = obtener(
+                        especialidad,
+                        'Id',
+                        ''
+                    );
+
+                    const nombre = obtener(
+                        especialidad,
+                        'Nombre',
+                        ''
+                    );
+
+                    const opcion = elemento(
+                        'option',
+                        '',
+                        nombre
+                    );
+
+                    opcion.value = id;
+
+                    selector.appendChild(opcion);
+                });
+            }
+
+            // =========================================
+            // CREAR TARJETAS DE SERVICIOS
+            // =========================================
+
+            function crearTarjetaServicio(servicio) {
+
+                const id = obtener(
+                    servicio,
+                    'IdServicio',
+                    0
+                );
+
+                const nombre = obtener(
+                    servicio,
+                    'Nombre',
+                    ''
+                );
+
+                const descripcion = obtener(
+                    servicio,
+                    'Descripcion',
+                    ''
+                );
+
+                const costo = obtener(
+                    servicio,
+                    'Costo',
+                    0
+                );
+
+                const duracion = obtener(
+                    servicio,
+                    'DuracionMinutos',
+                    null
+                );
+
+                const disponible = obtener(
+                    servicio,
+                    'Disponible',
+                    false
+                ) === true;
+
+                const tarjeta = elemento(
+                    'div',
+                    'service-card'
+                );
+
+                tarjeta.dataset.filtro =
+                    normalizar(nombre + ' ' + descripcion);
+
+                // ENCABEZADO
+
+                const encabezado = elemento(
+                    'div',
+                    'service-header'
+                );
+
+                encabezado.appendChild(
+                    elemento('h3', '', nombre)
+                );
+
+                const estado = elemento(
+                    'span',
+                    disponible
+                        ? 'status-badge active-service'
+                        : 'status-badge paused-service'
+                );
+
+                estado.appendChild(
+                    elemento('span', 'status-dot')
+                );
+
+                estado.appendChild(
+                    document.createTextNode(
+                        disponible ? ' Activo' : ' Inactivo'
+                    )
+                );
+
+                encabezado.appendChild(estado);
+
+                tarjeta.appendChild(encabezado);
+
+                // DESCRIPCIÓN
+
+                tarjeta.appendChild(
+                    elemento(
+                        'p',
+                        '',
+                        descripcion || 'Sin descripción registrada.'
+                    )
+                );
+
+                // INFORMACIÓN
+
+                const informacion = elemento(
+                    'div',
+                    'service-info'
+                );
+
+                const filaPrecio = elemento(
+                    'div',
+                    'info-row'
+                );
+
+                filaPrecio.appendChild(
+                    elemento('span', '', 'Precio:')
+                );
+
+                filaPrecio.appendChild(
+                    elemento('strong', '', dineroUSD(costo))
+                );
+
+                informacion.appendChild(filaPrecio);
+
+                const filaDuracion = elemento(
+                    'div',
+                    'info-row'
+                );
+
+                filaDuracion.appendChild(
+                    elemento('span', '', 'Duración:')
+                );
+
+                filaDuracion.appendChild(
+                    elemento('b', '', duracionServicio(duracion))
+                );
+
+                informacion.appendChild(filaDuracion);
+
+                tarjeta.appendChild(informacion);
+
+                tarjeta.appendChild(
+                    elemento('div', 'service-divider')
+                );
+
+                // BOTONES
+
+                const acciones = elemento(
+                    'div',
+                    'service-actions'
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        'Editar',
+                        'edit-button',
+                        function() {
+                            abrirEditarServicio(servicio);
+                        }
+                    )
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        disponible ? 'Desactivar' : 'Activar',
+                        disponible
+                            ? 'text-action lv-state'
+                            : 'activate-action lv-state',
+                        function() {
+                            confirmarEstadoServicio(servicio);
+                        }
+                    )
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        'Eliminar',
+                        'text-action lv-delete',
+                        function() {
+                            confirmarEliminarServicio(servicio);
+                        }
+                    )
+                );
+
+                tarjeta.appendChild(acciones);
+
+                return tarjeta;
+            }
+
+            function renderizarServicios() {
+
+                contenedorServicios.replaceChildren();
+
+                servicios.forEach(function(servicio) {
+
+                    contenedorServicios.appendChild(
+                        crearTarjetaServicio(servicio)
+                    );
+                });
+
+                filtrarRegistros();
+            }
+
+            // =========================================
+            // CREAR TARJETAS DE MEMBRESÍAS
+            // =========================================
+
+            function crearTarjetaMembresia(membresia) {
+
+                const id = obtener(
+                    membresia,
+                    'IdMembresia',
+                    0
+                );
+
+                const nombre = obtener(
+                    membresia,
+                    'Nombre',
+                    ''
+                );
+
+                const beneficios = obtener(
+                    membresia,
+                    'Beneficios',
+                    ''
+                );
+
+                const duracion = obtener(
+                    membresia,
+                    'Duracion',
+                    ''
+                );
+
+                const precio = obtener(
+                    membresia,
+                    'PrecioMensual',
+                    null
+                );
+
+                const activo = obtener(
+                    membresia,
+                    'Activo',
+                    false
+                ) === true;
+
+                const cantidad = obtener(
+                    membresia,
+                    'MiembrosActivos',
+                    0
+                );
+
+                const esVIP =
+                    normalizar(nombre).includes('vip');
+
+                const tarjeta = elemento(
+                    'div',
+                    esVIP
+                        ? 'membership-card vip-card'
+                        : 'membership-card'
+                );
+
+                tarjeta.dataset.filtro =
+                    normalizar(nombre + ' ' + beneficios);
+
+                // ENCABEZADO
+
+                const superior = elemento(
+                    'div',
+                    'membership-top'
+                );
+
+                if (esVIP) {
+
+                    const filaVIP = elemento(
+                        'div',
+                        'vip-title-row'
+                    );
+
+                    filaVIP.appendChild(
+                        elemento('h3', '', nombre)
+                    );
+
+                    filaVIP.appendChild(
+                        elemento(
+                            'span',
+                            'popular-badge',
+                            'VIP'
+                        )
+                    );
+
+                    superior.appendChild(filaVIP);
+
+                }
+                else {
+
+                    superior.appendChild(
+                        elemento('h3', '', nombre)
+                    );
+                }
+
+                const textoPrecio =
+                    precio === null ||
+                        precio === undefined
+                        ? 'Precio no configurado'
+                        : dineroUSD(precio) +
+                        (normalizar(duracion).includes('mes')
+                            ? '/mes'
+                            : '');
+
+                superior.appendChild(
+                    elemento(
+                        'div',
+                        'membership-price',
+                        textoPrecio
+                    )
+                );
+
+                superior.appendChild(
+                    elemento(
+                        'div',
+                        activo
+                            ? 'lv-plan-state'
+                            : 'lv-plan-state inactive',
+                        activo ? 'Plan activo' : 'Plan inactivo'
+                    )
+                );
+
+                tarjeta.appendChild(superior);
+
+                // BENEFICIOS
+
+                const seccionBeneficios = elemento(
+                    'div',
+                    'benefits-section'
+                );
+
+                seccionBeneficios.appendChild(
+                    elemento(
+                        'span',
+                        'benefits-title',
+                        'BENEFICIOS INCLUIDOS'
+                    )
+                );
+
+                const lista = elemento(
+                    'div',
+                    'benefits-list lv-benefits-list'
+                );
+
+                const partes = String(beneficios)
+                    .split(/[,;\n]+/)
+                    .map(function(b) {
+                        return b.trim();
+                    })
+                    .filter(Boolean);
+
+                if (partes.length === 0) {
+
+                    lista.appendChild(
+                        elemento(
+                            'p',
+                            'lv-benefit-empty',
+                            'Beneficios no configurados.'
+                        )
+                    );
+
+                }
+                else {
+
+                    partes.forEach(function(beneficio) {
+
+                        const fila = elemento(
+                            'div',
+                            'benefit'
+                        );
+
+                        fila.appendChild(
+                            elemento('span', '', '✓')
+                        );
+
+                        fila.appendChild(
+                            elemento('p', '', beneficio)
+                        );
+
+                        lista.appendChild(fila);
+                    });
+                }
+
+                seccionBeneficios.appendChild(lista);
+
+                tarjeta.appendChild(seccionBeneficios);
+
+                tarjeta.appendChild(
+                    elemento('div', 'membership-divider')
+                );
+
+                // PARTE INFERIOR
+
+                const inferior = elemento(
+                    'div',
+                    'membership-bottom'
+                );
+
+                const contador = elemento(
+                    'div',
+                    'members-count'
+                );
+
+                contador.appendChild(
+                    elemento(
+                        'span',
+                        '',
+                        'MIEMBROS ACTIVOS'
+                    )
+                );
+
+                contador.appendChild(
+                    elemento(
+                        'strong',
+                        '',
+                        cantidad === null
+                            ? 'Sin datos'
+                            : cantidad
+                    )
+                );
+
+                inferior.appendChild(contador);
+
+                // ACCIONES
+
+                const acciones = elemento(
+                    'div',
+                    'membership-actions'
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        'Editar',
+                        'small-edit',
+                        function() {
+                            abrirEditarMembresia(membresia);
+                        }
+                    )
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        'Ver Miembros',
+                        'members-button',
+                        function() {
+                            verMiembros(membresia);
+                        }
+                    )
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        activo ? 'Desactivar' : 'Activar',
+                        'lv-membership-action lv-state',
+                        function() {
+                            confirmarEstadoMembresia(membresia);
+                        }
+                    )
+                );
+
+                acciones.appendChild(
+                    enlace(
+                        'Eliminar',
+                        'lv-membership-action lv-delete',
+                        function() {
+                            confirmarEliminarMembresia(membresia);
+                        }
+                    )
+                );
+
+                inferior.appendChild(acciones);
+
+                tarjeta.appendChild(inferior);
+
+                return tarjeta;
+            }
+
+            function renderizarMembresias() {
+
+                contenedorMembresias.replaceChildren();
+
+                membresias.forEach(function(membresia) {
+
+                    contenedorMembresias.appendChild(
+                        crearTarjetaMembresia(membresia)
+                    );
+                });
+
+                filtrarRegistros();
+            }
+
+            // =========================================
+            // BUSCADOR
+            // =========================================
+
+            function filtrarRegistros() {
+
+                const texto = normalizar(
+                    campoBusqueda.value.trim()
+                );
+
+                let visiblesServicios = 0;
+
+                let visiblesMembresias = 0;
+
+                contenedorServicios
+                    .querySelectorAll('.service-card')
+                    .forEach(function(tarjeta) {
+
+                        const visible =
+                            tarjeta.dataset.filtro.includes(texto);
+
+                        tarjeta.hidden = !visible;
+
+                        if (visible) {
+                            visiblesServicios++;
+                        }
+                    });
+
+                contenedorMembresias
+                    .querySelectorAll('.membership-card')
+                    .forEach(function(tarjeta) {
+
+                        const visible =
+                            tarjeta.dataset.filtro.includes(texto);
+
+                        tarjeta.hidden = !visible;
+
+                        if (visible) {
+                            visiblesMembresias++;
+                        }
+                    });
+
+                document.getElementById('sinServicios')
+                    .hidden = visiblesServicios > 0;
+
+                document.getElementById('sinMembresias')
+                    .hidden = visiblesMembresias > 0;
+            }
+
+            campoBusqueda.addEventListener(
+                'input',
+                filtrarRegistros
+            );
+
+            // =========================================
+            // AGREGAR SERVICIO
+            // =========================================
+
+            function abrirAgregarServicio() {
+
+                recordarPestaña('servicios');
+
+                formServicio.reset();
+
+                formServicio.action =
+                    rutas.agregarServicio;
+
+                document.getElementById('idServicio')
+                    .value = '0';
+
+                document.getElementById('estadoServicio')
+                    .value = 'true';
+
+                document.getElementById('tituloModalServicio')
+                    .textContent = 'Agregar Servicio';
+
+                abrirModal('modalServicio');
+            }
+
+            // =========================================
+            // EDITAR SERVICIO
+            // =========================================
+
+            function abrirEditarServicio(servicio) {
+
+                recordarPestaña('servicios');
+
+                formServicio.reset();
+
+                formServicio.action =
+                    rutas.editarServicio;
+
+                document.getElementById('idServicio')
+                    .value = obtener(
+                        servicio, 'IdServicio', 0
+                    );
+
+                document.getElementById('nombreServicio')
+                    .value = obtener(
+                        servicio, 'Nombre', ''
+                    );
+
+                document.getElementById('descripcionServicio')
+                    .value = obtener(
+                        servicio, 'Descripcion', ''
+                    );
+
+                document.getElementById('costoServicio')
+                    .value = obtener(
+                        servicio, 'Costo', 0
+                    );
+
+                document.getElementById('duracionServicio')
+                    .value = obtener(
+                        servicio, 'DuracionMinutos', ''
+                    ) ?? '';
+
+                document.getElementById('especialidadServicio')
+                    .value = obtener(
+                        servicio, 'IdEspecialidad', ''
+                    ) ?? '';
+
+                document.getElementById('estadoServicio')
+                    .value = obtener(
+                        servicio, 'Disponible', false
+                    ) === true ? 'true' : 'false';
+
+                document.getElementById('tituloModalServicio')
+                    .textContent = 'Editar Servicio';
+
+                abrirModal('modalServicio');
+            }
+
+            // =========================================
+            // CREAR MEMBRESÍA
+            // =========================================
+
+            function abrirAgregarMembresia() {
+
+                recordarPestaña('membresias');
+
+                formMembresia.reset();
+
+                formMembresia.action =
+                    rutas.agregarMembresia;
+
+                document.getElementById('idMembresia')
+                    .value = '0';
+
+                document.getElementById('duracionMembresia')
+                    .value = '1 mes';
+
+                document.getElementById('estadoMembresia')
+                    .value = 'true';
+
+                document.getElementById('tituloModalMembresia')
+                    .textContent = 'Crear Plan de Membresía';
+
+                abrirModal('modalMembresia');
+            }
+
+            // =========================================
+            // EDITAR MEMBRESÍA
+            // =========================================
+
+            function abrirEditarMembresia(membresia) {
+
+                recordarPestaña('membresias');
+
+                formMembresia.reset();
+
+                formMembresia.action =
+                    rutas.editarMembresia;
+
+                document.getElementById('idMembresia')
+                    .value = obtener(
+                        membresia, 'IdMembresia', 0
+                    );
+
+                document.getElementById('nombreMembresia')
+                    .value = obtener(
+                        membresia, 'Nombre', ''
+                    );
+
+                document.getElementById('beneficiosMembresia')
+                    .value = obtener(
+                        membresia, 'Beneficios', ''
+                    );
+
+                document.getElementById('duracionMembresia')
+                    .value = obtener(
+                        membresia, 'Duracion', ''
+                    );
+
+                document.getElementById('precioMembresia')
+                    .value = obtener(
+                        membresia, 'PrecioMensual', ''
+                    ) ?? '';
+
+                document.getElementById('estadoMembresia')
+                    .value = obtener(
+                        membresia, 'Activo', false
+                    ) === true ? 'true' : 'false';
+
+                document.getElementById('tituloModalMembresia')
+                    .textContent = 'Editar Membresía';
+
+                abrirModal('modalMembresia');
+            }
+
+            // =========================================
+            // BOTÓN PRINCIPAL Y CREAR PLAN
+            // =========================================
+
+            document.getElementById('botonAgregarServicio')
+                .addEventListener('click', function(e) {
+
+                    e.preventDefault();
+
+                    if (pestañaActual === 'servicios') {
+                        abrirAgregarServicio();
+                    }
+                    else {
+                        abrirAgregarMembresia();
+                    }
+                });
+
+            document.getElementById('botonCrearPlan')
+                .addEventListener('click', function(e) {
+
+                    e.preventDefault();
+
+                    abrirAgregarMembresia();
+                });
+
+            // =========================================
+            // VER MIEMBROS DE UNA MEMBRESÍA
+            // =========================================
+
+            function fechaLegible(valor) {
+
+                if (!valor) {
+                    return 'No registrada';
+                }
+
+                const fecha = new Date(valor);
+
+                if (Number.isNaN(fecha.getTime())) {
+                    return 'No registrada';
+                }
+
+                return fecha.toLocaleDateString('es-SV', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            function verMiembros(membresia) {
+
+                const id = Number(
+                    obtener(membresia, 'IdMembresia', 0)
+                );
+
+                const nombre = obtener(
+                    membresia, 'Nombre', ''
+                );
+
+                document.getElementById('tituloModalMiembros')
+                    .textContent = 'Miembros de ' + nombre;
+
+                const contenedor =
+                    document.getElementById('contenidoMiembros');
+
+                contenedor.replaceChildren();
+
+                const asociados = miembros.filter(
+                    function(miembro) {
+
+                        return Number(
+                            obtener(miembro, 'IdMembresia', 0)
+                        ) === id;
+                    }
+                );
+
+                if (asociados.length === 0) {
+
+                    contenedor.appendChild(
+                        elemento(
+                            'p',
+                            'lv-modal-description',
+                            'No hay clientes asociados a esta membresía.'
+                        )
+                    );
+
+                    abrirModal('modalMiembros');
+
+                    return;
+                }
+
+                const cantidadVigentes =
+                    asociados.filter(function(miembro) {
+
+                        return obtener(
+                            miembro, 'EsVigente', false
+                        ) === true;
+                    }).length;
+
+                contenedor.appendChild(
+                    elemento(
+                        'p',
+                        'lv-modal-description',
+                        'Clientes asociados: ' +
+                        asociados.length +
+                        ' | Membresías vigentes: ' +
+                        cantidadVigentes
+                    )
+                );
+
+                asociados.forEach(function(miembro) {
+
+                    const nombreCliente = obtener(
+                        miembro,
+                        'NombreCompleto',
+                        'Cliente'
+                    );
+
+                    const vigente = obtener(
+                        miembro,
+                        'EsVigente',
+                        false
+                    ) === true;
+
+                    const estado = obtener(
+                        miembro,
+                        'EstadoMembresia',
+                        'Sin estado'
+                    );
+
+                    const inicio = obtener(
+                        miembro,
+                        'FechaInicio',
+                        null
+                    );
+
+                    const fin = obtener(
+                        miembro,
+                        'FechaFin',
+                        null
+                    );
+
+                    const fila = elemento(
+                        'div',
+                        'lv-member-entry'
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'strong',
+                            '',
+                            nombreCliente
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            vigente
+                                ? 'lv-member-active'
+                                : 'lv-member-inactive',
+                            vigente
+                                ? 'Membresía vigente'
+                                : 'Membresía no vigente'
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            'Estado registrado: ' + estado
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            'Inicio: ' + fechaLegible(inicio)
+                        )
+                    );
+
+                    fila.appendChild(
+                        elemento(
+                            'span',
+                            '',
+                            'Vencimiento: ' + fechaLegible(fin)
+                        )
+                    );
+
+                    contenedor.appendChild(fila);
+                });
+
+                abrirModal('modalMiembros');
+            }
+
+            // =========================================
+            // CONFIRMACIONES GENERALES
+            // =========================================
+
+            function prepararConfirmacion(
+                accion,
+                titulo,
+                mensaje,
+                parametros,
+                textoBoton,
+                esEliminacion
+            ) {
+
+                formConfirmar.action = accion;
+
+                document.getElementById('tituloConfirmar')
+                    .textContent = titulo;
+
+                document.getElementById('textoConfirmar')
+                    .textContent = mensaje;
+
+                const campos =
+                    document.getElementById('camposConfirmar');
+
+                campos.replaceChildren();
+
+                Object.entries(parametros).forEach(
+                    function(entrada) {
+
+                        const campo = document.createElement('input');
+
+                        campo.type = 'hidden';
+
+                        campo.name = entrada[0];
+
+                        campo.value = String(entrada[1]);
+
+                        campos.appendChild(campo);
+                    }
+                );
+
+                const boton =
+                    document.getElementById('botonConfirmar');
+
+                boton.textContent = textoBoton;
+
+                boton.className = esEliminacion
+                    ? 'lv-btn-danger'
+                    : 'lv-btn-save';
+
+                abrirModal('modalConfirmar');
+            }
+
+            // =========================================
+            // ACTIVAR / DESACTIVAR SERVICIO
+            // =========================================
+
+            function confirmarEstadoServicio(servicio) {
+
+                recordarPestaña('servicios');
+
+                const id = obtener(
+                    servicio, 'IdServicio', 0
+                );
+
+                const nombre = obtener(
+                    servicio, 'Nombre', ''
+                );
+
+                const disponible = obtener(
+                    servicio, 'Disponible', false
+                ) === true;
+
+                const activar = !disponible;
+
+                prepararConfirmacion(
+
+                    rutas.estadoServicio,
+
+                    activar
+                        ? 'Activar Servicio'
+                        : 'Desactivar Servicio',
+
+                    activar
+                        ? '¿Deseas activar el servicio "' +
+                        nombre + '"?'
+                        : '¿Deseas desactivar el servicio "' +
+                        nombre +
+                        '"? Se conservarán las reservas y registros históricos.',
+
+                    {
+                        idServicio: id,
+                        activar: activar
+                    },
+
+                    activar
+                        ? 'Sí, activar'
+                        : 'Sí, desactivar',
+
+                    false
+                );
+            }
+
+            // =========================================
+            // ELIMINAR SERVICIO
+            // =========================================
+
+            function confirmarEliminarServicio(servicio) {
+
+                recordarPestaña('servicios');
+
+                const id = obtener(
+                    servicio, 'IdServicio', 0
+                );
+
+                const nombre = obtener(
+                    servicio, 'Nombre', ''
+                );
+
+                prepararConfirmacion(
+
+                    rutas.eliminarServicio,
+
+                    'Eliminar Servicio',
+
+                    '¿Seguro que deseas eliminar "' +
+                    nombre +
+                    '"? Esta acción es permanente. Si tiene citas, promociones u otros registros relacionados, no podrá eliminarse. En ese caso puedes desactivarlo.',
+
+                    {
+                        idServicio: id
+                    },
+
+                    'Sí, eliminar servicio',
+
+                    true
+                );
+            }
+
+            // =========================================
+            // ACTIVAR / DESACTIVAR MEMBRESÍA
+            // =========================================
+
+            function confirmarEstadoMembresia(membresia) {
+
+                recordarPestaña('membresias');
+
+                const id = obtener(
+                    membresia, 'IdMembresia', 0
+                );
+
+                const nombre = obtener(
+                    membresia, 'Nombre', ''
+                );
+
+                const activo = obtener(
+                    membresia, 'Activo', false
+                ) === true;
+
+                const activar = !activo;
+
+                prepararConfirmacion(
+
+                    rutas.estadoMembresia,
+
+                    activar
+                        ? 'Activar Membresía'
+                        : 'Desactivar Membresía',
+
+                    activar
+                        ? '¿Deseas activar el plan "' +
+                        nombre + '"?'
+                        : '¿Deseas desactivar "' +
+                        nombre +
+                        '"? Los clientes que ya tienen esta membresía conservarán sus registros e historial.',
+
+                    {
+                        idMembresia: id,
+                        activar: activar
+                    },
+
+                    activar
+                        ? 'Sí, activar'
+                        : 'Sí, desactivar',
+
+                    false
+                );
+            }
+
+            // =========================================
+            // ELIMINAR MEMBRESÍA
+            // =========================================
+
+            function confirmarEliminarMembresia(membresia) {
+
+                recordarPestaña('membresias');
+
+                const id = obtener(
+                    membresia, 'IdMembresia', 0
+                );
+
+                const nombre = obtener(
+                    membresia, 'Nombre', ''
+                );
+
+                prepararConfirmacion(
+
+                    rutas.eliminarMembresia,
+
+                    'Eliminar Membresía',
+
+                    '¿Seguro que deseas eliminar el plan "' +
+                    nombre +
+                    '"? La eliminación es permanente y solo será permitida si no tiene clientes ni registros relacionados. Puedes desactivarlo para conservar su historial.',
+
+                    {
+                        idMembresia: id
+                    },
+
+                    'Sí, eliminar membresía',
+
+                    true
+                );
+            }
+
+            // =========================================
+            // CONSERVAR LA PESTAÑA AL GUARDAR
+            // =========================================
+
+            formServicio.addEventListener(
+                'submit',
+                function() {
+                    recordarPestaña('servicios');
+                }
+            );
+
+            formMembresia.addEventListener(
+                'submit',
+                function() {
+                    recordarPestaña('membresias');
+                }
+            );
+
+            // =========================================
+            // INICIAR PANTALLA
+            // =========================================
+
+            cargarDatos();
+
+    </script>
 
 </body>
 

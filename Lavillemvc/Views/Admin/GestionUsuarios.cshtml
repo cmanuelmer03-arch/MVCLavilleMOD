@@ -1,46 +1,197 @@
-﻿<!DOCTYPE html>
+﻿@model List<Lavillemvc.Models.AdminGestionUsuarios>
+@using System
+@using System.Linq
+@using System.Globalization
+@using Lavillemvc.Controllers
+
+@{
+    Layout = null;
+    var usuarios = Model ?? new List<Lavillemvc.Models.AdminGestionUsuarios>();
+    var resumen = usuarios.FirstOrDefault();
+
+    var sucursales =
+        ViewBag.Sucursales as List<(int Id, string Nombre)>
+        ?? new List<(int Id, string Nombre)>();
+
+    var especialidades =
+        ViewBag.Especialidades as List<(int Id, string Nombre)>
+        ?? new List<(int Id, string Nombre)>();
+}
+
+<!DOCTYPE html>
 <html lang="es">
-
 <head>
-
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
     <title>Gestión de Usuarios - L'Avielle</title>
-
-    <!-- conexion con css -->
     <link href="~/css/gestionusuarios.css" rel="stylesheet" />
 
+    <style>
+            .search-bar input {
+                width: 100%;
+                min-width: 0;
+                border: 0;
+                outline: 0;
+                background: transparent;
+                color: inherit;
+                font: inherit;
+            }
+
+            .filter-chip {
+                cursor: pointer;
+            }
+
+            button.filter-chip {
+                font: inherit;
+            }
+
+            .sort-dropdown select {
+                border: 0;
+                background: transparent;
+                color: inherit;
+                font: inherit;
+                cursor: pointer;
+            }
+
+            .user-row[hidden], .mensaje-vacio[hidden] {
+                display: none !important;
+            }
+
+            .actions button {
+                border: 0;
+                background: transparent;
+                padding: 0;
+                color: inherit;
+                font: inherit;
+                cursor: pointer;
+            }
+
+                .actions button:hover {
+                    text-decoration: underline;
+                }
+
+            .accion-eliminar {
+                color: #a44c47 !important;
+            }
+
+            .modal-fondo {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 1000;
+                background: rgba(0,0,0,.5);
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+                .modal-fondo.abierto {
+                    display: flex;
+                }
+
+            .modal-caja {
+                background: #fff;
+                color: #4a332b;
+                width: 100%;
+                max-width: 480px;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 28px;
+                border-radius: 16px;
+                box-shadow: 0 15px 40px rgba(0,0,0,.2);
+            }
+
+                .modal-caja h2 {
+                    font-family: "Times New Roman", serif;
+                    margin: 0 0 20px;
+                    color: #563b32;
+                }
+
+            .campo-modal {
+                margin-bottom: 15px;
+            }
+
+                .campo-modal label {
+                    display: block;
+                    font-size: 13px;
+                    margin-bottom: 6px;
+                }
+
+                .campo-modal input,
+                .campo-modal select {
+                    width: 100%;
+                    padding: 11px;
+                    border: 1px solid #eaded4;
+                    border-radius: 8px;
+                    background: white;
+                    color: #4a332b;
+                    font: inherit;
+                }
+
+            .acciones-modal {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                margin-top: 22px;
+            }
+
+            .boton-modal {
+                padding: 11px 18px;
+                border: 0;
+                border-radius: 8px;
+                background: #62463a;
+                color: #fff;
+                cursor: pointer;
+            }
+
+            .boton-cancelar {
+                background: #eee4db;
+                color: #4a332b;
+            }
+
+            .modal-dato {
+                margin: 12px 0;
+            }
+
+                .modal-dato strong {
+                    display: block;
+                    font-size: 12px;
+                    color: #a67c6b;
+                }
+
+            .mensaje-usuarios {
+                padding: 14px 18px;
+                margin-bottom: 18px;
+                background: #f4eee6;
+                border-radius: 10px;
+            }
+
+            .mensaje-error {
+                background: #fff0ed;
+                color: #9a4037;
+            }
+    </style>
 </head>
 
 <body>
-
     <div class="page">
-
         <div class="content-wrapper">
 
-            <!-- sidebar -->
+            <!-- SIDEBAR ORIGINAL -->
             <aside class="sidebar">
-
                 <div class="sidebar-top">
-
                     <div class="brand-group">
-
-                        <div class="brand-logo">
-                            L'Avielle
-                        </div>
-
+                        <div class="brand-logo">L'Avielle</div>
                         <div class="admin-badge">
                             Administrador General
                         </div>
-
                     </div>
 
-                    <!-- conexion entre frames -->
                     <nav class="nav-list">
 
-                        <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link">
-
+                        <a href="@Url.Action("Dashboard", "Admin")"
+                           class="sidebar-link">
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <rect x="3" y="3" width="7" height="7" rx="1"></rect>
@@ -49,16 +200,11 @@
                                     <rect x="14" y="14" width="7" height="7" rx="1"></rect>
                                 </svg>
                             </span>
-
-                            <span class="tab-text">
-                                Dashboard General
-                            </span>
-
+                            <span class="tab-text">Dashboard General</span>
                         </a>
 
-
-                        <a href="@Url.Action("GestionUsuarios", "Admin")" class="sidebar-link active">
-
+                        <a href="@Url.Action("GestionUsuarios", "Admin")"
+                           class="sidebar-link active">
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <circle cx="9" cy="8" r="3"></circle>
@@ -66,18 +212,12 @@
                                     <path d="M16 11c2.8 0 5 1.5 5 4"></path>
                                 </svg>
                             </span>
-
-                            <span class="tab-text">
-                                Gestión de Usuarios
-                            </span>
-
+                            <span class="tab-text">Gestión de Usuarios</span>
                             <span class="active-indicator"></span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionSucursales", "Admin")" class="sidebar-link">
-
+                        <a href="@Url.Action("GestionSucursales", "Admin")"
+                           class="sidebar-link">
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <rect x="4" y="3" width="16" height="18" rx="1"></rect>
@@ -87,32 +227,22 @@
                                     <path d="M10 21v-3h4v3"></path>
                                 </svg>
                             </span>
-
-                            <span class="tab-text">
-                                Gestión de Sucursales
-                            </span>
-
+                            <span class="tab-text">Gestión de Sucursales</span>
                         </a>
 
-
-                        <a href="@Url.Action("GestionServicios", "Admin")" class="sidebar-link">
-
+                        <a href="@Url.Action("GestionServicios", "Admin")"
+                           class="sidebar-link">
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M12 3l1.3 4.7L18 9l-4.7 1.3L12 15l-1.3-4.7L6 9l4.7-1.3z"></path>
-                                    <path d="m19 14 .7 2.3L22 17l-.7-2.3L19 20l-.7-2.3L16 17l2.3-.7z"></path>
+                                    <path d="m19 14 .7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7z"></path>
                                 </svg>
                             </span>
-
-                            <span class="tab-text">
-                                Gestión de Servicios
-                            </span>
-
+                            <span class="tab-text">Gestión de Servicios</span>
                         </a>
 
-
-                        <a href="@Url.Action("ReportesGenerales", "Admin")" class="sidebar-link">
-
+                        <a href="@Url.Action("ReportesGenerales", "Admin")"
+                           class="sidebar-link">
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M4 19V9"></path>
@@ -121,24 +251,15 @@
                                     <path d="M22 19V3"></path>
                                 </svg>
                             </span>
-
-                            <span class="tab-text">
-                                Reportes
-                            </span>
-
+                            <span class="tab-text">Reportes</span>
                         </a>
-
                     </nav>
-
                 </div>
 
-                <!-- cerrar sesion -->
                 <div class="sidebar-bottom">
-
                     <div class="divider"></div>
-
-                    <a href="#" class="sidebar-link logout-link">
-
+                    <a href="@Url.Action("Index", "Login")"
+                       class="sidebar-link logout-link">
                         <span class="nav-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"></path>
@@ -146,68 +267,66 @@
                                 <path d="M10 12h8"></path>
                             </svg>
                         </span>
-
-                        <span class="tab-text">
-                            Cerrar Sesión
-                        </span>
-
+                        <span class="tab-text">Cerrar Sesión</span>
                     </a>
-
                 </div>
-
             </aside>
 
-
-            <!-- contenido -->
+            <!-- CONTENIDO -->
             <main class="main-content">
 
-                <!-- encabezado -->
                 <section class="section-header">
-
                     <div class="title-wrapper">
-
-                        <h1>
-                            Gestión de Usuarios
-                        </h1>
-
+                        <h1>Gestión de Usuarios</h1>
                         <p>
-                            Administra cuentas de clientes, especialistas, recepcionistas y gerentes
+                            Administra cuentas de clientes, especialistas,
+                            recepcionistas y gerentes
                         </p>
-
                     </div>
 
-
                     <div class="header-actions">
-
-                        <!-- busqueda -->
                         <div class="search-bar">
-
                             <span class="search-icon">
-
                                 <svg viewBox="0 0 24 24">
                                     <circle cx="10.5" cy="10.5" r="6"></circle>
                                     <path d="m15 15 5 5"></path>
                                 </svg>
-
                             </span>
-
-                            <span class="search-text">
-                                Buscar por nombre, email o rol...
-                            </span>
-
+                            <input id="buscarUsuario"
+                                   type="search"
+                                   placeholder="Buscar por nombre, email o rol..." />
                         </div>
 
-                        <!-- crear usuario -->
-                        <a href="#" class="create-button">
+                        <button type="button"
+                                class="create-button"
+                                id="abrirCrear">
                             + Crear Usuario
-                        </a>
-
+                        </button>
                     </div>
-
                 </section>
 
+                @if (TempData["MensajeUsuarios"] != null)
+                {
+                    <div class="mensaje-usuarios">
+                        @TempData["MensajeUsuarios"]
+                    </div>
+                }
 
-                <!-- resumen -->
+                @if (TempData["ErrorUsuarios"] != null)
+                {
+                    <div class="mensaje-usuarios mensaje-error">
+                        @TempData["ErrorUsuarios"]
+                    </div>
+                }
+
+                @if (ViewBag.ErrorUsuarios != null)
+                {
+                    <div class="mensaje-usuarios mensaje-error">
+                        @ViewBag.ErrorUsuarios
+                    </div>
+                }
+
+                <!-- TARJETAS ORIGINALES -->
                 <section class="role-summary-row">
 
                     <div class="summary-card">
@@ -215,7 +334,9 @@
                             <span class="sum-dot clientes"></span>
                             <span>Clientes</span>
                         </div>
-                        <div class="sum-value">2,842</div>
+                        <div class="sum-value">
+                            @(resumen?.TotalClientes ?? 0)
+                        </div>
                     </div>
 
                     <div class="summary-card">
@@ -223,7 +344,9 @@
                             <span class="sum-dot especialistas"></span>
                             <span>Especialistas</span>
                         </div>
-                        <div class="sum-value">24</div>
+                        <div class="sum-value">
+                            @(resumen?.TotalEspecialistas ?? 0)
+                        </div>
                     </div>
 
                     <div class="summary-card">
@@ -231,7 +354,9 @@
                             <span class="sum-dot recepcionistas"></span>
                             <span>Recepcionistas</span>
                         </div>
-                        <div class="sum-value">8</div>
+                        <div class="sum-value">
+                            @(resumen?.TotalRecepcionistas ?? 0)
+                        </div>
                     </div>
 
                     <div class="summary-card">
@@ -239,7 +364,9 @@
                             <span class="sum-dot gerentes"></span>
                             <span>Gerentes</span>
                         </div>
-                        <div class="sum-value">4</div>
+                        <div class="sum-value">
+                            @(resumen?.TotalGerentes ?? 0)
+                        </div>
                     </div>
 
                     <div class="summary-card">
@@ -247,7 +374,9 @@
                             <span class="sum-dot inventario"></span>
                             <span>Inventario</span>
                         </div>
-                        <div class="sum-value">4</div>
+                        <div class="sum-value">
+                            @(resumen?.TotalInventario ?? 0)
+                        </div>
                     </div>
 
                     <div class="summary-card">
@@ -255,52 +384,59 @@
                             <span class="sum-dot admins"></span>
                             <span>Admins</span>
                         </div>
-                        <div class="sum-value">2</div>
+                        <div class="sum-value">
+                            @(resumen?.TotalAdministradores ?? 0)
+                        </div>
                     </div>
-
                 </section>
 
-
-                <!-- filtros -->
+                <!-- FILTROS ORIGINALES -->
                 <section class="filter-bar">
-
                     <div class="filter-options">
-
-                        <a href="#" class="filter-chip selected">Todos</a>
-                        <a href="#" class="filter-chip">Clientes</a>
-                        <a href="#" class="filter-chip">Especialistas</a>
-                        <a href="#" class="filter-chip">Recepcionistas</a>
-                        <a href="#" class="filter-chip">Gerentes</a>
-                        <a href="#" class="filter-chip">Inventario</a>
-                        <a href="#" class="filter-chip">Administradores</a>
-
+                        <button type="button" class="filter-chip selected"
+                                data-rol="Todos">
+                            Todos
+                        </button>
+                        <button type="button" class="filter-chip"
+                                data-rol="Cliente">
+                            Clientes
+                        </button>
+                        <button type="button" class="filter-chip"
+                                data-rol="Especialista">
+                            Especialistas
+                        </button>
+                        <button type="button" class="filter-chip"
+                                data-rol="Recepcionista">
+                            Recepcionistas
+                        </button>
+                        <button type="button" class="filter-chip"
+                                data-rol="Gerente">
+                            Gerentes
+                        </button>
+                        <button type="button" class="filter-chip"
+                                data-rol="Inventario">
+                            Inventario
+                        </button>
+                        <button type="button" class="filter-chip"
+                                data-rol="Administrador">
+                            Administradores
+                        </button>
                     </div>
-
 
                     <div class="sort-dropdown">
-
-                        <span>
-                            Ordenar por:
-                        </span>
-
-                        <strong>
-                            Nombre
-                        </strong>
-
-                        <span>
-                            ▼
-                        </span>
-
+                        <span>Ordenar por:</span>
+                        <select id="ordenarUsuarios">
+                            <option value="nombre">Nombre</option>
+                            <option value="rol">Rol</option>
+                            <option value="correo">Email</option>
+                        </select>
                     </div>
-
                 </section>
 
-
-                <!-- tabla -->
+                <!-- TABLA ORIGINAL -->
                 <section class="users-table-container">
 
                     <div class="table-header">
-
                         <div>NOMBRE</div>
                         <div>EMAIL</div>
                         <div>ROL</div>
@@ -308,285 +444,638 @@
                         <div>ESTADO</div>
                         <div>ÚLTIMO ACCESO</div>
                         <div>ACCIONES</div>
-
                     </div>
 
+                    <div id="listadoUsuarios">
+                        @foreach (var usuario in usuarios)
+                        {
+                            string estado =
+                                string.IsNullOrWhiteSpace(usuario.EstadoCuenta)
+                                ? "No registrado"
+                                : usuario.EstadoCuenta;
 
-                    <div class="user-row">
+                            <div class="user-row"
+                                 data-id="@usuario.IdUsuario"
+                                 data-tipo="@usuario.TipoOrigen"
+                                 data-nombre="@usuario.NombreCompleto"
+                                 data-correo="@usuario.Correo"
+                                 data-rol="@usuario.Rol"
+                                 data-sucursal="@usuario.IdSucursal"
+                                 data-sucursal-nombre="@usuario.Sucursal"
+                                 data-especialidad="@usuario.Especialidad"
+                                 data-disponibilidad="@(usuario.DisponibilidadEspecialista == true ? "true" : "false")"
+                                 data-estado="@estado"
+                                 data-acceso="@(usuario.UltimoAcceso?.ToString("dd/MM/yyyy HH:mm") ?? "Sin registro")">
 
-                        <div class="user-name">María García</div>
-                        <div class="user-email">maria.garcia@email.com</div>
-                        <div class="user-role">Cliente</div>
-                        <div class="user-branch">—</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">26 Sep 2026</div>
+                                <div class="user-name">
+                                    @usuario.NombreCompleto
+                                </div>
 
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                        </div>
+                                <div class="user-email">
+                                    @(string.IsNullOrWhiteSpace(usuario.Correo)
+                                        ? "—" : usuario.Correo)
+                                </div>
 
+                                <div class="user-role">@usuario.Rol</div>
+
+                                <div class="user-branch">
+                                    @(string.IsNullOrWhiteSpace(usuario.Sucursal)
+                                        ? "—" : usuario.Sucursal)
+                                </div>
+
+                                <div>
+                                    <span class="status active-status">
+                                        @estado
+                                    </span>
+                                </div>
+
+                                <div class="last-access">
+                                    @(usuario.UltimoAcceso?.ToString(
+                                        "dd MMM yyyy",
+                                        new CultureInfo("es-SV"))
+                                      ?? "Sin registro")
+                                </div>
+
+                                <div class="actions">
+                                    <button type="button"
+                                            class="ver-usuario">
+                                        Ver
+                                    </button>
+                                    <button type="button"
+                                            class="editar-usuario">
+                                        Editar
+                                    </button>
+                                    <button type="button"
+                                            class="accion-eliminar eliminar-usuario">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        }
                     </div>
 
+                    <p id="sinResultados"
+                       class="mensaje-vacio"
+                       hidden>
+                        No se encontraron usuarios.
+                    </p>
 
-                    <div class="user-row">
-
-                        <div class="user-name">Ana Martínez</div>
-                        <div class="user-email">ana.martinez@lavielle.com</div>
-                        <div class="user-role">Recepcionista</div>
-                        <div class="user-branch">Las Mercedes</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">26 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                            <a href="#">Permisos</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="user-row">
-
-                        <div class="user-name">Valentina Rojas</div>
-                        <div class="user-email">valentina.rojas@lavielle.com</div>
-                        <div class="user-role">Especialista</div>
-                        <div class="user-branch">Las Mercedes</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">26 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                            <a href="#">Permisos</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="user-row">
-
-                        <div class="user-name">Isabella Marchetti</div>
-                        <div class="user-email">isabella.m@lavielle.com</div>
-                        <div class="user-role">Especialista</div>
-                        <div class="user-branch">Centro</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">25 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                            <a href="#">Permisos</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="user-row">
-
-                        <div class="user-name">Carlos Mendoza</div>
-                        <div class="user-email">carlos.m@lavielle.com</div>
-                        <div class="user-role">Gerente</div>
-                        <div class="user-branch">Las Mercedes</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">26 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                            <a href="#">Permisos</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="user-row">
-
-                        <div class="user-name">Laura Pérez</div>
-                        <div class="user-email">laura.perez@email.com</div>
-                        <div class="user-role">Cliente</div>
-                        <div class="user-branch">—</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">25 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="user-row">
-
-                        <div class="user-name">Roberto Silva</div>
-                        <div class="user-email">roberto.s@lavielle.com</div>
-                        <div class="user-role">Inventario</div>
-                        <div class="user-branch">Altamira</div>
-                        <div><span class="status active-status">Activo</span></div>
-                        <div class="last-access">24 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                            <a href="#">Permisos</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="user-row">
-
-                        <div class="user-name">Daniela Fuentes</div>
-                        <div class="user-email">daniela.f@lavielle.com</div>
-                        <div class="user-role">Especialista</div>
-                        <div class="user-branch">Centro</div>
-                        <div><span class="status partial-status">Parcial</span></div>
-                        <div class="last-access">22 Sep 2026</div>
-
-                        <div class="actions">
-                            <a href="#">Ver</a>
-                            <a href="#">Editar</a>
-                            <a href="#">Permisos</a>
-                        </div>
-
-                    </div>
-
-
-                    <!-- paginacion -->
                     <div class="table-pagination">
-
-                        <span class="pagination-info">
-                            Mostrando 1-8 de 2,890 usuarios
+                        <span class="pagination-info"
+                              id="contadorUsuarios">
+                            Mostrando @usuarios.Count de @usuarios.Count usuarios
                         </span>
 
                         <div class="pagination-controls">
-
-                            <a href="#" class="page-button">
+                            <button type="button"
+                                    class="page-button"
+                                    id="anteriorPagina">
                                 ←
-                            </a>
-
-                            <a href="#" class="page-button active-page">
-                                1
-                            </a>
-
-                            <a href="#" class="page-button">
-                                2
-                            </a>
-
-                            <a href="#" class="page-button">
+                            </button>
+                            <span class="page-button active-page"
+                                  id="paginaActual">1</span>
+                            <button type="button"
+                                    class="page-button"
+                                    id="siguientePagina">
                                 →
-                            </a>
-
+                            </button>
                         </div>
-
                     </div>
 
                 </section>
-
             </main>
-
         </div>
 
-
-        <!-- footer -->
+        <!-- FOOTER ORIGINAL -->
         <footer class="footer">
-
-            <!-- informacion del footer -->
             <div class="footer-upper">
-
                 <div class="footer-about">
-
-                    <div class="footer-logo">
-                        L'Avielle
-                    </div>
-
+                    <div class="footer-logo">L'Avielle</div>
                     <p>
                         Un concepto exclusivo de salón de belleza y spa de bienestar,
-                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                        donde el lujo se traduce en calma, elegancia y atención
+                        de nivel internacional.
                     </p>
-
-                    <!-- redes sociales -->
                     <div class="social-row">
-
                         <a href="#" class="social-button">Instagram</a>
                         <a href="#" class="social-button">Facebook</a>
                         <a href="#" class="social-button">Web</a>
-
                     </div>
-
                 </div>
 
-
-                <!-- navegacion del footer -->
                 <div class="footer-column">
-
                     <h3>Navegación</h3>
-
                     <div class="footer-links">
-
                         <a href="@Url.Action("Dashboard", "Admin")">Inicio</a>
                         <a href="#">Servicios</a>
                         <a href="#">Especialistas</a>
                         <a href="#">Perfil</a>
                         <a href="#">Iniciar Sesión</a>
                         <a href="#">Registrarse</a>
-
                     </div>
-
                 </div>
 
-
-                <!-- contacto -->
                 <div class="footer-column">
-
                     <h3>Contacto &amp; Ubicación</h3>
-
                     <div class="contact-list">
-
                         <div class="contact-item">
                             Paseo de la Reforma 402, Juárez, CDMX
                         </div>
-
                         <div class="contact-item">
                             +52 55 1234 5678
                         </div>
-
                         <div class="contact-item">
                             contacto&#64;lavielle.com
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
 
             <div class="footer-divider"></div>
 
-
-            <!-- parte final del footer -->
             <div class="footer-bottom">
-
                 <span>
-                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                    © 2026 L'Avielle Salón de Belleza.
+                    Todos los derechos reservados.
                 </span>
 
                 <div class="footer-legal">
-
                     <a href="#">Política de Privacidad</a>
                     <a href="#">Términos del Servicio</a>
-
                 </div>
-
             </div>
-
         </footer>
-
     </div>
 
-</body>
+    <!-- CREAR / EDITAR -->
+    <div class="modal-fondo" id="modalFormulario">
+        <div class="modal-caja">
+            <h2 id="tituloFormulario">Crear Usuario</h2>
 
+            <form id="formUsuario"
+                  method="post"
+                  action="@Url.Action("CrearUsuario", "Admin")">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="IdUsuario"
+                       id="campoId" />
+
+                <input type="hidden"
+                       name="TipoOrigen"
+                       id="campoTipo" />
+
+                <div class="campo-modal">
+                    <label for="campoNombre">Nombre completo</label>
+                    <input name="NombreCompleto"
+                           id="campoNombre"
+                           required />
+                </div>
+
+                <div class="campo-modal" id="grupoCorreo">
+                    <label for="campoCorreo">Correo electrónico</label>
+                    <input type="email"
+                           name="Correo"
+                           id="campoCorreo" />
+                </div>
+
+                <div class="campo-modal" id="grupoRol">
+                    <label for="campoRol">Rol</label>
+                    <select name="Rol" id="campoRol">
+                        <option value="Cliente">Cliente</option>
+                        <option value="Especialista">Especialista</option>
+                        <option value="Recepcionista">Recepcionista</option>
+                        <option value="Gerente">Gerente</option>
+                        <option value="Inventario">Inventario</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+
+                <div class="campo-modal" id="grupoSucursal">
+                    <label for="campoSucursal">Sucursal</label>
+                    <select name="IdSucursal" id="campoSucursal">
+                        <option value="">Seleccionar sucursal</option>
+                        @foreach (var sucursal in sucursales)
+                        {
+                            <option value="@sucursal.Id">
+                                @sucursal.Nombre
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="campo-modal" id="grupoEspecialidad">
+                    <label for="campoEspecialidad">Especialidad</label>
+                    <select name="IdEspecialidad"
+                            id="campoEspecialidad">
+                        <option value="">Seleccionar especialidad</option>
+                        @foreach (var especialidad in especialidades)
+                        {
+                            <option value="@especialidad.Id">
+                                @especialidad.Nombre
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="campo-modal" id="grupoDisponibilidad">
+                    <label for="campoDisponibilidad">
+                        Disponibilidad
+                    </label>
+                    <select name="Disponibilidad"
+                            id="campoDisponibilidad">
+                        <option value="true">Disponible</option>
+                        <option value="false">No disponible</option>
+                    </select>
+                </div>
+
+                <div class="acciones-modal">
+                    <button type="button"
+                            class="boton-modal boton-cancelar"
+                            data-cerrar>
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="boton-modal"
+                            id="botonGuardar">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VER DETALLES -->
+    <div class="modal-fondo" id="modalDetalles">
+        <div class="modal-caja">
+            <h2>Detalles del Usuario</h2>
+            <div id="detalleUsuario"></div>
+            <div class="acciones-modal">
+                <button type="button"
+                        class="boton-modal"
+                        data-cerrar>
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ELIMINAR -->
+    <div class="modal-fondo" id="modalEliminar">
+        <div class="modal-caja">
+            <h2>Eliminar Usuario</h2>
+            <p>
+                ¿Estás seguro de que deseas eliminar a
+                <strong id="nombreEliminar"></strong>?
+            </p>
+
+            <form method="post"
+                  action="@Url.Action("EliminarUsuario", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden"
+                       name="idUsuario"
+                       id="idEliminar" />
+
+                <div class="acciones-modal">
+                    <button type="button"
+                            class="boton-modal boton-cancelar"
+                            data-cerrar>
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="boton-modal">
+                        Eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+            const modalFormulario =
+                document.getElementById("modalFormulario");
+
+            const modalDetalles =
+                document.getElementById("modalDetalles");
+
+            const modalEliminar =
+                document.getElementById("modalEliminar");
+
+            const formulario =
+                document.getElementById("formUsuario");
+
+            const campoId = document.getElementById("campoId");
+            const campoTipo = document.getElementById("campoTipo");
+            const campoNombre = document.getElementById("campoNombre");
+            const campoCorreo = document.getElementById("campoCorreo");
+            const campoRol = document.getElementById("campoRol");
+            const campoSucursal = document.getElementById("campoSucursal");
+            const campoEspecialidad =
+                document.getElementById("campoEspecialidad");
+            const campoDisponibilidad =
+                document.getElementById("campoDisponibilidad");
+
+            const accionCrear =
+                '@Url.Action("CrearUsuario", "Admin")';
+            const accionEditar =
+                '@Url.Action("EditarUsuario", "Admin")';
+
+            function cerrarModales() {
+                document.querySelectorAll(".modal-fondo")
+                    .forEach(m => m.classList.remove("abierto"));
+            }
+
+            function abrirModal(modal) {
+                cerrarModales();
+                modal.classList.add("abierto");
+            }
+
+            document.querySelectorAll("[data-cerrar]")
+                .forEach(b => b.addEventListener("click", cerrarModales));
+
+            document.querySelectorAll(".modal-fondo")
+                .forEach(modal => {
+                    modal.addEventListener("click", e => {
+                        if (e.target === modal) cerrarModales();
+                    });
+                });
+
+            document.addEventListener("keydown", e => {
+                if (e.key === "Escape") cerrarModales();
+            });
+
+            function actualizarCampos() {
+                const rol = campoRol.value;
+                const esCliente = rol === "Cliente";
+                const esEspecialista = rol === "Especialista";
+
+                document.getElementById("grupoSucursal").hidden =
+                    esCliente || esEspecialista;
+
+                document.getElementById("grupoEspecialidad").hidden =
+                    !esEspecialista;
+
+                document.getElementById("grupoDisponibilidad").hidden =
+                    !esEspecialista;
+
+                document.getElementById("grupoCorreo").hidden =
+                    esEspecialista;
+
+                campoSucursal.required =
+                    !esCliente && !esEspecialista;
+
+                campoEspecialidad.required = esEspecialista;
+
+                if (campoTipo.value === "especialista") {
+                    campoRol.disabled = true;
+                } else if (campoId.value) {
+                    campoRol.disabled =
+                        campoTipo.value === "cliente";
+                } else {
+                    campoRol.disabled = false;
+                }
+
+                // Los controles ocultos no se envían como campos requeridos.
+            }
+
+            campoRol.addEventListener("change", actualizarCampos);
+
+            document.getElementById("abrirCrear")
+                .addEventListener("click", () => {
+                    formulario.reset();
+                    formulario.action = accionCrear;
+                    campoId.value = "";
+                    campoTipo.value = "";
+                    document.getElementById("tituloFormulario")
+                        .textContent = "Crear Usuario";
+                    document.getElementById("botonGuardar")
+                        .textContent = "Crear Usuario";
+                    actualizarCampos();
+                    abrirModal(modalFormulario);
+                });
+
+            const filas =
+                Array.from(document.querySelectorAll(".user-row"));
+
+            document.querySelectorAll(".editar-usuario")
+                .forEach(boton => {
+                    boton.addEventListener("click", () => {
+                        const fila = boton.closest(".user-row");
+                        formulario.reset();
+                        formulario.action = accionEditar;
+
+                        campoId.value = fila.dataset.id;
+                        campoTipo.value = fila.dataset.tipo;
+                        campoNombre.value = fila.dataset.nombre;
+                        campoCorreo.value = fila.dataset.correo;
+
+                        campoRol.value = fila.dataset.rol;
+
+                        campoSucursal.value =
+                            fila.dataset.sucursal || "";
+
+                        campoDisponibilidad.value =
+                            fila.dataset.disponibilidad;
+
+                        const nombreEspecialidad =
+                            (fila.dataset.especialidad || "")
+                                .trim().toLowerCase();
+
+                        campoEspecialidad.value = "";
+
+                        Array.from(campoEspecialidad.options)
+                            .forEach(opcion => {
+                                if (opcion.textContent.trim()
+                                    .toLowerCase() === nombreEspecialidad) {
+                                    campoEspecialidad.value = opcion.value;
+                                }
+                            });
+
+                        document.getElementById("tituloFormulario")
+                            .textContent = "Editar Usuario";
+
+                        document.getElementById("botonGuardar")
+                            .textContent = "Guardar Cambios";
+
+                        actualizarCampos();
+                        abrirModal(modalFormulario);
+                    });
+                });
+
+            // Reactivar el valor del rol al enviar el formulario
+            formulario.addEventListener("submit", () => {
+                campoRol.disabled = false;
+            });
+
+            function agregarDetalle(titulo, valor) {
+                const contenedor =
+                    document.getElementById("detalleUsuario");
+
+                const bloque = document.createElement("div");
+                bloque.className = "modal-dato";
+
+                const etiqueta = document.createElement("strong");
+                etiqueta.textContent = titulo;
+
+                const contenido = document.createElement("span");
+                contenido.textContent = valor || "No registrado";
+
+                bloque.append(etiqueta, contenido);
+                contenedor.appendChild(bloque);
+            }
+
+            document.querySelectorAll(".ver-usuario")
+                .forEach(boton => {
+                    boton.addEventListener("click", () => {
+                        const fila = boton.closest(".user-row");
+                        document.getElementById("detalleUsuario")
+                            .replaceChildren();
+
+                        agregarDetalle("Nombre", fila.dataset.nombre);
+                        agregarDetalle("Correo", fila.dataset.correo);
+                        agregarDetalle("Rol", fila.dataset.rol);
+                        agregarDetalle(
+                            "Sucursal", fila.dataset.sucursalNombre);
+                        agregarDetalle(
+                            "Especialidad", fila.dataset.especialidad);
+                        agregarDetalle("Estado", fila.dataset.estado);
+                        agregarDetalle(
+                            "Último acceso", fila.dataset.acceso);
+
+                        abrirModal(modalDetalles);
+                    });
+                });
+
+            document.querySelectorAll(".eliminar-usuario")
+                .forEach(boton => {
+                    boton.addEventListener("click", () => {
+                        const fila = boton.closest(".user-row");
+
+                        document.getElementById("idEliminar")
+                            .value = fila.dataset.id;
+
+                        document.getElementById("nombreEliminar")
+                            .textContent = fila.dataset.nombre;
+
+                        abrirModal(modalEliminar);
+                    });
+                });
+
+            // BÚSQUEDA, FILTROS Y PAGINACIÓN
+
+            const buscador =
+                document.getElementById("buscarUsuario");
+
+            const selectorOrden =
+                document.getElementById("ordenarUsuarios");
+
+            const filtros =
+                document.querySelectorAll(".filter-chip");
+
+            const contador =
+                document.getElementById("contadorUsuarios");
+
+            let rolActivo = "Todos";
+            let pagina = 1;
+            const porPagina = 8;
+
+            function actualizarTabla() {
+                const texto = buscador.value.trim().toLowerCase();
+                const campoOrden = selectorOrden.value;
+
+                filas.sort((a, b) => {
+                    return (a.dataset[campoOrden] || "")
+                        .localeCompare(
+                            b.dataset[campoOrden] || "",
+                            "es",
+                            { sensitivity: "base" });
+                });
+
+                const coincidentes = filas.filter(fila => {
+                    const mismoRol = rolActivo === "Todos" ||
+                        (fila.dataset.rol || "").toLowerCase() ===
+                        rolActivo.toLowerCase();
+
+                    const contenido = [
+                        fila.dataset.nombre,
+                        fila.dataset.correo,
+                        fila.dataset.rol
+                    ].join(" ").toLowerCase();
+
+                    return mismoRol && contenido.includes(texto);
+                });
+
+                const totalPaginas =
+                    Math.max(1, Math.ceil(coincidentes.length / porPagina));
+
+                pagina = Math.min(pagina, totalPaginas);
+
+                filas.forEach(fila => {
+                    fila.hidden = true;
+                    document.getElementById("listadoUsuarios")
+                        .appendChild(fila);
+                });
+
+                const inicio = (pagina - 1) * porPagina;
+                const visibles =
+                    coincidentes.slice(inicio, inicio + porPagina);
+
+                visibles.forEach(fila => fila.hidden = false);
+
+                document.getElementById("sinResultados").hidden =
+                    coincidentes.length !== 0;
+
+                contador.textContent = coincidentes.length === 0
+                    ? "Mostrando 0 usuarios"
+                    : `Mostrando ${inicio + 1}-${inicio + visibles.length} de ${coincidentes.length} usuarios`;
+
+                document.getElementById("paginaActual")
+                    .textContent = pagina;
+
+                document.getElementById("anteriorPagina")
+                    .disabled = pagina <= 1;
+
+                document.getElementById("siguientePagina")
+                    .disabled = pagina >= totalPaginas;
+            }
+
+            buscador.addEventListener("input", () => {
+                pagina = 1;
+                actualizarTabla();
+            });
+
+            selectorOrden.addEventListener("change", () => {
+                pagina = 1;
+                actualizarTabla();
+            });
+
+            filtros.forEach(boton => {
+                boton.addEventListener("click", () => {
+                    rolActivo = boton.dataset.rol;
+                    pagina = 1;
+
+                    filtros.forEach(f =>
+                        f.classList.toggle("selected", f === boton));
+
+                    actualizarTabla();
+                });
+            });
+
+            document.getElementById("anteriorPagina")
+                .addEventListener("click", () => {
+                    if (pagina > 1) {
+                        pagina--;
+                        actualizarTabla();
+                    }
+                });
+
+            document.getElementById("siguientePagina")
+                .addEventListener("click", () => {
+                    pagina++;
+                    actualizarTabla();
+                });
+
+            actualizarTabla();
+    </script>
+</body>
 </html>

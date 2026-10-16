@@ -1,16 +1,178 @@
-﻿<!DOCTYPE html>
+﻿@model List<Lavillemvc.Models.AdminGestionSucursales>
+@using System
+@using System.Linq
+@using System.Collections.Generic
+@using System.Globalization
+@using Lavillemvc.Controllers
+
+@{
+    Layout = null;
+
+    var sucursales = Model ??
+        new List<Lavillemvc.Models.AdminGestionSucursales>();
+
+    var resumen = sucursales.FirstOrDefault();
+
+    var empleados = ViewBag.EmpleadosSucursales
+        as List<AdminController.EmpleadoSucursalOpcion>
+        ?? new List<AdminController.EmpleadoSucursalOpcion>();
+
+    var culturaDinero = CultureInfo.GetCultureInfo("en-US");
+    var culturaMes = CultureInfo.GetCultureInfo("es-SV");
+
+    string mes = culturaMes.TextInfo.ToTitleCase(
+        DateTime.Today.ToString("MMMM yyyy", culturaMes));
+}
+
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
-
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
     <title>Gestión de Sucursales - L'Avielle</title>
 
-    <!-- conexion con css -->
     <link href="~/css/gestionsucursales.css" rel="stylesheet" />
 
+    <style>
+            .search-bar input {
+                border: 0;
+                outline: 0;
+                background: transparent;
+                width: 100%;
+                min-width: 0;
+                color: inherit;
+                font: inherit;
+            }
+
+            .branch-card[hidden],
+            .sin-sucursales[hidden],
+            .comparison-row[hidden] {
+                display: none !important;
+            }
+
+            .modal-fondo {
+                position: fixed;
+                inset: 0;
+                display: none;
+                z-index: 9999;
+                background: rgba(0,0,0,.48);
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+            }
+
+                .modal-fondo.abierto {
+                    display: flex;
+                }
+
+            .modal-caja {
+                max-width: 560px;
+                width: 100%;
+                max-height: 90vh;
+                overflow: auto;
+                border-radius: 14px;
+                background: #fff;
+                color: #62463a;
+                padding: 26px;
+                box-shadow: 0 16px 45px #0003;
+            }
+
+                .modal-caja h2 {
+                    margin: 0 0 18px;
+                    font-size: 24px;
+                }
+
+            .campo-modal {
+                margin: 12px 0;
+            }
+
+                .campo-modal label {
+                    display: block;
+                    margin-bottom: 6px;
+                    font-size: 13px;
+                }
+
+                .campo-modal input,
+                .campo-modal select,
+                .campo-modal textarea {
+                    box-sizing: border-box;
+                    width: 100%;
+                    border: 1px solid #decfc3;
+                    border-radius: 8px;
+                    padding: 11px;
+                    font: inherit;
+                    color: #62463a;
+                    background: white;
+                }
+
+                .campo-modal textarea {
+                    min-height: 65px;
+                }
+
+            .modal-acciones {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 22px;
+            }
+
+                .modal-acciones button {
+                    border: 0;
+                    padding: 11px 18px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    background: #62463a;
+                    color: white;
+                }
+
+                    .modal-acciones button[data-cerrar] {
+                        background: #eee4db;
+                        color: #62463a;
+                    }
+
+            .detalle-fila {
+                margin: 9px 0;
+            }
+
+                .detalle-fila strong {
+                    display: block;
+                    color: #a67c6b;
+                    font-size: 12px;
+                }
+
+            .aviso-sucursales {
+                background: #f7eee7;
+                border-radius: 10px;
+                padding: 12px 16px;
+                margin: 16px 0;
+            }
+
+                .aviso-sucursales.error {
+                    background: #fff0ed;
+                    color: #973f34;
+                }
+
+            .empleado-fila {
+                padding: 8px 0;
+                border-bottom: 1px solid #efe8e1;
+            }
+
+            .branch-actions .eliminar-sucursal {
+                color: #a34842;
+            }
+
+                .branch-actions .eliminar-sucursal:hover {
+                    text-decoration: underline;
+                }
+
+            .modal-acciones .boton-eliminar {
+                background: #a34842;
+            }
+    </style>
 </head>
 
 <body>
@@ -19,7 +181,7 @@
 
         <div class="content-wrapper">
 
-            <!-- sidebar -->
+            <!-- SIDEBAR -->
             <aside class="sidebar">
 
                 <div class="sidebar-top">
@@ -36,28 +198,35 @@
 
                     </div>
 
-                    <!-- conexion entre frames -->
                     <nav class="nav-list">
 
-                        <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("Dashboard", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                    <rect x="3" y="3"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+                                    <rect x="14" y="3"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+                                    <rect x="3" y="14"
+                                          width="7" height="7"
+                                          rx="1"></rect>
+                                    <rect x="14" y="14"
+                                          width="7" height="7"
+                                          rx="1"></rect>
                                 </svg>
                             </span>
 
                             <span class="tab-text">
                                 Dashboard General
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionUsuarios", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionUsuarios", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
@@ -70,15 +239,16 @@
                             <span class="tab-text">
                                 Gestión de Usuarios
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionSucursales", "Admin")" class="sidebar-link active">
+                        <a href="@Url.Action("GestionSucursales", "Admin")"
+                           class="sidebar-link active">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+                                    <rect x="4" y="3"
+                                          width="16" height="18"
+                                          rx="1"></rect>
                                     <path d="M8 7h1M12 7h1M16 7h1"></path>
                                     <path d="M8 11h1M12 11h1M16 11h1"></path>
                                     <path d="M8 15h1M12 15h1M16 15h1"></path>
@@ -91,11 +261,10 @@
                             </span>
 
                             <span class="active-indicator"></span>
-
                         </a>
 
-
-                        <a href="@Url.Action("GestionServicios", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("GestionServicios", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
@@ -107,11 +276,10 @@
                             <span class="tab-text">
                                 Gestión de Servicios
                             </span>
-
                         </a>
 
-
-                        <a href="@Url.Action("ReportesGenerales", "Admin")" class="sidebar-link">
+                        <a href="@Url.Action("ReportesGenerales", "Admin")"
+                           class="sidebar-link">
 
                             <span class="nav-icon">
                                 <svg viewBox="0 0 24 24">
@@ -125,19 +293,18 @@
                             <span class="tab-text">
                                 Reportes
                             </span>
-
                         </a>
 
                     </nav>
-
                 </div>
 
-                <!-- cerrar sesion -->
+                <!-- CERRAR SESIÓN -->
                 <div class="sidebar-bottom">
 
                     <div class="divider"></div>
 
-                    <a href="#" class="sidebar-link logout-link">
+                    <a href="@Url.Action("Index", "Login")"
+                       class="sidebar-link logout-link">
 
                         <span class="nav-icon">
                             <svg viewBox="0 0 24 24">
@@ -150,18 +317,14 @@
                         <span class="tab-text">
                             Cerrar Sesión
                         </span>
-
                     </a>
 
                 </div>
-
             </aside>
 
-
-            <!-- contenido -->
+            <!-- CONTENIDO PRINCIPAL -->
             <main class="main-content">
 
-                <!-- encabezado -->
                 <section class="header-row">
 
                     <div class="header-text">
@@ -171,15 +334,14 @@
                         </h1>
 
                         <p>
-                            Panel de administración centralizada de sedes L'Avielle
+                            Panel de administración centralizada
+                            de sedes L'Avielle
                         </p>
 
                     </div>
 
-
                     <div class="header-actions">
 
-                        <!-- busqueda -->
                         <div class="search-bar">
 
                             <span class="search-icon">
@@ -189,33 +351,59 @@
                                 </svg>
                             </span>
 
-                            <span class="search-text">
-                                Buscar sucursal...
-                            </span>
-
+                            <input type="search"
+                                   id="buscarSucursal"
+                                   placeholder="Buscar sucursal..."
+                                   aria-label="Buscar sucursal" />
                         </div>
 
-
-                        <a href="#" class="add-button">
+                        <a href="#"
+                           class="add-button"
+                           id="abrirAgregar">
                             + Agregar Sucursal
                         </a>
 
                     </div>
-
                 </section>
 
+                <!-- MENSAJES -->
+                @if (ViewBag.ErrorSucursales != null)
+                {
+                    <div class="aviso-sucursales error">
+                        @ViewBag.ErrorSucursales
+                    </div>
+                }
 
-                <!-- resumen -->
+                @if (TempData["ErrorSucursales"] != null)
+                {
+                    <div class="aviso-sucursales error">
+                        @TempData["ErrorSucursales"]
+                    </div>
+                }
+
+                @if (TempData["MensajeSucursales"] != null)
+                {
+                    <div class="aviso-sucursales">
+                        @TempData["MensajeSucursales"]
+                    </div>
+                }
+
+                <!-- RESUMEN -->
                 <section class="summary-row">
 
                     <div class="summary-card">
 
                         <div class="card-header">
-                            <span class="card-title">Total Sucursales</span>
+
+                            <span class="card-title">
+                                Total Sucursales
+                            </span>
 
                             <span class="icon-wrap">
                                 <svg viewBox="0 0 24 24">
-                                    <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+                                    <rect x="4" y="3"
+                                          width="16" height="18"
+                                          rx="1"></rect>
                                     <path d="M8 7h1M12 7h1M16 7h1"></path>
                                     <path d="M8 11h1M12 11h1M16 11h1"></path>
                                 </svg>
@@ -223,16 +411,17 @@
                         </div>
 
                         <div class="summary-value">
-                            4 Sedes
+                            @(resumen?.TotalSucursales ?? 0) Sedes
                         </div>
-
                     </div>
-
 
                     <div class="summary-card">
 
                         <div class="card-header">
-                            <span class="card-title">Sedes Activas</span>
+
+                            <span class="card-title">
+                                Sedes Abiertas
+                            </span>
 
                             <span class="icon-wrap green-icon">
                                 <svg viewBox="0 0 24 24">
@@ -242,16 +431,17 @@
                         </div>
 
                         <div class="summary-value">
-                            3 Activas
+                            @(resumen?.SucursalesAbiertas ?? 0) Abiertas
                         </div>
-
                     </div>
-
 
                     <div class="summary-card">
 
                         <div class="card-header">
-                            <span class="card-title">En Mantenimiento</span>
+
+                            <span class="card-title">
+                                Sedes Cerradas
+                            </span>
 
                             <span class="icon-wrap orange-icon">
                                 <svg viewBox="0 0 24 24">
@@ -261,453 +451,192 @@
                         </div>
 
                         <div class="summary-value">
-                            1 Sede
+                            @(resumen?.SucursalesCerradas ?? 0) Cerradas
                         </div>
-
                     </div>
-
 
                     <div class="summary-card">
 
                         <div class="card-header">
-                            <span class="card-title">Empleados Totales</span>
+
+                            <span class="card-title">
+                                Empleados Totales
+                            </span>
 
                             <span class="icon-wrap">
                                 <svg viewBox="0 0 24 24">
                                     <circle cx="9" cy="8" r="3"></circle>
                                     <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
-                                    <path d="M16 11c2.8 0 5 1.5 5 4"></path>
                                 </svg>
                             </span>
                         </div>
 
                         <div class="summary-value">
-                            36 Profesionales
+                            @(resumen?.TotalEmpleados ?? 0) Profesionales
                         </div>
-
                     </div>
 
                 </section>
 
-
-                <!-- sucursales -->
+                <!-- TARJETAS DE SUCURSALES -->
                 <section class="branches-grid-section">
 
-                    <div class="grid-row">
+                    @for (int inicio = 0;
+                          inicio < sucursales.Count;
+                          inicio += 2)
+                    {
+                        <div class="grid-row">
 
-                        <div class="branch-card">
+                            @foreach (var sucursal in
+                                sucursales.Skip(inicio).Take(2))
+                            {
+                                <div class="branch-card"
+                                     data-id="@sucursal.IdSucursal"
+                                     data-nombre="@sucursal.NombreSucursal"
+                                     data-direccion="@sucursal.Direccion"
+                                     data-telefono="@sucursal.Telefono"
+                                     data-apertura="@(sucursal.HorarioApertura?.ToString(@"hh\:mm") ?? "")"
+                                     data-cierre="@(sucursal.HorarioCierre?.ToString(@"hh\:mm") ?? "")"
+                                     data-abierto="@(sucursal.Abierto == true ? "true" : "false")"
+                                     data-estado="@sucursal.EstadoSucursal"
+                                     data-gerente="@sucursal.Gerente"
+                                     data-empleados="@sucursal.CantidadEmpleados"
+                                     data-reservas="@sucursal.ReservasMes"
+                                     data-ingresos="@sucursal.IngresosMes">
 
-                            <div class="branch-header">
+                                    <div class="branch-header">
 
-                                <h2>
-                                    L'Avielle Centro
-                                </h2>
+                                        <h2>
+                                            @sucursal.NombreSucursal
+                                        </h2>
 
-                                <span class="status active-status">
-                                    Activo
-                                </span>
+                                        <span class="status @(sucursal.Abierto == true ? "active-status" : "maintenance-status")">
+                                            @sucursal.EstadoSucursal
+                                        </span>
 
-                            </div>
+                                    </div>
 
+                                    <div class="branch-details">
 
-                            <div class="branch-details">
+                                        <div class="detail-row">
 
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
-                                            <circle cx="12" cy="9" r="2.5"></circle>
-                                        </svg>
-                                    </span>
+                                            <span class="detail-icon">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
+                                                    <circle cx="12" cy="9" r="2.5"></circle>
+                                                </svg>
+                                            </span>
 
-                                    <span>
-                                        Av. Urdaneta, Centro Comercial City Market, Piso 2, Local 12, Caracas
-                                    </span>
+                                            <span>
+                                                @sucursal.Direccion
+                                            </span>
+                                        </div>
+
+                                        <div class="detail-row">
+
+                                            <span class="detail-icon">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M6 3h3l2 5-2 2c1 2.2 2.8 4 5 5l2-2 5 2v3c0 1.1-.9 2-2 2C10.8 20 4 13.2 4 5c0-1.1.9-2 2-2z"></path>
+                                                </svg>
+                                            </span>
+
+                                            <span>
+                                                @sucursal.TelefonoMostrar
+                                            </span>
+                                        </div>
+
+                                        <div class="detail-row">
+
+                                            <span class="detail-icon">
+                                                <svg viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="8"></circle>
+                                                    <path d="M12 7v5l3 2"></path>
+                                                </svg>
+                                            </span>
+
+                                            <span>
+                                                @sucursal.HorarioMostrar
+                                            </span>
+                                        </div>
+
+                                        <div class="detail-row">
+
+                                            <span class="detail-icon">
+                                                <svg viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="8" r="3"></circle>
+                                                    <path d="M5 21c0-3.5 3.1-6 7-6s7 2.5 7 6"></path>
+                                                </svg>
+                                            </span>
+
+                                            <span>
+                                                Gerente: @sucursal.Gerente
+                                            </span>
+                                        </div>
+
+                                        <div class="detail-row">
+
+                                            <span class="detail-icon">
+                                                <svg viewBox="0 0 24 24">
+                                                    <circle cx="9" cy="8" r="3"></circle>
+                                                    <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
+                                                </svg>
+                                            </span>
+
+                                            <span>
+                                                @sucursal.CantidadEmpleados
+                                                Empleados en nómina
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="branch-divider"></div>
+
+                                    <!-- BOTONES -->
+                                    <div class="branch-actions">
+
+                                        <a href="#"
+                                           class="ver-sucursal">
+                                            Ver Detalles
+                                        </a>
+
+                                        <span class="action-dot"></span>
+
+                                        <a href="#"
+                                           class="editar-sucursal">
+                                            Editar
+                                        </a>
+
+                                        <span class="action-dot"></span>
+
+                                        <a href="#"
+                                           class="gestionar-empleados">
+                                            Gestionar Empleados
+                                        </a>
+
+                                        <span class="action-dot"></span>
+
+                                        <!-- NUEVO BOTÓN -->
+                                        <a href="#"
+                                           class="eliminar-sucursal">
+                                            Eliminar
+                                        </a>
+
+                                    </div>
+
                                 </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M6 3h3l2 5-2 2c1 2.2 2.8 4 5 5l2-2 5 2v3c0 1.1-.9 2-2 2C10.8 20 4 13.2 4 5c0-1.1.9-2 2-2z"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        +58 212-555-0101
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="8"></circle>
-                                            <path d="M12 7v5l3 2"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Lun-Sáb 8:00 - 19:00
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="8" r="3"></circle>
-                                            <path d="M5 21c0-3.5 3.1-6 7-6s7 2.5 7 6"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Gerente: Carlos Mendoza
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="9" cy="8" r="3"></circle>
-                                            <path d="M3 20c0-3.2 2.7-5 6-5s6 1.8 6 5"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        12 Empleados en nómina
-                                    </span>
-                                </div>
-
-                            </div>
-
-
-                            <div class="branch-divider"></div>
-
-
-                            <div class="branch-actions">
-
-                                <a href="#">Ver Detalles</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Editar</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Gestionar Empleados</a>
-
-                            </div>
+                            }
 
                         </div>
-
-
-                        <div class="branch-card">
-
-                            <div class="branch-header">
-
-                                <h2>
-                                    L'Avielle Las Mercedes
-                                </h2>
-
-                                <span class="status active-status">
-                                    Activo
-                                </span>
-
-                            </div>
-
-
-                            <div class="branch-details">
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Calle Madrid, C.C. Paseo Las Mercedes, Nivel 1, Local 45, Caracas
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M6 3h3l2 5-2 2c1 2.2 2.8 4 5 5l2-2 5 2v3c0 1.1-.9 2-2 2"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        +58 212-555-0202
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="8"></circle>
-                                            <path d="M12 7v5l3 2"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Lun-Sáb 9:00 - 20:00
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="8" r="3"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Gerente: Ana Martínez
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="9" cy="8" r="3"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        10 Empleados en nómina
-                                    </span>
-                                </div>
-
-                            </div>
-
-
-                            <div class="branch-divider"></div>
-
-
-                            <div class="branch-actions">
-
-                                <a href="#">Ver Detalles</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Editar</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Gestionar Empleados</a>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="grid-row">
-
-                        <div class="branch-card">
-
-                            <div class="branch-header">
-
-                                <h2>
-                                    L'Avielle Altamira
-                                </h2>
-
-                                <span class="status active-status">
-                                    Activo
-                                </span>
-
-                            </div>
-
-
-                            <div class="branch-details">
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Av. San Juan Bosco, Centro Altamira, PB, Local 3, Caracas
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M6 3h3l2 5-2 2"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        +58 212-555-0303
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="8"></circle>
-                                            <path d="M12 7v5l3 2"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Lun-Vie 9:00 - 18:00
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="8" r="3"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Gerente: Valentina Rojas
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="9" cy="8" r="3"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        8 Empleados en nómina
-                                    </span>
-                                </div>
-
-                            </div>
-
-
-                            <div class="branch-divider"></div>
-
-
-                            <div class="branch-actions">
-
-                                <a href="#">Ver Detalles</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Editar</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Gestionar Empleados</a>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="branch-card">
-
-                            <div class="branch-header">
-
-                                <h2>
-                                    L'Avielle La Castellana
-                                </h2>
-
-                                <span class="status maintenance-status">
-                                    En Mantenimiento
-                                </span>
-
-                            </div>
-
-
-                            <div class="branch-details">
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Av. Principal La Castellana, Torre Millennium, PB, Caracas
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <path d="M6 3h3l2 5-2 2"></path>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        +58 212-555-0444
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="8"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Horario no asignado
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="12" cy="8" r="3"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        Gerente: Por asignar
-                                    </span>
-                                </div>
-
-
-                                <div class="detail-row">
-                                    <span class="detail-icon">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="9" cy="8" r="3"></circle>
-                                        </svg>
-                                    </span>
-
-                                    <span>
-                                        6 Empleados en nómina
-                                    </span>
-                                </div>
-
-                            </div>
-
-
-                            <div class="branch-divider"></div>
-
-
-                            <div class="branch-actions">
-
-                                <a href="#">Ver Detalles</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Editar</a>
-                                <span class="action-dot"></span>
-                                <a href="#">Gestionar Empleados</a>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- comparativa -->
+                    }
+
+                    <p class="sin-sucursales"
+                       id="sinSucursales"
+                       hidden>
+                        No se encontraron sucursales.
+                    </p>
+
+                    <!-- COMPARATIVA -->
                     <div class="comparison-card">
 
                         <div class="comparison-header">
@@ -717,11 +646,9 @@
                             </h2>
 
                             <span class="month-badge">
-                                Septiembre 2026
+                                @mes
                             </span>
-
                         </div>
-
 
                         <div class="comparison-table">
 
@@ -733,52 +660,36 @@
                                 <div>Valoración</div>
                             </div>
 
+                            @foreach (var sucursal in sucursales)
+                            {
+                                <div class="comparison-row"
+                                     data-comparacion="@sucursal.IdSucursal">
 
-                            <div class="comparison-row">
+                                    <div class="branch-name">
+                                        @sucursal.NombreSucursal
+                                    </div>
 
-                                <div class="branch-name">L'Avielle Centro</div>
-                                <div>412 citas</div>
-                                <div class="income">Bs. 145,000</div>
-                                <div>12 estilistas</div>
-                                <div class="rating">☆ 4.8</div>
+                                    <div>
+                                        @sucursal.ReservasMes citas
+                                    </div>
 
-                            </div>
+                                    <div class="income">
+                                        @sucursal.IngresosMes.ToString(
+                                            "C2", culturaDinero)
+                                    </div>
 
+                                    <div>
+                                        @sucursal.CantidadEmpleados empleados
+                                    </div>
 
-                            <div class="comparison-row">
+                                    <div class="rating">
+                                        @sucursal.ValoracionMostrar
+                                    </div>
 
-                                <div class="branch-name">L'Avielle Las Mercedes</div>
-                                <div>380 citas</div>
-                                <div class="income">Bs. 138,500</div>
-                                <div>10 estilistas</div>
-                                <div class="rating">☆ 4.9</div>
-
-                            </div>
-
-
-                            <div class="comparison-row">
-
-                                <div class="branch-name">L'Avielle Altamira</div>
-                                <div>298 citas</div>
-                                <div class="income">Bs. 112,700</div>
-                                <div>8 estilistas</div>
-                                <div class="rating">☆ 4.7</div>
-
-                            </div>
-
-
-                            <div class="comparison-row">
-
-                                <div class="branch-name">L'Avielle La Castellana</div>
-                                <div>155 citas</div>
-                                <div class="income">Bs. 89,000</div>
-                                <div>6 estilistas</div>
-                                <div class="rating">☆ 4.5</div>
-
-                            </div>
+                                </div>
+                            }
 
                         </div>
-
                     </div>
 
                 </section>
@@ -787,11 +698,9 @@
 
         </div>
 
-
-        <!-- footer -->
+        <!-- FOOTER -->
         <footer class="footer">
 
-            <!-- informacion del footer -->
             <div class="footer-upper">
 
                 <div class="footer-about">
@@ -801,30 +710,28 @@
                     </div>
 
                     <p>
-                        Un concepto exclusivo de salón de belleza y spa de bienestar,
-                        donde el lujo se traduce en calma, elegancia y atención de nivel internacional.
+                        Un concepto exclusivo de salón de belleza y spa de
+                        bienestar, donde el lujo se traduce en calma,
+                        elegancia y atención de nivel internacional.
                     </p>
 
-                    <!-- redes sociales -->
                     <div class="social-row">
-
                         <a href="#" class="social-button">Instagram</a>
                         <a href="#" class="social-button">Facebook</a>
                         <a href="#" class="social-button">Web</a>
-
                     </div>
-
                 </div>
 
-
-                <!-- navegacion del footer -->
                 <div class="footer-column">
 
                     <h3>Navegación</h3>
 
                     <div class="footer-links">
 
-                        <a href="@Url.Action("Dashboard", "Admin")">Inicio</a>
+                        <a href="@Url.Action("Dashboard", "Admin")">
+                            Inicio
+                        </a>
+
                         <a href="#">Servicios</a>
                         <a href="#">Especialistas</a>
                         <a href="#">Perfil</a>
@@ -832,11 +739,8 @@
                         <a href="#">Registrarse</a>
 
                     </div>
-
                 </div>
 
-
-                <!-- contacto -->
                 <div class="footer-column">
 
                     <h3>Contacto &amp; Ubicación</h3>
@@ -844,11 +748,11 @@
                     <div class="contact-list">
 
                         <div class="contact-item">
-                            Paseo de la Reforma 402, Juárez, CDMX
+                            Colonia Escalón, San Salvador, El Salvador
                         </div>
 
                         <div class="contact-item">
-                            +52 55 1234 5678
+                            +503 2200-0101
                         </div>
 
                         <div class="contact-item">
@@ -856,27 +760,22 @@
                         </div>
 
                     </div>
-
                 </div>
 
             </div>
 
-
             <div class="footer-divider"></div>
 
-
-            <!-- parte final del footer -->
             <div class="footer-bottom">
 
                 <span>
-                    © 2026 L'Avielle Salón de Belleza. Todos los derechos reservados.
+                    © 2026 L'Avielle Salón de Belleza.
+                    Todos los derechos reservados.
                 </span>
 
                 <div class="footer-legal">
-
                     <a href="#">Política de Privacidad</a>
                     <a href="#">Términos del Servicio</a>
-
                 </div>
 
             </div>
@@ -885,6 +784,551 @@
 
     </div>
 
-</body>
+    <!-- MODAL AGREGAR / EDITAR -->
+    <div class="modal-fondo"
+         id="modalSucursal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloModalSucursal">
 
+        <div class="modal-caja">
+
+            <h2 id="tituloModalSucursal">
+                Agregar Sucursal
+            </h2>
+
+            <form id="formSucursal"
+                  method="post"
+                  action="@Url.Action("AgregarSucursal", "Admin")">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="IdSucursal"
+                       id="idSucursal"
+                       value="0" />
+
+                <div class="campo-modal">
+
+                    <label for="nombreSucursal">
+                        Nombre de la sucursal
+                    </label>
+
+                    <input id="nombreSucursal"
+                           name="NombreSucursal"
+                           required
+                           maxlength="120" />
+                </div>
+
+                <div class="campo-modal">
+
+                    <label for="direccionSucursal">
+                        Dirección en El Salvador
+                    </label>
+
+                    <textarea id="direccionSucursal"
+                              name="Direccion"
+                              required
+                              maxlength="350"></textarea>
+                </div>
+
+                <div class="campo-modal">
+
+                    <label for="telefonoSucursal">
+                        Teléfono (+503)
+                    </label>
+
+                    <input id="telefonoSucursal"
+                           name="Telefono"
+                           type="tel"
+                           placeholder="+503 2200-0000"
+                           maxlength="30" />
+                </div>
+
+                <div class="campo-modal">
+
+                    <label for="horarioApertura">
+                        Horario de apertura
+                    </label>
+
+                    <input id="horarioApertura"
+                           name="HorarioApertura"
+                           type="time" />
+                </div>
+
+                <div class="campo-modal">
+
+                    <label for="horarioCierre">
+                        Horario de cierre
+                    </label>
+
+                    <input id="horarioCierre"
+                           name="HorarioCierre"
+                           type="time" />
+                </div>
+
+                <div class="campo-modal">
+
+                    <label for="abiertoSucursal">
+                        Estado de la sucursal
+                    </label>
+
+                    <select id="abiertoSucursal"
+                            name="Abierto">
+                        <option value="true">Abierta</option>
+                        <option value="false">Cerrada</option>
+                    </select>
+                </div>
+
+                <div class="modal-acciones">
+
+                    <button type="button" data-cerrar>
+                        Cancelar
+                    </button>
+
+                    <button type="submit">
+                        Guardar
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLES -->
+    <div class="modal-fondo"
+         id="modalDetalles"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloDetalles">
+
+        <div class="modal-caja">
+
+            <h2 id="tituloDetalles">
+                Detalles de la sucursal
+            </h2>
+
+            <div id="contenidoDetalles"></div>
+
+            <div class="modal-acciones">
+                <button type="button" data-cerrar>
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EMPLEADOS -->
+    <div class="modal-fondo"
+         id="modalEmpleados"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloEmpleados">
+
+        <div class="modal-caja">
+
+            <h2 id="tituloEmpleados">
+                Gestionar Empleados
+            </h2>
+
+            <p id="nombreSucursalEmpleados"></p>
+
+            <div id="listadoEmpleados"></div>
+
+            <form method="post"
+                  action="@Url.Action("AsignarEmpleadoSucursal", "Admin")">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="idSucursal"
+                       id="destinoEmpleado" />
+
+                <div class="campo-modal">
+
+                    <label for="empleadoElegido">
+                        Asignar empleado existente a esta sucursal
+                    </label>
+
+                    <select name="idEmpleado"
+                            id="empleadoElegido"
+                            required>
+
+                        <option value="">
+                            Seleccionar empleado
+                        </option>
+
+                        @foreach (var empleado in empleados)
+                        {
+                            <option value="@empleado.IdEmpleado"
+                                    data-sucursal="@empleado.IdSucursal">
+                                @empleado.Nombre (@empleado.Cargo)
+                            </option>
+                        }
+
+                    </select>
+                </div>
+
+                <div class="modal-acciones">
+
+                    <button type="button" data-cerrar>
+                        Cancelar
+                    </button>
+
+                    <button type="submit">
+                        Asignar empleado
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NUEVO MODAL ELIMINAR -->
+    <div class="modal-fondo"
+         id="modalEliminar"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloEliminar">
+
+        <div class="modal-caja">
+
+            <h2 id="tituloEliminar">
+                Eliminar Sucursal
+            </h2>
+
+            <p>
+                ¿Seguro que deseas eliminar
+                <strong id="nombreSucursalEliminar"></strong>?
+            </p>
+
+            <p>
+                Esta acción es permanente. Si la sucursal
+                tiene empleados, reservas u otros registros
+                relacionados, la base de datos impedirá eliminarla.
+            </p>
+
+            <form method="post"
+                  action="@Url.Action("EliminarSucursal", "Admin")">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="idSucursal"
+                       id="idSucursalEliminar" />
+
+                <div class="modal-acciones">
+
+                    <button type="button" data-cerrar>
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="boton-eliminar">
+                        Sí, eliminar sucursal
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+            const tarjetas = Array.from(
+                document.querySelectorAll('.branch-card'));
+
+            const entradaBusqueda =
+                document.getElementById('buscarSucursal');
+
+            const modalSucursal =
+                document.getElementById('modalSucursal');
+
+            const modalDetalles =
+                document.getElementById('modalDetalles');
+
+            const modalEmpleados =
+                document.getElementById('modalEmpleados');
+
+            const modalEliminar =
+                document.getElementById('modalEliminar');
+
+            const formSucursal =
+                document.getElementById('formSucursal');
+
+            const accionAgregar =
+                '@Url.Action("AgregarSucursal", "Admin")';
+
+            const accionEditar =
+                '@Url.Action("EditarSucursal", "Admin")';
+
+            function cerrarModales() {
+                document.querySelectorAll('.modal-fondo')
+                    .forEach(m => m.classList.remove('abierto'));
+            }
+
+            function abrirModal(modal) {
+                cerrarModales();
+                modal.classList.add('abierto');
+            }
+
+            document.querySelectorAll('[data-cerrar]')
+                .forEach(b => {
+                    b.addEventListener('click', cerrarModales);
+                });
+
+            document.querySelectorAll('.modal-fondo')
+                .forEach(m => {
+                    m.addEventListener('click', e => {
+                        if (e.target === m) {
+                            cerrarModales();
+                        }
+                    });
+                });
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    cerrarModales();
+                }
+            });
+
+            // AGREGAR
+            document.getElementById('abrirAgregar')
+                .addEventListener('click', e => {
+
+                    e.preventDefault();
+
+                    formSucursal.reset();
+                    formSucursal.action = accionAgregar;
+
+                    document.getElementById('idSucursal')
+                        .value = '0';
+
+                    document.getElementById('tituloModalSucursal')
+                        .textContent = 'Agregar Sucursal';
+
+                    abrirModal(modalSucursal);
+                });
+
+            function agregarDetalle(contenedor, titulo, valor) {
+
+                const fila = document.createElement('div');
+                fila.className = 'detalle-fila';
+
+                const etiqueta = document.createElement('strong');
+                etiqueta.textContent = titulo;
+
+                const contenido = document.createElement('span');
+                contenido.textContent = valor || 'No registrado';
+
+                fila.append(etiqueta, contenido);
+                contenedor.appendChild(fila);
+            }
+
+            tarjetas.forEach(tarjeta => {
+
+                // VER DETALLES
+                tarjeta.querySelector('.ver-sucursal')
+                    .addEventListener('click', e => {
+
+                        e.preventDefault();
+
+                        const d = tarjeta.dataset;
+
+                        const contenedor =
+                            document.getElementById('contenidoDetalles');
+
+                        contenedor.replaceChildren();
+
+                        agregarDetalle(
+                            contenedor, 'Sucursal', d.nombre);
+
+                        agregarDetalle(
+                            contenedor, 'Dirección', d.direccion);
+
+                        agregarDetalle(
+                            contenedor, 'Teléfono', d.telefono);
+
+                        agregarDetalle(
+                            contenedor,
+                            'Horario',
+                            d.apertura && d.cierre
+                                ? d.apertura + ' - ' + d.cierre
+                                : 'Horario no asignado');
+
+                        agregarDetalle(
+                            contenedor, 'Estado', d.estado);
+
+                        agregarDetalle(
+                            contenedor, 'Gerente', d.gerente);
+
+                        agregarDetalle(
+                            contenedor, 'Empleados', d.empleados);
+
+                        agregarDetalle(
+                            contenedor,
+                            'Reservas del mes',
+                            d.reservas);
+
+                        agregarDetalle(
+                            contenedor,
+                            'Ingresos del mes (USD)',
+                            d.ingresos);
+
+                        abrirModal(modalDetalles);
+                    });
+
+                // EDITAR
+                tarjeta.querySelector('.editar-sucursal')
+                    .addEventListener('click', e => {
+
+                        e.preventDefault();
+
+                        const d = tarjeta.dataset;
+
+                        formSucursal.reset();
+                        formSucursal.action = accionEditar;
+
+                        document.getElementById('idSucursal')
+                            .value = d.id;
+
+                        document.getElementById('nombreSucursal')
+                            .value = d.nombre;
+
+                        document.getElementById('direccionSucursal')
+                            .value = d.direccion;
+
+                        document.getElementById('telefonoSucursal')
+                            .value = d.telefono;
+
+                        document.getElementById('horarioApertura')
+                            .value = d.apertura || '';
+
+                        document.getElementById('horarioCierre')
+                            .value = d.cierre || '';
+
+                        document.getElementById('abiertoSucursal')
+                            .value = d.abierto;
+
+                        document.getElementById('tituloModalSucursal')
+                            .textContent = 'Editar Sucursal';
+
+                        abrirModal(modalSucursal);
+                    });
+
+                // GESTIONAR EMPLEADOS
+                tarjeta.querySelector('.gestionar-empleados')
+                    .addEventListener('click', e => {
+
+                        e.preventDefault();
+
+                        const d = tarjeta.dataset;
+
+                        document.getElementById('nombreSucursalEmpleados')
+                            .textContent = d.nombre;
+
+                        document.getElementById('destinoEmpleado')
+                            .value = d.id;
+
+                        const listado =
+                            document.getElementById('listadoEmpleados');
+
+                        listado.replaceChildren();
+
+                        const opciones = Array.from(
+                            document.querySelectorAll(
+                                '#empleadoElegido option[data-sucursal]'));
+
+                        const asignados = opciones.filter(
+                            o => o.dataset.sucursal === d.id);
+
+                        if (asignados.length === 0) {
+
+                            const aviso = document.createElement('p');
+
+                            aviso.textContent =
+                                'Esta sucursal no tiene empleados asignados.';
+
+                            listado.appendChild(aviso);
+                        }
+
+                        asignados.forEach(o => {
+
+                            const fila = document.createElement('div');
+
+                            fila.className = 'empleado-fila';
+
+                            fila.textContent = o.textContent.trim();
+
+                            listado.appendChild(fila);
+                        });
+
+                        const selector =
+                            document.getElementById('empleadoElegido');
+
+                        selector.value = '';
+
+                        Array.from(selector.options).forEach(o => {
+                            o.hidden =
+                                !!o.dataset.sucursal &&
+                                o.dataset.sucursal === d.id;
+                        });
+
+                        abrirModal(modalEmpleados);
+                    });
+
+                // NUEVO: ELIMINAR
+                tarjeta.querySelector('.eliminar-sucursal')
+                    .addEventListener('click', e => {
+
+                        e.preventDefault();
+
+                        const d = tarjeta.dataset;
+
+                        document.getElementById('idSucursalEliminar')
+                            .value = d.id;
+
+                        document.getElementById('nombreSucursalEliminar')
+                            .textContent = d.nombre;
+
+                        abrirModal(modalEliminar);
+                    });
+
+            });
+
+            // BUSCADOR
+            entradaBusqueda.addEventListener('input', () => {
+
+                const texto = entradaBusqueda.value
+                    .trim()
+                    .toLocaleLowerCase('es');
+
+                let visibles = 0;
+
+                tarjetas.forEach(t => {
+
+                    const coincide =
+                        (t.dataset.nombre + ' ' + t.dataset.direccion)
+                            .toLocaleLowerCase('es')
+                            .includes(texto);
+
+                    t.hidden = !coincide;
+
+                    if (coincide) {
+                        visibles++;
+                    }
+
+                    const comparacion = document.querySelector(
+                        '[data-comparacion="' + t.dataset.id + '"]');
+
+                    if (comparacion) {
+                        comparacion.hidden = !coincide;
+                    }
+                });
+
+                document.getElementById('sinSucursales')
+                    .hidden = visibles !== 0;
+            });
+    </script>
+
+</body>
 </html>
