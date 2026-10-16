@@ -1,0 +1,246 @@
+﻿
+/* ==========================================
+   L'AVIELLE - LAYOUT GENERAL DEL GERENTE
+   ========================================== */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+.pagina-gerente {
+    background: #211f1e;
+    font-family: 'DM Sans', Arial, sans-serif;
+}
+
+/* ESTRUCTURA PRINCIPAL */
+
+.gerente-estructura {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    align-items: stretch;
+}
+
+/* ==========================================
+   SIDEBAR
+   ========================================== */
+
+.gerente-sidebar {
+    width: 235px;
+    min-width: 235px;
+    background: #5c4035;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 32px 20px 28px;
+    box-sizing: border-box;
+}
+
+.gerente-logo {
+    color: #d1ae72;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.gerente-subtitulo {
+    display: inline-block;
+    background: rgba(255,255,255,.10);
+    color: #f6e8dc;
+    padding: 5px 9px;
+    font-size: 10px;
+    border-radius: 5px;
+}
+
+/* NAVEGACIÓN */
+
+.gerente-navegacion {
+    margin-top: 52px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.gerente-enlace {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 13px;
+    border-radius: 9px;
+    color: #e8d8ce;
+    text-decoration: none;
+    font-size: 12px;
+    transition: background .2s ease;
+}
+
+a.gerente-enlace:hover {
+    background: #705344;
+}
+
+.gerente-enlace.activo {
+    background: #755542;
+    color: #dbb56c;
+    font-weight: 600;
+    border-right: 3px solid #d5ad66;
+}
+
+.gerente-enlace-pendiente {
+    opacity: .8;
+    cursor: default;
+}
+
+.gerente-icono {
+    min-width: 18px;
+    text-align: center;
+    font-size: 17px;
+    color: #c6a16b;
+}
+
+/* PARTE INFERIOR */
+
+.gerente-sidebar-inferior {
+    border-top: 1px solid rgba(255,255,255,.09);
+    padding-top: 22px;
+}
+
+.gerente-cerrar {
+    color: #c9ac9a;
+    font-size: 12px;
+}
+
+/* ==========================================
+   CONTENIDO DEL DASHBOARD
+   ========================================== */
+
+.gerente-contenido {
+    flex: 1;
+    min-width: 0;
+    background: #fcf7f3;
+}
+
+    .gerente-contenido > .contenido {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .gerente-contenido .dashboard-sucursal {
+        width: 100%;
+        max-width: none;
+        min-height: 100%;
+    }
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.gerente-footer {
+    background: #211f1e;
+    color: #aaa09c;
+    padding: 55px 6% 27px;
+    box-sizing: border-box;
+}
+
+.gerente-footer-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 60px;
+    padding-bottom: 42px;
+}
+
+.gerente-footer-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 30px;
+    color: #d0a968;
+    font-weight: normal;
+    margin: 0 0 18px;
+}
+
+.gerente-footer h3 {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 20px;
+}
+
+.gerente-footer p {
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 0 0 10px;
+    max-width: 350px;
+}
+
+.gerente-footer a {
+    color: #aaa09c;
+    text-decoration: none;
+}
+
+    .gerente-footer a:hover {
+        color: #d0a968;
+    }
+
+.gerente-footer-abajo {
+    border-top: 1px solid #39312d;
+    padding-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    color: #817a76;
+    font-size: 11px;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 950px) {
+
+    .gerente-sidebar {
+        width: 190px;
+        min-width: 190px;
+        padding: 25px 12px;
+    }
+
+    .gerente-enlace {
+        font-size: 11px;
+        padding: 12px 8px;
+    }
+
+    .gerente-footer-grid {
+        gap: 30px;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .gerente-estructura {
+        flex-direction: column;
+    }
+
+    .gerente-sidebar {
+        width: 100%;
+        min-width: 0;
+        gap: 20px;
+    }
+
+    .gerente-navegacion {
+        margin-top: 25px;
+    }
+
+    .gerente-sidebar-inferior {
+        display: none;
+    }
+
+    .gerente-footer-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .gerente-footer-abajo {
+        flex-direction: column;
+    }
+}

@@ -1,0 +1,729 @@
+﻿/* ============================================================
+   L'AVIELLE | DASHBOARD DE SUCURSAL
+   Archivo sugerido: wwwroot/css/gerente-dashboard.css
+   Estilos aislados bajo .dashboard-sucursal para evitar
+   interferencias con Admin, Cliente y Recepcion.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+.dashboard-sucursal {
+    --gd-fondo: #fcf7f3;
+    --gd-blanco: #ffffff;
+    --gd-cafe: #5c4035;
+    --gd-cafe-oscuro: #3e2d28;
+    --gd-dorado: #c9a866;
+    --gd-texto: #342b28;
+    --gd-secundario: #a48778;
+    --gd-borde: #eee6e0;
+    --gd-verde: #5d8c66;
+    --gd-verde-fondo: #eaf4ed;
+    --gd-naranja: #c97620;
+    --gd-naranja-fondo: #fff1df;
+    --gd-sombra: 0 7px 22px rgba(66, 46, 36, .035);
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    padding: 34px 33px 42px;
+    background: var(--gd-fondo);
+    color: var(--gd-texto);
+    font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+    .dashboard-sucursal *,
+    .dashboard-sucursal *::before,
+    .dashboard-sucursal *::after {
+        box-sizing: border-box;
+    }
+
+    .dashboard-sucursal h1,
+    .dashboard-sucursal h2,
+    .dashboard-sucursal h3,
+    .dashboard-sucursal p {
+        margin-top: 0;
+    }
+
+    .dashboard-sucursal h1,
+    .dashboard-sucursal h2,
+    .dashboard-sucursal .resumen-valor,
+    .dashboard-sucursal .rendimiento-total {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 500;
+    }
+
+    /* ================= CABECERA ================= */
+    .dashboard-sucursal .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+
+    .dashboard-sucursal .titulo-dashboard {
+        min-width: 0;
+    }
+
+        .dashboard-sucursal .titulo-dashboard h1 {
+            margin: 0 0 6px;
+            color: var(--gd-cafe);
+            font-size: clamp(25px, 2.65vw, 36px);
+            letter-spacing: -.8px;
+            line-height: 1.2;
+        }
+
+        .dashboard-sucursal .titulo-dashboard p {
+            margin: 0;
+            color: var(--gd-secundario);
+            font-size: 11px;
+        }
+
+            .dashboard-sucursal .titulo-dashboard p span {
+                margin: 0 5px;
+                color: var(--gd-cafe);
+            }
+
+            .dashboard-sucursal .titulo-dashboard p strong {
+                color: var(--gd-cafe);
+                font-weight: 600;
+            }
+
+    .dashboard-sucursal .usuario {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        gap: 10px;
+        padding: 5px 13px 5px 5px;
+        background: var(--gd-blanco);
+        border: 1px solid var(--gd-borde);
+        border-radius: 99px;
+    }
+
+    .dashboard-sucursal .avatar {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .dashboard-sucursal .usuario-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .dashboard-sucursal .usuario-info strong {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .dashboard-sucursal .usuario-info small {
+            font-size: 10px;
+            color: var(--gd-dorado);
+        }
+
+    /* ================= TARJETAS KPI ================= */
+    .dashboard-sucursal .resumen-sucursal {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 13px;
+        margin-bottom: 27px;
+    }
+
+    .dashboard-sucursal .resumen-sucursal-card {
+        min-width: 0;
+        min-height: 105px;
+        padding: 15px 15px 17px;
+        background: var(--gd-blanco);
+        border: 1px solid var(--gd-borde);
+        border-radius: 15px;
+        box-shadow: var(--gd-sombra);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+        .dashboard-sucursal .resumen-sucursal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(66, 46, 36, .065);
+        }
+
+    .dashboard-sucursal .resumen-card-arriba {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 16px;
+        color: #a37866;
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1px;
+    }
+
+    .dashboard-sucursal .resumen-icono {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 27px;
+        height: 27px;
+        flex: 0 0 27px;
+        border-radius: 7px;
+        background: #f8f2ee;
+        color: var(--gd-cafe);
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .dashboard-sucursal .resumen-sucursal-card:nth-child(2) .resumen-icono {
+        background: var(--gd-verde-fondo);
+        color: var(--gd-verde);
+    }
+
+    .dashboard-sucursal .resumen-sucursal-card:nth-child(3) .resumen-icono {
+        background: #edf3ff;
+        color: #3676d4;
+    }
+
+    .dashboard-sucursal .resumen-sucursal-card:nth-child(4) .resumen-icono {
+        background: #fff1df;
+        color: #cb7d28;
+    }
+
+    .dashboard-sucursal .resumen-sucursal-card:nth-child(5) .resumen-icono {
+        background: #fcf3ea;
+        color: var(--gd-dorado);
+    }
+
+    .dashboard-sucursal .resumen-valor {
+        color: #292120;
+        font-size: clamp(17px, 1.55vw, 23px);
+        line-height: 1.25;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* ================= GRID PRINCIPAL ================= */
+    .dashboard-sucursal .dashboard-sucursal-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .dashboard-sucursal .dashboard-columna {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+    }
+
+    .dashboard-sucursal .card {
+        min-width: 0;
+        margin: 0;
+        padding: 23px 22px;
+        background: var(--gd-blanco);
+        border: 1px solid var(--gd-borde);
+        border-radius: 17px;
+        box-shadow: var(--gd-sombra);
+    }
+
+        .dashboard-sucursal .card h2 {
+            margin: 0;
+            color: var(--gd-cafe);
+            font-size: 19px;
+            letter-spacing: -.3px;
+            line-height: 1.3;
+        }
+
+    .dashboard-sucursal .dashboard-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 19px;
+    }
+
+        .dashboard-sucursal .dashboard-card-header h2 {
+            margin: 0;
+        }
+
+    .dashboard-sucursal .btn-pequeno {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 6px 11px;
+        background: #faf4f0;
+        border: 1px solid #f1e7e0;
+        border-radius: 9px;
+        color: var(--gd-cafe);
+        font-size: 10px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .dashboard-sucursal a.btn-pequeno:hover {
+        background: #f3e7dc;
+    }
+
+    /* ================= TABLA DE RESERVAS ================= */
+    .dashboard-sucursal .tabla-reservas {
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: separate;
+        text-align: left;
+        table-layout: auto;
+        font-size: 11px;
+    }
+
+        .dashboard-sucursal .tabla-reservas thead {
+            background: #fcf7f3;
+        }
+
+        .dashboard-sucursal .tabla-reservas th {
+            padding: 10px 8px;
+            color: #ad806b;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+            .dashboard-sucursal .tabla-reservas th:first-child {
+                border-radius: 7px 0 0 7px;
+            }
+
+            .dashboard-sucursal .tabla-reservas th:last-child {
+                border-radius: 0 7px 7px 0;
+            }
+
+        .dashboard-sucursal .tabla-reservas td {
+            padding: 13px 8px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1ebe6;
+            color: var(--gd-texto);
+            line-height: 1.5;
+            overflow-wrap: break-word;
+        }
+
+        .dashboard-sucursal .tabla-reservas .hora,
+        .dashboard-sucursal .tabla-reservas .cliente {
+            font-weight: 600;
+        }
+
+    .dashboard-sucursal .estado-tabla {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        line-height: 1.1;
+        white-space: nowrap;
+    }
+
+    .dashboard-sucursal .estado-confirmado-tabla {
+        background: var(--gd-verde-fondo);
+        color: var(--gd-verde);
+    }
+
+    .dashboard-sucursal .estado-curso {
+        background: #fff2de;
+        color: #bc9243;
+    }
+
+    .dashboard-sucursal .estado-pendiente {
+        background: var(--gd-naranja-fondo);
+        color: var(--gd-naranja);
+    }
+
+    /* ================= PERSONAL DEL DÍA ================= */
+    .dashboard-sucursal .personal-lista {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 14px 9px;
+        margin-top: 20px;
+    }
+
+    .dashboard-sucursal .personal-item {
+        display: flex;
+        flex: 1 1 66px;
+        min-width: 60px;
+        max-width: 105px;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        text-align: center;
+    }
+
+    .dashboard-sucursal .personal-foto-contenedor {
+        position: relative;
+        width: 51px;
+        height: 51px;
+        margin-bottom: 6px;
+    }
+
+    .dashboard-sucursal .personal-foto {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #f6eee8;
+    }
+
+    .dashboard-sucursal .personal-estado {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        width: 10px;
+        height: 10px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: #62986c;
+    }
+
+        .dashboard-sucursal .personal-estado.personal-ocupado {
+            background: #d18c43;
+        }
+
+    .dashboard-sucursal .personal-item strong {
+        font-size: 10px;
+        font-weight: 700;
+        color: #332924;
+    }
+
+    .dashboard-sucursal .personal-item small {
+        font-size: 9px;
+        color: #b18e80;
+    }
+
+    /* ================= RENDIMIENTO MENSUAL ================= */
+    .dashboard-sucursal .rendimiento-total {
+        color: var(--gd-verde);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .dashboard-sucursal .grafico-mensual {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        align-items: end;
+        gap: 12px;
+        min-height: 137px;
+        margin-bottom: 17px;
+        padding: 18px 16px 12px;
+        border-radius: 12px;
+        background: #fcf8f5;
+    }
+
+    .dashboard-sucursal .grafico-grupo {
+        display: flex;
+        height: 106px;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .dashboard-sucursal .grafico-barra {
+        width: 29px;
+        max-width: 100%;
+        min-height: 0;
+        border-radius: 5px 5px 0 0;
+        background: #ae8171;
+        transition: height .35s ease;
+    }
+        /* Alturas de demostración SOLO cuando el HTML no trae height inline.
+   Para cifras reales, calcular altura desde ingresos semanales. */
+        .dashboard-sucursal .grafico-barra.barra-semana-1 {
+            height: 58px;
+        }
+
+        .dashboard-sucursal .grafico-barra.barra-semana-2 {
+            height: 83px;
+        }
+
+        .dashboard-sucursal .grafico-barra.barra-semana-3 {
+            height: 103px;
+            background: var(--gd-dorado);
+        }
+
+        .dashboard-sucursal .grafico-barra.barra-semana-4 {
+            height: 72px;
+        }
+
+    .dashboard-sucursal .grafico-grupo small {
+        color: #af8b7e;
+        font-size: 9px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .dashboard-sucursal .top-servicios {
+        padding-top: 16px;
+        border-top: 1px solid #f1eae5;
+    }
+
+    .dashboard-sucursal .top-servicios-titulo {
+        margin-bottom: 8px;
+        color: #ac806d;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .dashboard-sucursal .top-servicio {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 36px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3ece7;
+    }
+
+        .dashboard-sucursal .top-servicio .top-numero {
+            min-width: 20px;
+            color: var(--gd-dorado);
+            font-size: 11px;
+        }
+
+        .dashboard-sucursal .top-servicio strong {
+            flex: 1;
+            color: var(--gd-texto);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .dashboard-sucursal .top-servicio small {
+            color: #b58c77;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+    /* ================= PROMOCIONES ================= */
+    .dashboard-sucursal .enlace-gestionar {
+        font-size: 10px;
+        color: #b18a50;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .dashboard-sucursal a.enlace-gestionar:hover {
+        text-decoration: underline;
+    }
+
+    .dashboard-sucursal .promocion-dashboard {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 10px;
+        padding: 13px 14px;
+        background: #fcf8f5;
+        border-radius: 10px;
+    }
+
+        .dashboard-sucursal .promocion-dashboard > div {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            gap: 3px;
+        }
+
+        .dashboard-sucursal .promocion-dashboard strong {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .dashboard-sucursal .promocion-dashboard small {
+            color: #b18d80;
+            font-size: 10px;
+        }
+
+    .dashboard-sucursal .estado-activo {
+        flex-shrink: 0;
+        padding: 5px 9px;
+        border-radius: 6px;
+        background: var(--gd-verde-fondo);
+        color: var(--gd-verde);
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    /* ================= DISPONIBILIDAD ================= */
+    .dashboard-sucursal .disponibilidad-lista {
+        margin-top: 18px;
+    }
+
+    .dashboard-sucursal .fila-disponibilidad {
+        display: grid;
+        grid-template-columns: minmax(105px, 1.6fr) repeat(4, minmax(0, 1fr));
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 11px;
+    }
+
+        .dashboard-sucursal .fila-disponibilidad strong {
+            color: var(--gd-texto);
+            font-size: 10px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+    .dashboard-sucursal .horario {
+        display: block;
+        width: 100%;
+        height: 10px;
+        border-radius: 3px;
+        background: #ece8e5;
+    }
+
+    .dashboard-sucursal .horario-libre {
+        background: #83a589;
+    }
+
+    .dashboard-sucursal .horario-ocupado {
+        background: #df841b;
+    }
+
+    .dashboard-sucursal .etiquetas-horario {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 18px;
+        margin-left: 35%;
+        color: #bf9988;
+        font-size: 9px;
+        text-transform: uppercase;
+    }
+
+/* ================= ADAPTACIÓN A PANTALLAS ================= */
+@media (max-width: 1250px) {
+    .dashboard-sucursal {
+        padding: 28px 24px 36px;
+    }
+
+        .dashboard-sucursal .resumen-sucursal {
+            gap: 10px;
+        }
+
+        .dashboard-sucursal .resumen-sucursal-card {
+            padding: 13px 12px;
+        }
+
+        .dashboard-sucursal .resumen-card-arriba {
+            font-size: 8px;
+        }
+
+        .dashboard-sucursal .dashboard-sucursal-grid {
+            gap: 15px;
+        }
+
+        .dashboard-sucursal .card {
+            padding: 20px 16px;
+        }
+}
+
+@media (max-width: 980px) {
+    .dashboard-sucursal .resumen-sucursal {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dashboard-sucursal .dashboard-sucursal-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dashboard-sucursal .resumen-valor {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 620px) {
+    .dashboard-sucursal {
+        padding: 20px 14px 26px;
+    }
+
+        .dashboard-sucursal .dashboard-header {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-sucursal .titulo-dashboard h1 {
+            font-size: 27px;
+        }
+
+        .dashboard-sucursal .usuario {
+            margin-left: 0;
+        }
+
+        .dashboard-sucursal .resumen-sucursal {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .dashboard-sucursal .resumen-sucursal-card {
+            min-height: 100px;
+        }
+
+        .dashboard-sucursal .resumen-valor {
+            font-size: 19px;
+        }
+
+        .dashboard-sucursal .card {
+            padding: 17px 13px;
+            border-radius: 13px;
+        }
+
+            .dashboard-sucursal .card h2 {
+                font-size: 17px;
+            }
+
+        .dashboard-sucursal .tabla-reservas {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+            .dashboard-sucursal .tabla-reservas th,
+            .dashboard-sucursal .tabla-reservas td {
+                padding: 10px 7px;
+            }
+
+        .dashboard-sucursal .personal-lista {
+            justify-content: flex-start;
+        }
+
+        .dashboard-sucursal .personal-item {
+            flex: 0 1 28%;
+        }
+
+        .dashboard-sucursal .fila-disponibilidad {
+            grid-template-columns: minmax(84px, 1.6fr) repeat(4, minmax(0, 1fr));
+            gap: 4px;
+        }
+
+        .dashboard-sucursal .etiquetas-horario {
+            margin-left: 30%;
+        }
+}
+
+@media (max-width: 380px) {
+    .dashboard-sucursal .resumen-sucursal {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-sucursal .grafico-mensual {
+        gap: 6px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .dashboard-sucursal .grafico-barra {
+        width: 22px;
+    }
+}

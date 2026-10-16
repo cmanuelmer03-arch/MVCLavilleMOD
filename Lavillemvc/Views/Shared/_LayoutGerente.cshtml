@@ -1,0 +1,169 @@
+﻿@{
+    var menuActivo = ViewData["ActiveMenu"]?.ToString() ?? "Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - L'Avielle</title>
+
+    <!-- ESTRUCTURA GENERAL DEL GERENTE -->
+    <link rel="stylesheet"
+          href="@Url.Content("~/css/gerente-layout.css")" />
+
+    <!-- DISEÑO DEL DASHBOARD -->
+    <link rel="stylesheet"
+          href="@Url.Content("~/css/gerente-dashboard.css")" />
+</head>
+
+<body class="pagina-gerente">
+
+    <div class="gerente-estructura">
+
+        <!-- ====================================== -->
+        <!-- MENÚ LATERAL -->
+        <!-- ====================================== -->
+
+        <aside class="gerente-sidebar">
+
+            <div class="gerente-sidebar-superior">
+
+                <div class="gerente-logo">
+                    L'Avielle
+                </div>
+
+                <div class="gerente-subtitulo">
+                    Gerente de Sucursal
+                </div>
+
+                <nav class="gerente-navegacion">
+
+                    <a class="gerente-enlace @(menuActivo == "Dashboard" ? "activo" : "")"
+                       href="@Url.Action("DashboardSucursal", "GerenteDashboard")">
+
+                        <span class="gerente-icono">▦</span>
+
+                        <span>Dashboard Sucursal</span>
+
+                    </a>
+
+                    <!-- ACTIVAREMOS ESTOS ENLACES CUANDO
+                         EXISTAN SUS CONTROLADORES -->
+
+                    <span class="gerente-enlace gerente-enlace-pendiente">
+                        <span class="gerente-icono">♙</span>
+                        <span>Gestión de Empleados</span>
+                    </span>
+
+                    <span class="gerente-enlace gerente-enlace-pendiente">
+                        <span class="gerente-icono">☆</span>
+                        <span>Gestión de Promociones</span>
+                    </span>
+
+                </nav>
+
+            </div>
+
+            <div class="gerente-sidebar-inferior">
+
+                <!-- Se conectará con la acción real
+                     de cerrar sesión al configurar login -->
+
+                <span class="gerente-cerrar">
+                    ⇥ &nbsp; Cerrar Sesión
+                </span>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ====================================== -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ====================================== -->
+
+        <div class="gerente-contenido">
+
+            @RenderBody()
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FOOTER DEL GERENTE -->
+    <!-- ========================================== -->
+
+    <footer class="gerente-footer">
+
+        <div class="gerente-footer-grid">
+
+            <section>
+
+                <h2 class="gerente-footer-logo">
+                    L'Avielle
+                </h2>
+
+                <p>
+                    Un concepto exclusivo de salón de
+                    belleza y spa de bienestar, donde
+                    la elegancia y la atención de nivel
+                    internacional se encuentran.
+                </p>
+
+            </section>
+
+            <section>
+
+                <h3>NAVEGACIÓN</h3>
+
+                <p>
+                    <a href="@Url.Action("DashboardSucursal", "GerenteDashboard")">
+                        Dashboard Sucursal
+                    </a>
+                </p>
+
+                <p>Gestión de Empleados</p>
+
+                <p>Gestión de Promociones</p>
+
+            </section>
+
+            <section>
+
+                <h3>CONTACTO Y UBICACIÓN</h3>
+
+                <p>
+                    Información de contacto y dirección
+                    pendiente de configurar.
+                </p>
+
+            </section>
+
+        </div>
+
+        <div class="gerente-footer-abajo">
+
+            <span>
+                © @DateTime.Now.Year L'Avielle.
+                Todos los derechos reservados.
+            </span>
+
+            <span>
+                Salón de Belleza y Bienestar
+            </span>
+
+        </div>
+
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

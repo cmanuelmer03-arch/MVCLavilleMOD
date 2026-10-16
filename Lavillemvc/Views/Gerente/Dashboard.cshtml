@@ -1,0 +1,604 @@
+﻿@model Lavillemvc.Models.GerenteDashboardSucursal
+@using System.Globalization
+
+@{
+    Layout = "~/Views/Shared/_LayoutGerente.cshtml";
+
+    ViewData["Title"] = "Dashboard de Sucursal";
+    ViewData["ActiveMenu"] = "Dashboard";
+
+    var cultura = CultureInfo.GetCultureInfo("es-SV");
+
+    string mesActual = DateTime.Now
+        .ToString("MMMM yyyy", cultura);
+
+    string estadoSucursal = Model.Abierto switch
+    {
+        true => "Sucursal abierta",
+        false => "Sucursal cerrada",
+        _ => "Estado no disponible"
+    };
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Dashboard de Sucursal - L'Avielle</title>
+
+    <link rel="stylesheet"
+          href="@Url.Content("~/css/GerenteDashboard.css")" />
+</head>
+
+<body>
+
+    <!-- AQUÍ CONSERVAS TODO TU CONTENIDO ACTUAL -->
+
+
+
+<main class="contenido">
+
+    <div class="dashboard dashboard-sucursal">
+
+        <!-- ================================== -->
+        <!-- HEADER -->
+        <!-- ================================== -->
+
+        <div class="dashboard-header">
+
+            <div class="titulo-dashboard">
+
+                <h1>
+                    Dashboard de Sucursal
+                </h1>
+
+                <p>
+
+                    @Model.NombreSucursal
+
+                    <span>—</span>
+
+                    Panel de Control General
+
+                    <span>•</span>
+
+                    <strong>
+                        @mesActual
+                    </strong>
+
+                </p>
+
+            </div>
+
+            <div class="usuario">
+
+                <img src="~/images/gerente.png"
+                     alt="Gerente de sucursal"
+                     class="avatar" />
+
+                <div class="usuario-info">
+
+                    <strong>
+                        Gerente de Sucursal
+                    </strong>
+
+                    <small>
+                        @estadoSucursal
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================== -->
+        <!-- TARJETAS SUPERIORES -->
+        <!-- ================================== -->
+
+        <section class="resumen-sucursal">
+
+            <!-- RESERVAS DE HOY -->
+
+            <div class="resumen-sucursal-card">
+
+                <div class="resumen-card-arriba">
+
+                    <span>
+                        Reservas Hoy
+                    </span>
+
+                    <span class="resumen-icono">
+                        ◫
+                    </span>
+
+                </div>
+
+                <div class="resumen-valor">
+                    @Model.ReservasHoy Citas
+                </div>
+
+            </div>
+
+
+            <!-- INGRESOS DEL MES -->
+
+            <div class="resumen-sucursal-card">
+
+                <div class="resumen-card-arriba">
+
+                    <span>
+                        Ingresos del Mes
+                    </span>
+
+                    <span class="resumen-icono">
+                        $
+                    </span>
+
+                </div>
+
+                <div class="resumen-valor">
+                    $ @Model.IngresosCitasMes.ToString("N2", cultura)
+                </div>
+
+            </div>
+
+
+            <!-- CLIENTES DEL MES -->
+
+            <div class="resumen-sucursal-card">
+
+                <div class="resumen-card-arriba">
+
+                    <span>
+                        Clientes del Mes
+                    </span>
+
+                    <span class="resumen-icono">
+                        ♙
+                    </span>
+
+                </div>
+
+                <div class="resumen-valor">
+                    @Model.ClientesMes Clientes
+                </div>
+
+            </div>
+
+
+            <!-- EMPLEADOS REGISTRADOS -->
+
+            <div class="resumen-sucursal-card">
+
+                <div class="resumen-card-arriba">
+
+                    <span>
+                        Empleados Registrados
+                    </span>
+
+                    <span class="resumen-icono">
+                        ♙
+                    </span>
+
+                </div>
+
+                <div class="resumen-valor">
+                    @Model.TotalEmpleados Empleados
+                </div>
+
+            </div>
+
+
+            <!-- SERVICIOS DISPONIBLES -->
+
+            <div class="resumen-sucursal-card">
+
+                <div class="resumen-card-arriba">
+
+                    <span>
+                        Servicios Disponibles
+                    </span>
+
+                    <span class="resumen-icono">
+                        ☆
+                    </span>
+
+                </div>
+
+                <div class="resumen-valor">
+                    @Model.ServiciosDisponibles Servicios
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================== -->
+        <!-- GRID PRINCIPAL -->
+        <!-- ================================== -->
+
+        <section class="dashboard-sucursal-grid">
+
+
+            <!-- ================================== -->
+            <!-- COLUMNA IZQUIERDA -->
+            <!-- ================================== -->
+
+            <div class="dashboard-columna">
+
+
+                <!-- ================================== -->
+                <!-- RESERVAS DEL DÍA -->
+                <!-- ================================== -->
+
+                <div class="card">
+
+                    <div class="dashboard-card-header">
+
+                        <h2>
+                            Reservas del Día
+                        </h2>
+
+                        <span class="btn-pequeno">
+                            Total: @Model.ReservasHoy
+                        </span>
+
+                    </div>
+
+
+                    <table class="tabla-reservas">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>HORA</th>
+
+                                <th>CLIENTE</th>
+
+                                <th>SERVICIO</th>
+
+                                <th>ESPECIALISTA</th>
+
+                                <th>ESTADO</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @*
+                                PENDIENTE:
+                                Esta tabla necesita la consulta
+                                detallada de las citas del día.
+
+                                GerenteDashboardSucursal
+                                actualmente solo contiene los
+                                indicadores generales.
+
+                                No mostrar registros de ejemplo
+                                como si fueran datos reales.
+                            *@
+
+                            <tr>
+
+                                <td colspan="5"
+                                    style="text-align:center;
+                                    padding:25px;">
+
+                                    El listado detallado de reservas
+                                    está pendiente de conexión.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+                    <div style="margin-top:15px;">
+
+                        <span class="estado-tabla estado-confirmado-tabla">
+
+                            Confirmadas:
+                            @Model.CitasConfirmadas
+
+                        </span>
+
+                        <span class="estado-tabla estado-pendiente">
+
+                            Pendientes:
+                            @Model.CitasPendientes
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================== -->
+                <!-- PERSONAL DEL DÍA -->
+                <!-- ================================== -->
+
+                <div class="card">
+
+                    <h2>
+                        Personal del Día — L'Avielle Staff
+                    </h2>
+
+                    <div class="personal-lista">
+
+                        @*
+                            PENDIENTE:
+                            Consultar los empleados o especialistas
+                            asignados a la sucursal y sus horarios.
+
+                            TotalEmpleados no indica por sí solo
+                            quién está trabajando hoy.
+                        *@
+
+                        <div class="personal-item">
+
+                            <strong>
+                                @Model.TotalEmpleados
+                            </strong>
+
+                            <small>
+                                Empleados registrados
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <p style="margin-top:15px;
+                        font-size:13px;
+                        opacity:0.75;">
+
+                        El personal presente y sus horarios
+                        estarán disponibles al conectar
+                        la consulta de asistencia.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================== -->
+            <!-- COLUMNA DERECHA -->
+            <!-- ================================== -->
+
+            <div class="dashboard-columna">
+
+
+                <!-- ================================== -->
+                <!-- RENDIMIENTO MENSUAL -->
+                <!-- ================================== -->
+
+                <div class="card">
+
+                    <div class="dashboard-card-header">
+
+                        <h2>
+                            Rendimiento Mensual
+                        </h2>
+
+                        <span class="rendimiento-total">
+
+                            $ @Model.IngresosCitasMes.ToString("N2", cultura)
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="grafico-mensual">
+
+                        @*
+                            PENDIENTE:
+                            El gráfico necesita los ingresos
+                            desglosados por semana.
+
+                            No se inventan valores ni alturas.
+                        *@
+
+                        <div class="grafico-grupo">
+
+                            <div class="grafico-barra barra-semana-1"
+                                 style="height:0;">
+                            </div>
+
+                            <small>
+                                Semana 1
+                            </small>
+
+                        </div>
+
+
+                        <div class="grafico-grupo">
+
+                            <div class="grafico-barra barra-semana-2"
+                                 style="height:0;">
+                            </div>
+
+                            <small>
+                                Semana 2
+                            </small>
+
+                        </div>
+
+
+                        <div class="grafico-grupo">
+
+                            <div class="grafico-barra barra-semana-3"
+                                 style="height:0;">
+                            </div>
+
+                            <small>
+                                Semana 3
+                            </small>
+
+                        </div>
+
+
+                        <div class="grafico-grupo">
+
+                            <div class="grafico-barra barra-semana-4"
+                                 style="height:0;">
+                            </div>
+
+                            <small>
+                                Semana 4
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <p style="font-size:13px;
+                        text-align:center;
+                        opacity:0.75;">
+
+                        Desglose semanal pendiente de conexión.
+
+                    </p>
+
+
+                    <!-- TOP SERVICIOS -->
+
+                    <div class="top-servicios">
+
+                        <div class="top-servicios-titulo">
+
+                            TOP SERVICIOS EXCLUSIVOS
+
+                        </div>
+
+                        <div class="top-servicio">
+
+                            <span class="top-numero">
+                                —
+                            </span>
+
+                            <strong>
+                                Ranking pendiente de conexión
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ================================== -->
+                <!-- PROMOCIONES -->
+                <!-- ================================== -->
+
+                <div class="card">
+
+                    <div class="dashboard-card-header">
+
+                        <h2>
+                            Promociones Activas
+                        </h2>
+
+                        <span class="enlace-gestionar">
+
+                            @Model.PromocionesActivas activas
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="promocion-dashboard">
+
+                        <div>
+
+                            <strong>
+                                Promociones de la sucursal
+                            </strong>
+
+                            <small>
+                                Listado pendiente de conexión
+                            </small>
+
+                        </div>
+
+                        <span class="estado-activo">
+                            @Model.PromocionesActivas
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ================================== -->
+                <!-- DISPONIBILIDAD -->
+                <!-- ================================== -->
+
+                <div class="card">
+
+                    <h2>
+                        Disponibilidad de Hoy
+                    </h2>
+
+                    <div class="disponibilidad-lista">
+
+                        @*
+                            PENDIENTE:
+                            Esta sección necesita consultar
+                            horarios de especialistas y citas
+                            asignadas para calcular ocupación.
+                        *@
+
+                        <div class="fila-disponibilidad">
+
+                            <strong>
+                                Horarios pendientes de conexión
+                            </strong>
+
+                        </div>
+
+                        <div class="etiquetas-horario">
+
+                            <span>AM</span>
+
+                            <span>MEDIODÍA</span>
+
+                            <span>TARDE</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+</body>
+</html>
+
