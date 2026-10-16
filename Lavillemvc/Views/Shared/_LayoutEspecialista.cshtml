@@ -3,6 +3,12 @@
 <html lang="es">
 
 <head>
+    
+
+
+    <link rel="stylesheet"
+          href="~/css/accesibilidad-lavielle.css"
+          asp-append-version="true" />
 
     <meta charset="utf-8" />
 
@@ -19,9 +25,25 @@
     <link rel="stylesheet"
           href="~/css/especialista.css" />
 
-    @await RenderSectionAsync("Styles", required: false)
+          
+<!-- ESTILOS DEL ESPECIALISTA -->
+<link rel="stylesheet"
+      href="~/css/especialista2.css" />
 
+<link rel="stylesheet"
+      href="~/css/especialista.css" />
 
+<!-- MENÚ DE ACCESIBILIDAD -->
+<link rel="stylesheet"
+      href="~/css/accesibilidad-lavielle.css" />
+
+<!-- ESTILOS PARTICULARES DE CADA VISTA -->
+@await RenderSectionAsync("Styles", required: false)
+
+<!-- TEMA OSCURO DEL ESPECIALISTA -->
+<link rel="stylesheet"
+      href="~/css/accesibilidad-especialista-temas.css"
+      asp-append-version="true" />
 </head>
 
 
@@ -160,9 +182,19 @@
         </div>
 
     </footer>
+    
 
+    <!-- MENÚ DE ACCESIBILIDAD -->
+    @await Html.PartialAsync(
+        "~/Views/Shared/_MenuAccesibilidad.cshtml"
+    )
+
+    <!-- JAVASCRIPT DE ACCESIBILIDAD -->
+    <script src="@Url.Content("~/js/accesibilidad-lavielle.js")"
+            defer></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 
 </body>
 

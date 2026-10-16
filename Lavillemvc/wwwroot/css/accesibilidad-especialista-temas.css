@@ -1,0 +1,159 @@
+﻿/* L'Avielle: temas de accesibilidad SOLO para el layout del Especialista.
+   Cargar AL FINAL del <head> de _LayoutEspecialista.cshtml,
+   DESPUÉS de RenderSectionAsync("Styles", ...).
+   No altera las reglas de Admin, Cliente, Gerente o Recepción. */
+
+/* Claro: recuperar el esquema del proyecto al cambiar desde oscuro. */
+html[data-la-theme="light"] body {
+    color-scheme: light;
+}
+
+/* Oscuro: respetar los valores que establece accesibilidad-lavielle.css */
+html[data-la-theme="dark"] body {
+    color-scheme: dark;
+    background: var(--la-page-bg);
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] :is(.especialista-layout, .contenido-especialista, .especialista-page, .especialista-agenda, .disponibilidad-page) {
+    background-color: var(--la-page-bg);
+    color: var(--la-text);
+}
+
+/* Navegación lateral y pie de página; conservar la identidad L'Avielle */
+html[data-la-theme="dark"] .sidebar-especialista,
+html[data-la-theme="dark"] .footer {
+    background: #151312;
+    color: var(--la-text);
+}
+
+    html[data-la-theme="dark"] .sidebar-especialista a,
+    html[data-la-theme="dark"] .sidebar-especialista strong,
+    html[data-la-theme="dark"] .sidebar-especialista span,
+    html[data-la-theme="dark"] .cerrar-especialista {
+        color: #f0dfd3;
+    }
+
+        html[data-la-theme="dark"] .sidebar-especialista a:hover,
+        html[data-la-theme="dark"] .sidebar-especialista a:focus-visible {
+            background-color: #423329;
+            color: #ffdda4;
+        }
+
+/* Textos generales del módulo (sin tocar el menú flotante) */
+html[data-la-theme="dark"] :is(.especialista-page, .especialista-agenda, .disponibilidad-page)
+:is(h1, h2, h3, h4, strong, label, p) {
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] :is(.especialista-page, .especialista-agenda, .disponibilidad-page)
+:is(small, .agenda-identidad, .agenda-rango, .disp-ayuda) {
+    color: var(--la-muted);
+}
+
+/* Mi Agenda: tarjetas, formularios y resumen */
+html[data-la-theme="dark"] .especialista-agenda :is( .agenda-resumen > div, .cita-card, .agenda-vacia, .proxima-cita, .resumen-dia ) {
+    background: var(--la-surface);
+    border-color: var(--la-border);
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-agenda :is( .agenda-resumen strong, .cita-hora strong, .cita-datos strong, .cliente-proxima strong, .resumen-dia strong ) {
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-agenda :is( .cita-datos span, .cita-datos small, .cliente-proxima small, .detalle-cita small, .agenda-resumen small ) {
+    color: var(--la-muted);
+}
+
+html[data-la-theme="dark"] .especialista-agenda :is( a.filtro-agenda, .agenda-fecha-form input ) {
+    background: var(--la-surface);
+    border-color: var(--la-border);
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-agenda a.filtro-agenda.activo {
+    background: #4b392c;
+    color: #f5d9a8;
+    box-shadow: 0 0 0 1px #9a7752 inset;
+}
+
+html[data-la-theme="dark"] .especialista-agenda .cliente-foto {
+    background: #574638;
+    color: #fff2e7;
+}
+
+html[data-la-theme="dark"] .especialista-agenda hr {
+    border-color: var(--la-border);
+}
+
+/* Mi Disponibilidad: este módulo usa variables propias --disp-*. */
+html[data-la-theme="dark"] .disponibilidad-page {
+    --disp-cafe: #f1e1d3;
+    --disp-texto: #f1e9e4;
+    --disp-secundario: #c9b6ab;
+    --disp-borde: #57473e;
+    --disp-fondo: #26211e;
+    color: var(--disp-texto);
+}
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( .horarios-card, .ausencias-card, .resumen-semanal ) {
+        background: var(--la-surface);
+        border-color: var(--la-border);
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( .horarios-card h2, .ausencia-item, .dia-horario.apagado ) {
+        background: var(--disp-fondo);
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page .dia-horario {
+        border-bottom-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( input[type="time"], input[type="date"], input[type="text"], select, textarea, .btn-restablecer ) {
+        background: #211d1a;
+        color: var(--la-text);
+        border-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( input[type="time"], input[type="date"], input[type="text"], select, textarea ):disabled {
+        background: #302923;
+        color: var(--la-muted);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( .resumen-semanal strong, .ausencia-item strong, .disp-ausencia-form label ) {
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page .almuerzo-horario {
+        border-left-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page .disp-ausencia-form {
+        border-top-color: var(--la-border);
+    }
+
+/* Mi Perfil: los contenedores heredados del CSS compartido */
+html[data-la-theme="dark"] .especialista-layout :is( .perfil-presentacion, .perfil .card, .accion, .perfil-derecha .card ) {
+    background: var(--la-surface);
+    color: var(--la-text);
+    border-color: var(--la-border);
+}
+
+html[data-la-theme="dark"] .especialista-layout .perfil :is( .perfil-titulo h1, .perfil-nombre h2, .perfil-datos p, .card h2, .campo label, .preferencia strong, .contacto-opcion strong ) {
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-layout .perfil :is( input, select, textarea ) {
+    background: #211d1a;
+    border-color: var(--la-border);
+    color: var(--la-text);
+}
+
+/* Contraste visible para navegación de teclado */
+html[data-la-theme="dark"] .especialista-layout :is(a, button, input, select, textarea):focus-visible {
+    outline: 3px solid #f0c377;
+    outline-offset: 2px;
+}
