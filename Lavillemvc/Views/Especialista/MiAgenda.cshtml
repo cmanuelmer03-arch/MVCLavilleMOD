@@ -46,7 +46,7 @@
     <header class="especialista-header">
         <div>
             <h1>Mi Agenda</h1>
-            <p>@Model.FechaHoy.ToDateTime(TimeOnly.MinValue).ToString("dddd, dd 'de' MMMM 'de' yyyy", cultura)</p>
+            <p>@fechaHoy.ToDateTime(TimeOnly.MinValue).ToString("dddd, dd 'de' MMMM 'de' yyyy", cultura)</p>
             <small class="agenda-identidad">@Model.NombreEspecialista · @Model.NombreEspecialidad</small>
         </div>
         <div class="agenda-resumen">
