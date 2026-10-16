@@ -1,6 +1,16 @@
 ﻿@{
     Layout = null;
     ViewData["Title"] = "Especialistas";
+
+    var rolActual = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var destinoPanel = rolActual switch
+    {
+        "Cliente" => (Controlador: "Cliente", Accion: "DashboardCliente"),
+        "Recepcionista" => (Controlador: "Gestion", Accion: "PanelPrinciRecepcionista"),
+        "Especialista" => (Controlador: "Especialista", Accion: "MiAgenda"),
+        "Encargado Inventario" => (Controlador: "Inventario", Accion: "PanelInventario"),
+        _ => (Controlador: "", Accion: "")
+    };
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -32,10 +42,35 @@
                 <a asp-controller="Servicios" asp-action="Sucursales" class="nav-link">Sucursales</a>
             </nav>
             <!-- Acciones del Header -->
+            <!-- Acciones del Header -->
             <div class="acciones-header">
-                <a asp-controller="Login" asp-action="Index" class="btn-header-login">Iniciar Sesión</a>
-                <a asp-controller="Login" asp-action="Registro" class="btn-header-reserva">REGISTRARSE</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="lavielle-cuenta">
+                        <div class="lavielle-cuenta-datos">
+                            <span class="lavielle-cuenta-nombre">@User.Identity.Name</span>
+                            <span class="lavielle-cuenta-rol">@rolActual</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(destinoPanel.Controlador))
+                        {
+                            <a asp-controller="@destinoPanel.Controlador"
+                               asp-action="@destinoPanel.Accion"
+                               class="lavielle-ir-panel">Ir al panel</a>
+                        }
+                        <form asp-controller="Login" asp-action="CerrarSesion" method="post"
+                              class="lavielle-salir-form" id="lavielle-form-cerrar-sesion">
+                            @Html.AntiForgeryToken()
+                            <button type="button" class="lavielle-salir" onclick="document.getElementById('lavielle-modal-cerrar-sesion').showModal()">Cerrar sesión</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Login" asp-action="Index" class="btn-header-login">Iniciar Sesión</a>
+                    <a asp-controller="Login" asp-action="Registro" class="btn-header-reserva">REGISTRARSE</a>
+                }
             </div>
+
 
         </div>
     </header>
@@ -317,5 +352,17 @@
         </div>
     </footer>
 
+    <!-- Confirmación personalizada de cierre de sesión -->
+    <dialog id="lavielle-modal-cerrar-sesion" class="lavielle-modal-sesion" aria-labelledby="lavielle-modal-titulo">
+        <div class="lavielle-modal-contenido">
+            <div class="lavielle-modal-icono" aria-hidden="true">&#10022;</div>
+            <h2 id="lavielle-modal-titulo">¿Deseas cerrar sesión?</h2>
+            <p>Tu sesión actual finalizará y regresarás al inicio de sesión.</p>
+            <div class="lavielle-modal-acciones">
+                <button type="button" class="lavielle-modal-cancelar" onclick="document.getElementById('lavielle-modal-cerrar-sesion').close()">Cancelar</button>
+                <button type="submit" form="lavielle-form-cerrar-sesion" class="lavielle-modal-confirmar">Sí, cerrar sesión</button>
+            </div>
+        </div>
+    </dialog>
 </body>
 </html>

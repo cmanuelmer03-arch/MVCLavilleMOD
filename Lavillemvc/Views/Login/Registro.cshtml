@@ -39,8 +39,15 @@
                 <p class="subtitulo-form">
                     &Uacute;nete a la experiencia L'Avielle y descubre la sofisticaci&oacute;n a tu medida.
                 </p>
+                @if (ViewBag.Error != null)
+                {
+                    <div class="mensaje-error-registro" role="alert">
+                        @ViewBag.Error
+                    </div>
+                }
 
                 <form method="post" asp-controller="Login" asp-action="Registro">
+                    @Html.AntiForgeryToken()
 
                     <!-- Campo: Nombre Completo -->
                     <div class="grupo-campo">
@@ -84,7 +91,7 @@
 
                     <!-- Checkbox: Términos y Condiciones -->
                     <div class="grupo-checkbox">
-                        <input type="checkbox" id="chkTerminos" name="chkTerminos" class="checkbox-custom" required />
+                        <input type="checkbox" id="chkTerminos" name="chkTerminos" value="true" class="checkbox-custom" required />
                         <label for="chkTerminos" class="label-checkbox">
                             Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a>
                         </label>
