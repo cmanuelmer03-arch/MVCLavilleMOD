@@ -3,6 +3,7 @@ using Lavillemvc.DAL;
 using Lavillemvc.Models;
 using Npgsql;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace Lavillemvc.Controllers
 {
@@ -15,10 +16,42 @@ namespace Lavillemvc.Controllers
             _conexion = new Conexion(configuration);
         }
 
+        private int ObtenerIdClienteActual()
+        {
+            var identificador =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(identificador))
+            {
+                throw new UnauthorizedAccessException(
+                    "No se pudo identificar al usuario.");
+            }
+
+            var partes = identificador.Split(':');
+
+            if (partes.Length != 2 ||
+                !partes[0].Equals(
+                    "cliente",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException(
+                    "El usuario actual no es un cliente.");
+            }
+
+            if (!int.TryParse(partes[1], out int idCliente) ||
+                idCliente <= 0)
+            {
+                throw new UnauthorizedAccessException(
+                    "El ID del cliente no es válido.");
+            }
+
+            return idCliente;
+        }
+
         [HttpGet]
         public async Task<IActionResult> PerfilCliente()
         {
-            int idCliente = 1;
+            int idCliente = ObtenerIdClienteActual();
 
             await using var conn = _conexion.GetConnection();
             await conn.OpenAsync();
@@ -149,7 +182,9 @@ namespace Lavillemvc.Controllers
 
             await using var cmd = new NpgsqlCommand(sql, conn);
 
-            cmd.Parameters.AddWithValue("@IdCliente", 1);
+            int idCliente = ObtenerIdClienteActual();
+
+            cmd.Parameters.AddWithValue("@IdCliente", idCliente);
 
             await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -227,7 +262,7 @@ namespace Lavillemvc.Controllers
 
         public async Task<IActionResult> MisReservas()
         {
-            int idCliente = 1;
+            int idCliente = ObtenerIdClienteActual();
 
             List<ClienteProcesoPago> reservas =
                 new List<ClienteProcesoPago>();
@@ -299,7 +334,7 @@ namespace Lavillemvc.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelarReserva(int idCita)
         {
-            int idCliente = 1;
+            int idCliente = ObtenerIdClienteActual();
 
             if (idCita <= 0)
             {
@@ -742,7 +777,7 @@ namespace Lavillemvc.Controllers
 
         public async Task<IActionResult> Promociones()
         {
-            int idCliente = 1;
+            int idCliente = ObtenerIdClienteActual();
 
             await using var conn =
                 _conexion.GetConnection();
@@ -956,7 +991,7 @@ namespace Lavillemvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ContratarMembresia(int idMembresia)
         {
-            int idCliente = 1;
+            int idCliente = ObtenerIdClienteActual();
 
             if (idMembresia <= 0)
             {
@@ -1121,7 +1156,7 @@ namespace Lavillemvc.Controllers
 
             var modelo = new ReservarCita
             {
-                IdCliente = 1,
+                IdCliente = ObtenerIdClienteActual(),
                 IdServicio = idServicio,
                 IdEspecialista = idEspecialista,
                 IdSucursal = idSucursal,
@@ -1432,7 +1467,7 @@ namespace Lavillemvc.Controllers
     ReservarCita modelo,
     int? idPromocion)
         {
-            modelo.IdCliente = 1;
+            modelo.IdCliente = ObtenerIdClienteActual();
 
             if (!modelo.IdServicio.HasValue ||
                 !modelo.IdEspecialista.HasValue ||
