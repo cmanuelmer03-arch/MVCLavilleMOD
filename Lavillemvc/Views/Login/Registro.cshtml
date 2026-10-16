@@ -64,7 +64,7 @@
                     <!-- Campo: Teléfono -->
                     <div class="grupo-campo">
                         <label class="label-campo">Teléfono</label>
-                        <input type="tel" name="txtTelefono" class="input-control" placeholder="+58 412 000 0000" />
+                        <input type="tel" id="txtTelefono" name="txtTelefono" class="input-control" placeholder="+58 412 000 0000" inputmode="numeric" maxlength="20" />
                     </div>
 
                     <!-- Campo: Contraseña -->
@@ -137,7 +137,8 @@
 
     </div>
 
-    <script>
+    
+            <script>
         function togglePassword(inputId) {
             var input = document.getElementById(inputId);
             if (input.type === "password") {
@@ -146,6 +147,11 @@
                 input.type = "password";
             }
         }
+
+        document.getElementById('txtTelefono').addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9+()\-\s]/g, '');
+        });
     </script>
+    
 </body>
 </html>

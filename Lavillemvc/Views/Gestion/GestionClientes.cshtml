@@ -51,16 +51,22 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER DE VISTA -->
+
+            @if (TempData["ToastOk"] != null)
+            {
+                <div style="background:#ebf3ec;color:#4e7e4f;padding:0.9rem 1.2rem;border-radius:10px;margin-bottom:1.5rem;font-size:0.85rem;border:1px solid #d3e3d6;">
+                    @TempData["ToastOk"]
+                </div>
+            }
+
             <header class="page-header">
                 <div class="page-title">
                     <h1>Gestión de Clientes</h1>
                     <p>Directorio de Socias L'Avielle y Registro Único</p>
                 </div>
-                <button class="btn-primary-gold">Registrar Nuevo Cliente</button>
+                <button type="button" class="btn-primary-gold" onclick="abrirModalCliente()">Registrar Nuevo Cliente</button>
             </header>
 
-            <!-- FILTROS Y BUSCADOR -->
             <section class="filter-card">
                 <form method="get" action="@Url.Action("GestionClientes","Gestion")">
                     <div class="filter-top-row">
@@ -89,7 +95,6 @@
                 </form>
             </section>
 
-            <!-- TABLA DE CLIENTES -->
             <section class="table-card">
                 <div style="overflow-x: auto;">
                     <table class="clientes-table">
@@ -101,13 +106,12 @@
                                 <th>Última Visita</th>
                                 <th>Citas</th>
                                 <th>Membresía</th>
-                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (clientes.Count == 0)
                             {
-                                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">No se encontraron clientes.</td></tr>
+                                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No se encontraron clientes.</td></tr>
                             }
                             @foreach (var item in clientes)
                             {
@@ -120,19 +124,12 @@
                                     <td>
                                         <span class="badge-membership @item.CssMembresia">@item.Membresia</span>
                                     </td>
-                                    <td>
-                                        <div class="action-links">
-                                            <a href="#" class="link-ver">Ver</a>
-                                            <a href="#" class="link-editar">Editar</a>
-                                        </div>
-                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
 
-                <!-- PAGINACIÓN -->
                 <div class="table-pagination">
                     <span>Mostrando @desde-@hasta de @total clientes</span>
                     <div class="pagination-controls">
@@ -163,7 +160,6 @@
                 </div>
             </section>
 
-            <!-- RESUMEN DE TOTALES -->
             <section class="summary-banner">
                 <div class="summary-col">
                     <span class="summary-label">Clientes Totales</span>
@@ -178,10 +174,52 @@
                     <span class="summary-value">+— Creados</span>
                 </div>
             </section>
+
+            <!-- MODAL NUEVO CLIENTE -->
+            <div id="modalCliente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+                <div style="background:var(--white);border-radius:16px;padding:2rem;width:min(500px,90vw);box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                    <h2 style="font-family:var(--font-serif);font-size:1.5rem;color:var(--bg-sidebar);margin-bottom:1.5rem;">Registrar Nuevo Cliente</h2>
+
+                    <form method="post" action="@Url.Action("NuevoCliente","Gestion")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                            <div>
+                                <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Nombre *</label>
+                                <input type="text" name="nombre" required maxlength="100"
+                                       style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Apellido *</label>
+                                <input type="text" name="apellido" required maxlength="100"
+                                       style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Teléfono</label>
+                            <input type="text" name="telefono" maxlength="20"
+                                   style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                        </div>
+
+                        <div style="margin-bottom:1.5rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Correo electrónico</label>
+                            <input type="email" name="correo" maxlength="150"
+                                   style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                        </div>
+
+                        <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
+                            <button type="button" class="btn-outline" onclick="cerrarModalCliente()" style="padding:0.7rem 1.4rem;">Cancelar</button>
+                            <button type="submit" class="btn-primary-gold">Registrar Cliente</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <!-- FOOTER OSCURO COMPARTIDO -->
     <footer class="site-footer">
         <div class="footer-grid">
             <div class="footer-brand">
@@ -230,6 +268,18 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        function abrirModalCliente() {
+            document.getElementById('modalCliente').style.display = 'flex';
+        }
+        function cerrarModalCliente() {
+            document.getElementById('modalCliente').style.display = 'none';
+        }
+        document.getElementById('modalCliente')?.addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalCliente();
+        });
+    </script>
 
 </body>
 </html>

@@ -28,6 +28,9 @@ namespace Lavillemvc.DAL
             _conexion = conexion;
         }
 
+        // ============================================================
+        // HELPERS
+        // ============================================================
         private async Task<NpgsqlConnection> AbrirAsync()
         {
             var conn = _conexion.GetConnection();
@@ -219,7 +222,6 @@ namespace Lavillemvc.DAL
         {
             await using var conn = await AbrirAsync();
 
-            // 1) Intentar leer del snapshot de indicadores
             const string sqlInd = @"
                 SELECT especialistas_activos,
                        especialistas_totales,
@@ -248,7 +250,6 @@ namespace Lavillemvc.DAL
                 }
             }
 
-            // 2) Fallback: calcular en vivo
             const string sqlCalc = @"
                 SELECT
                   (SELECT COUNT(*) FROM public.especialista e
@@ -575,6 +576,211 @@ namespace Lavillemvc.DAL
                 });
             }
             return lista;
+        }
+
+        // ============================================================
+        // DROPDOWNS — Clientes
+        // ============================================================
+        public async Task<List<(int Id, string Nombre)>> ObtenerClientesSelectAsync()
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                SELECT id_cliente, nombre || ' ' || apellido
+                FROM public.cliente
+                ORDER BY nombre, apellido
+                LIMIT 500;";
+
+            var lista = new List<(int, string)>();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            await using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
+                lista.Add((r.GetInt32(0), r.GetString(1)));
+            return lista;
+        }
+
+        // ============================================================
+        // DROPDOWNS — Servicios
+        // ============================================================
+        public async Task<List<(int Id, string Nombre)>> ObtenerServiciosSelectAsync()
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                SELECT id_servicios, nombre
+                FROM public.servicios
+                WHERE disponible = TRUE
+                ORDER BY nombre;";
+
+            var lista = new List<(int, string)>();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            await using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
+                lista.Add((r.GetInt32(0), r.GetString(1)));
+            return lista;
+        }
+
+        // ============================================================
+        // DROPDOWNS — Especialistas
+        // ============================================================
+        public async Task<List<(int Id, string Nombre)>> ObtenerEspecialistasSelectAsync(int? idSucursal)
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                SELECT e.id_empleado, e.nombre || ' ' || e.apellido
+                FROM public.empleado e
+                WHERE e.cargo = 'Especialista'
+                  AND (@suc IS NULL OR e.id_sucursal = @suc)
+                ORDER BY e.nombre;";
+
+            var lista = new List<(int, string)>();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("suc", (object?)idSucursal ?? DBNull.Value);
+            await using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
+                lista.Add((r.GetInt32(0), r.GetString(1)));
+            return lista;
+        }
+
+        // ============================================================
+        // ACCIONES — Confirmar cita
+        // ============================================================
+        public async Task<bool> ConfirmarCitaAsync(int idCita, int? idSucursal)
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                UPDATE public.cita
+                SET estado = 'Confirmada'
+                WHERE id_cita = @id
+                  AND (@suc IS NULL OR id_sucursal = @suc)
+                  AND estado <> 'Cancelada';";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", idCita);
+            cmd.Parameters.AddWithValue("suc", (object?)idSucursal ?? DBNull.Value);
+
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+
+        // ============================================================
+        // ACCIONES — Cancelar cita
+        // ============================================================
+        public async Task<bool> CancelarCitaAsync(int idCita, int? idSucursal)
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                UPDATE public.cita
+                SET estado = 'Cancelada'
+                WHERE id_cita = @id
+                  AND (@suc IS NULL OR id_sucursal = @suc);";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", idCita);
+            cmd.Parameters.AddWithValue("suc", (object?)idSucursal ?? DBNull.Value);
+
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+
+        // ============================================================
+        // ACCIONES — Insertar cliente
+        // ============================================================
+        public async Task<bool> InsertarClienteAsync(
+            string nombre, string apellido,
+            string? telefono, string? correo,
+            int? idSucursal)
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                INSERT INTO public.cliente
+                    (nombre, apellido, telefono, correo,
+                     fecha_registro, id_sucursal_registro)
+                VALUES
+                    (@nom, @ape, @tel, @cor, NOW(), @suc);";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("nom", nombre.Trim());
+            cmd.Parameters.AddWithValue("ape", apellido.Trim());
+            cmd.Parameters.AddWithValue("tel", (object?)telefono?.Trim() ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("cor", (object?)correo?.Trim().ToLowerInvariant() ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("suc", (object?)idSucursal ?? DBNull.Value);
+
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+
+        // ============================================================
+        // ACCIONES — Insertar cita
+        // ============================================================
+        public async Task<bool> InsertarCitaAsync(
+            int idCliente, int idServicio, int? idEmpleado,
+            DateTime fecha, TimeSpan hora, int? idSucursal)
+        {
+            await using var conn = await AbrirAsync();
+            const string sql = @"
+                INSERT INTO public.cita
+                    (id_cliente, id_servicio, id_empleado,
+                     fecha_cita, hora_cita, estado, id_sucursal)
+                VALUES
+                    (@cli, @ser, @emp, @fec, @hor, 'Pendiente', @suc);";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("cli", idCliente);
+            cmd.Parameters.AddWithValue("ser", idServicio);
+            cmd.Parameters.AddWithValue("emp", (object?)idEmpleado ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("fec", fecha.Date);
+            cmd.Parameters.AddWithValue("hor", hora);
+            cmd.Parameters.AddWithValue("suc", (object?)idSucursal ?? DBNull.Value);
+
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+
+        // ============================================================
+        // ACCIONES — Insertar pago + factura (transacción)
+        // ============================================================
+        public async Task<bool> InsertarPagoAsync(
+            int idCliente, decimal monto,
+            string metodo, string estado)
+        {
+            await using var conn = await AbrirAsync();
+            await using var tx = await conn.BeginTransactionAsync();
+
+            try
+            {
+                const string sqlPago = @"
+                    INSERT INTO public.pago
+                        (id_cliente, subtotal, total, monto,
+                         moneda, metodo_pago, estado_pago, fecha_pago)
+                    VALUES
+                        (@cli, @sub, @tot, @mon,
+                         'USD', @met, @est, NOW())
+                    RETURNING id_pago;";
+
+                await using var cmdPago = new NpgsqlCommand(sqlPago, conn, tx);
+                cmdPago.Parameters.AddWithValue("cli", idCliente);
+                cmdPago.Parameters.AddWithValue("sub", monto);
+                cmdPago.Parameters.AddWithValue("tot", monto);
+                cmdPago.Parameters.AddWithValue("mon", monto);
+                cmdPago.Parameters.AddWithValue("met", metodo);
+                cmdPago.Parameters.AddWithValue("est", estado);
+
+                var idPago = (int)(await cmdPago.ExecuteScalarAsync() ?? 0);
+                if (idPago <= 0) { await tx.RollbackAsync(); return false; }
+
+                const string sqlFact = @"
+                    INSERT INTO public.factura (id_pago, total)
+                    VALUES (@pago, @tot);";
+
+                await using var cmdFact = new NpgsqlCommand(sqlFact, conn, tx);
+                cmdFact.Parameters.AddWithValue("pago", idPago);
+                cmdFact.Parameters.AddWithValue("tot", monto);
+
+                await cmdFact.ExecuteNonQueryAsync();
+
+                await tx.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                return false;
+            }
         }
     }
 }
