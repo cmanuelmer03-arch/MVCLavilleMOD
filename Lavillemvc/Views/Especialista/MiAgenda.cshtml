@@ -9,9 +9,18 @@
     var cultura = CultureInfo.GetCultureInfo("es-SV");
     var horaCultura = CultureInfo.GetCultureInfo("en-US");
     string periodo = ViewBag.Periodo as string ?? "hoy";
-    string fechaIso = ViewBag.FechaSeleccionada as string ?? Model.FechaHoy.ToString("yyyy-MM-dd");
-    DateOnly fechaActual = ViewBag.FechaActual is DateOnly x ? x : DateOnly.FromDateTime(DateTime.Now);
-    var detalle = Model.ProximaCita;
+
+    DateOnly fechaHoy = Model?.FechaHoy
+        ?? DateOnly.FromDateTime(DateTime.Today);
+
+    string fechaIso = ViewBag.FechaSeleccionada as string
+        ?? fechaHoy.ToString("yyyy-MM-dd");
+
+    DateOnly fechaActual = ViewBag.FechaActual is DateOnly x
+        ? x
+        : DateOnly.FromDateTime(DateTime.Today);
+
+    var detalle = Model?.ProximaCita;
     string etiquetaPeriodo = periodo == "mes" ? "del mes" : periodo == "semana" ? "de la semana" : "del día";
 }
 
