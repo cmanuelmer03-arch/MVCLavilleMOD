@@ -9,9 +9,15 @@
     var mesTexto = (string)ViewBag.MesTexto;
     var detalle = ViewBag.Detalle as CitaDetalle;
 
+    var clientesSelect = (List<(int Id, string Nombre)>)ViewBag.ClientesSelect;
+    var serviciosSelect = (List<(int Id, string Nombre)>)ViewBag.ServiciosSelect;
+    var especialistasSelect = (List<(int Id, string Nombre)>)ViewBag.EspecialistasSelect;
+
     var cultura = new System.Globalization.CultureInfo("es-ES");
     var prevSemana = lunes.AddDays(-7).ToString("yyyy-MM-dd");
     var nextSemana = lunes.AddDays(7).ToString("yyyy-MM-dd");
+
+    var citaActivaId = detalle?.IdCita ?? 0;
 }
 
 <!DOCTYPE html>
@@ -53,7 +59,14 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER VISTA -->
+
+            @if (TempData["ToastOk"] != null)
+            {
+                <div style="background:#ebf3ec;color:#4e7e4f;padding:0.9rem 1.2rem;border-radius:10px;margin-bottom:1.5rem;font-size:0.85rem;border:1px solid #d3e3d6;">
+                    @TempData["ToastOk"]
+                </div>
+            }
+
             <header class="page-header">
                 <div class="header-title-area">
                     <div class="page-title">
@@ -73,16 +86,13 @@
                         <button class="view-btn">Mes</button>
                         <button class="view-btn">Lista</button>
                     </div>
-                    <button class="btn-primary-gold"><span>+</span> Nueva Cita</button>
+                    <button type="button" class="btn-primary-gold" onclick="abrirModalCita()"><span>+</span> Nueva Cita</button>
                 </div>
             </header>
 
-            <!-- CONTENIDO PRINCIPAL EN GRID -->
             <div class="citas-layout">
-                <!-- CALENDARIO DE CITAS -->
                 <section class="calendar-card">
                     <div class="calendar-grid">
-                        <!-- Cabecera de Días -->
                         <div class="col-header"></div>
                         @for (int d = 0; d < 6; d++)
                         {
@@ -98,7 +108,6 @@
                             }
                         }
 
-                        <!-- Horas y Celdas -->
                         @for (int h = 8; h <= 18; h++)
                         {
                             var horaTxt = h > 12 ? (h - 12) + ":00 PM" : (h == 12 ? "12:00 PM" : h + ":00 AM");
@@ -117,20 +126,24 @@
                                         : c.Estado == "Cancelada" ? "dot-cancelada"
                                         : "dot-completada";
 
-                                        var claseExtra = (dia == fechaRef && c == citas.FirstOrDefault(x => x.Fecha.Date == fechaRef.Date)) ? "active-selected" : "";
+                                        var claseExtra = c.IdCita == citaActivaId ? "active-selected" : "";
 
-                                        <div class="cita-item @claseExtra">
-                                            <div class="cita-header"><span>@c.Cliente</span> <span class="cita-status-dot @dotCss"></span></div>
+                                        <a href="@Url.Action("GestionCitas", "Gestion", new { semana = lunes.ToString("yyyy-MM-dd"), id = c.IdCita })"
+                                           class="cita-item @claseExtra"
+                                           style="display:block;text-decoration:none;color:inherit;">
+                                            <div class="cita-header">
+                                                <span>@c.Cliente</span>
+                                                <span class="cita-status-dot @dotCss"></span>
+                                            </div>
                                             <div class="cita-sub">@c.Servicio</div>
                                             <div class="cita-staff">@c.Especialista</div>
-                                        </div>
+                                        </a>
                                     }
                                 </div>
                             }
                         }
                     </div>
 
-                    <!-- Leyenda -->
                     <div class="calendar-legend">
                         <div class="legend-item"><span class="cita-status-dot dot-confirmada"></span> Confirmada</div>
                         <div class="legend-item"><span class="cita-status-dot dot-pendiente"></span> Pendiente</div>
@@ -139,7 +152,6 @@
                     </div>
                 </section>
 
-                <!-- DETALLE DE CITA (PANEL DERECHO) -->
                 <aside class="detail-card">
                     <h2>Detalle de Cita</h2>
 
@@ -175,7 +187,7 @@
                         <div class="detail-group">
                             <div class="detail-label">Estado</div>
                             <div>
-                                <span class="@(detalle.Estado == "Confirmada" ? "status-pill-green" : "status-pill-green")">@detalle.Estado</span>
+                                <span class="status-pill-green">@detalle.Estado</span>
                             </div>
                         </div>
 
@@ -188,18 +200,126 @@
 
                         <div style="margin-top: auto;">
                             <div class="action-buttons-row">
-                                <button class="btn-outline">Modificar</button>
-                                <button class="btn-outline btn-outline-red">Cancelar</button>
+                                <button type="button" class="btn-outline" disabled title="Próximamente" style="opacity:0.55;cursor:not-allowed;">
+                                    Modificar
+                                </button>
+
+                                @if (detalle.Estado != "Cancelada")
+                                {
+                                    <form method="post" action="@Url.Action("CancelarCita","Gestion")" style="margin:0;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@detalle.IdCita" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <button type="submit" class="btn-outline btn-outline-red" style="width:100%;"
+                                                onclick="return confirm('¿Cancelar esta cita?');">
+                                            Cancelar
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn-outline btn-outline-red" disabled style="opacity:0.55;cursor:not-allowed;">
+                                        Ya cancelada
+                                    </button>
+                                }
                             </div>
-                            <button class="btn-gold-full">Confirmar Cita</button>
+
+                            @if (detalle.Estado != "Confirmada" && detalle.Estado != "Cancelada")
+                            {
+                                <form method="post" action="@Url.Action("ConfirmarCita","Gestion")" style="margin:0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@detalle.IdCita" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="btn-gold-full">Confirmar Cita</button>
+                                </form>
+                            }
+                            else if (detalle.Estado == "Confirmada")
+                            {
+                                <button type="button" class="btn-gold-full" disabled style="opacity:0.6;cursor:not-allowed;">
+                                    ✓ Cita ya confirmada
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn-gold-full" disabled style="opacity:0.6;cursor:not-allowed;">
+                                    Cita cancelada
+                                </button>
+                            }
                         </div>
                     }
                 </aside>
             </div>
+
+            <!-- MODAL NUEVA CITA -->
+            <div id="modalCita" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+                <div style="background:var(--white);border-radius:16px;padding:2rem;width:min(560px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;">
+                    <h2 style="font-family:var(--font-serif);font-size:1.5rem;color:var(--bg-sidebar);margin-bottom:1.5rem;">Nueva Cita</h2>
+
+                    <form method="post" action="@Url.Action("NuevaCita","Gestion")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Cliente *</label>
+                            <select name="idCliente" required
+                                    style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;">
+                                <option value="">— Selecciona un cliente —</option>
+                                @foreach (var c in clientesSelect)
+                                {
+                                    <option value="@c.Id">@c.Nombre</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Servicio *</label>
+                            <select name="idServicio" required
+                                    style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;">
+                                <option value="">— Selecciona un servicio —</option>
+                                @foreach (var s in serviciosSelect)
+                                {
+                                    <option value="@s.Id">@s.Nombre</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Especialista</label>
+                            <select name="idEmpleado"
+                                    style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;">
+                                <option value="">— Sin asignar —</option>
+                                @foreach (var e in especialistasSelect)
+                                {
+                                    <option value="@e.Id">@e.Nombre</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                            <div>
+                                <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Fecha *</label>
+                                <input type="date" name="fecha" required
+                                       value="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                       style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Hora *</label>
+                                <input type="time" name="hora" required value="09:00"
+                                       style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
+                            <button type="button" class="btn-outline" onclick="cerrarModalCita()" style="padding:0.7rem 1.4rem;">Cancelar</button>
+                            <button type="submit" class="btn-primary-gold">Crear Cita</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <!-- FOOTER OSCURO COMPARTIDO -->
     <footer class="site-footer">
         <div class="footer-grid">
             <div class="footer-brand">
@@ -248,6 +368,18 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        function abrirModalCita() {
+            document.getElementById('modalCita').style.display = 'flex';
+        }
+        function cerrarModalCita() {
+            document.getElementById('modalCita').style.display = 'none';
+        }
+        document.getElementById('modalCita')?.addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalCita();
+        });
+    </script>
 
 </body>
 </html>

@@ -9,10 +9,10 @@
     var atencion = (AtencionResumen)ViewBag.Atencion;
 
     var topCards = new[] {
-        new { Titulo = "CITAS HOY",       Valor = kpis.CitasHoy.ToString(),                       Icono = "calendar" },
-        new { Titulo = "PENDIENTES",      Valor = kpis.Pendientes.ToString(),                      Icono = "clock" },
-        new { Titulo = "CLIENTES NUEVOS", Valor = kpis.ClientesNuevos.ToString(),                 Icono = "user" },
-        new { Titulo = "PAGOS DEL DÍA",   Valor = "Bs. " + kpis.PagosDelDia.ToString("N0"),       Icono = "cash" }
+        new { Titulo = "CITAS HOY",       Valor = kpis.CitasHoy.ToString(),                 Icono = "calendar" },
+        new { Titulo = "PENDIENTES",      Valor = kpis.Pendientes.ToString(),                Icono = "clock" },
+        new { Titulo = "CLIENTES NUEVOS", Valor = kpis.ClientesNuevos.ToString(),           Icono = "user" },
+        new { Titulo = "PAGOS DEL DÍA",   Valor = "Bs. " + kpis.PagosDelDia.ToString("N0"), Icono = "cash" }
     };
 }
 
@@ -55,16 +55,34 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
+
+            <!-- TOAST DE ACCIÓN -->
+            @if (TempData["ToastOk"] != null)
+            {
+                <div style="background:#ebf3ec;color:#4e7e4f;padding:0.9rem 1.2rem;border-radius:10px;margin-bottom:1.5rem;font-size:0.85rem;border:1px solid #d3e3d6;">
+                    @TempData["ToastOk"]
+                </div>
+            }
+
             <!-- HEADER -->
             <header class="top-header">
                 <div class="greeting">
                     <h1>Buenos Días, @User.Identity?.Name?.Split(' ').FirstOrDefault()</h1>
                     <p>Panel de Recepción — L'Avielle Las Mercedes • @DateTime.Now.ToString("dddd, dd 'de' MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</p>
                 </div>
+
+                @{
+                    var nombreCompleto = User.Identity?.Name ?? "?";
+                    var partesNombre = nombreCompleto.Trim()
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var inicialesUsuario = partesNombre.Length >= 2
+                    ? $"{partesNombre[0][0]}{partesNombre[^1][0]}".ToUpper()
+                    : nombreCompleto.Substring(0, Math.Min(2, nombreCompleto.Length)).ToUpper();
+                }
                 <div class="user-profile">
-                    <img src="https://via.placeholder.com/40" alt="@User.Identity?.Name" class="user-avatar" />
+                    <div class="avatar-placeholder" style="width:36px;height:36px;font-size:0.75rem;">@inicialesUsuario</div>
                     <div class="user-info">
-                        <strong>@User.Identity?.Name</strong>
+                        <strong>@nombreCompleto</strong>
                         <span>Host Principal</span>
                     </div>
                 </div>
@@ -142,7 +160,12 @@
                                             <div class="acciones-td">
                                                 @if (cita.MostrarConfirmar)
                                                 {
-                                                    <a href="@Url.Action("ConfirmarCita", "Gestion", new { id = cita.IdCita })" class="btn-text-green">Confirmar</a>
+                                                    <form method="post" action="@Url.Action("ConfirmarCita","Gestion")" style="display:inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@cita.IdCita" />
+                                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                                        <button type="submit" class="btn-text-green" style="background:none;border:none;padding:0;cursor:pointer;">Confirmar</button>
+                                                    </form>
                                                 }
                                                 <a href="@Url.Action("GestionCitas", "Gestion")" class="btn-text-gold">Ver</a>
                                             </div>
@@ -175,7 +198,12 @@
                                         <p>@reserva.Servicio</p>
                                         <small>@reserva.Fecha</small>
                                     </div>
-                                    <a href="@Url.Action("ConfirmarCita", "Gestion", new { id = reserva.IdCita })" class="btn-gold-solid" style="text-decoration:none;">Confirmar</a>
+                                    <form method="post" action="@Url.Action("ConfirmarCita","Gestion")" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@reserva.IdCita" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" class="btn-gold-solid">Confirmar</button>
+                                    </form>
                                 </div>
                             }
                         </div>

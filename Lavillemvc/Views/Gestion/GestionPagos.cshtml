@@ -5,8 +5,8 @@
     var kpis = (KpiPagos)ViewBag.Kpis;
     var transacciones = (List<PagoTransaccion>)ViewBag.Transacciones;
     var desglose = (List<DesgloseMetodo>)ViewBag.Desglose;
+    var clientesSelect = (List<(int Id, string Nombre)>)ViewBag.ClientesSelect;
 
-    // Conic-gradient dinámico con colores reales
     decimal acum = 0;
     var stops = new List<string>();
     foreach (var d in desglose)
@@ -59,20 +59,26 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
-            <!-- HEADER VISTA -->
+
+            @if (TempData["ToastOk"] != null)
+            {
+                <div style="background:#ebf3ec;color:#4e7e4f;padding:0.9rem 1.2rem;border-radius:10px;margin-bottom:1.5rem;font-size:0.85rem;border:1px solid #d3e3d6;">
+                    @TempData["ToastOk"]
+                </div>
+            }
+
             <header class="page-header">
                 <div class="page-title">
                     <h1>Registro de Pagos</h1>
                     <div class="filter-label">Filtrado por: <strong>@DateTime.Now.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</strong></div>
                 </div>
 
-                <button class="btn-primary-gold">
+                <button type="button" class="btn-primary-gold" onclick="abrirModalPago()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
                     Nuevo Pago
                 </button>
             </header>
 
-            <!-- TARJETAS KPI -->
             <section class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-header">
@@ -115,9 +121,7 @@
                 </div>
             </section>
 
-            <!-- CONTENIDO PRINCIPAL EN GRID -->
             <div class="payments-grid">
-                <!-- TABLA TRANSACCIONES -->
                 <section class="table-card">
                     <h2 class="table-card-title">Transacciones Recientes</h2>
 
@@ -130,13 +134,12 @@
                                 <th>Método</th>
                                 <th>Fecha</th>
                                 <th>Estado</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (transacciones.Count == 0)
                             {
-                                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin transacciones registradas.</td></tr>
+                                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin transacciones registradas.</td></tr>
                             }
                             @foreach (var t in transacciones)
                             {
@@ -147,16 +150,6 @@
                                     <td class="metodo-text">@t.Metodo</td>
                                     <td class="metodo-text">@t.Fecha</td>
                                     <td><span class="badge-status @t.BadgeClass">@t.Estado</span></td>
-                                    <td>
-                                        <div class="action-icons">
-                                            <button class="action-icon-btn" title="Ver detalle">
-                                                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                                            </button>
-                                            <button class="action-icon-btn" title="Imprimir">
-                                                <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -164,14 +157,9 @@
 
                     <div class="table-pagination">
                         <span>Mostrando 1-@transacciones.Count de @transacciones.Count transacciones</span>
-                        <div class="pagination-btns">
-                            <button class="pagination-btn">&lt;</button>
-                            <button class="pagination-btn">&gt;</button>
-                        </div>
                     </div>
                 </section>
 
-                <!-- MÉTODOS DE PAGO (PANEL DERECHO) -->
                 <aside class="methods-card">
                     <h2>Métodos de Pago</h2>
 
@@ -205,10 +193,68 @@
                     </div>
                 </aside>
             </div>
+
+            <!-- MODAL NUEVO PAGO -->
+            <div id="modalPago" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+                <div style="background:var(--white);border-radius:16px;padding:2rem;width:min(520px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                    <h2 style="font-family:var(--font-serif);font-size:1.5rem;color:var(--bg-sidebar);margin-bottom:1.5rem;">Registrar Pago</h2>
+
+                    <form method="post" action="@Url.Action("NuevoPago","Gestion")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Cliente *</label>
+                            <select name="idCliente" required
+                                    style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;">
+                                <option value="">— Selecciona un cliente —</option>
+                                @foreach (var c in clientesSelect)
+                                {
+                                    <option value="@c.Id">@c.Nombre</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Monto (Bs.) *</label>
+                            <input type="number" name="monto" required min="0.01" step="0.01"
+                                   style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;" />
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Método de pago *</label>
+                            <select name="metodo" required
+                                    style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;">
+                                <option value="">— Selecciona —</option>
+                                <option>Efectivo</option>
+                                <option>Tarjeta Débito</option>
+                                <option>Tarjeta Crédito</option>
+                                <option>Transferencia</option>
+                                <option>Pago Móvil</option>
+                                <option>Pagar en Sucursal</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:1.5rem;">
+                            <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--text-label);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;">Estado *</label>
+                            <select name="estado" required
+                                    style="width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-strong);border-radius:8px;font-size:0.85rem;background:var(--bg-soft);outline:none;">
+                                <option value="Pagado">Pagado</option>
+                                <option value="Pendiente">Pendiente</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex;gap:0.8rem;justify-content:flex-end;">
+                            <button type="button" class="btn-outline" onclick="cerrarModalPago()" style="padding:0.7rem 1.4rem;">Cancelar</button>
+                            <button type="submit" class="btn-primary-gold">Registrar Pago</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <!-- FOOTER OSCURO COMPARTIDO -->
     <footer class="site-footer">
         <div class="footer-grid">
             <div class="footer-brand">
@@ -257,6 +303,18 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        function abrirModalPago() {
+            document.getElementById('modalPago').style.display = 'flex';
+        }
+        function cerrarModalPago() {
+            document.getElementById('modalPago').style.display = 'none';
+        }
+        document.getElementById('modalPago')?.addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalPago();
+        });
+    </script>
 
 </body>
 </html>
