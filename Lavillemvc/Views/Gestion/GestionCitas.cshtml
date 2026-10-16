@@ -1,16 +1,17 @@
-﻿@{
+﻿@using Lavillemvc.Models
+@{
     Layout = null;
 
-    // --- DATOS DE EJEMPLO DE CITAS EN EL CALENDARIO ---
-    var citasSemana = new[] {
-        new { Cliente = "Maria G.", Servicio = "Balayage", Especialista = "Valentina...", Hora = "09:00", Dia = "Lun 22", Estado = "Confirmada", CssDot = "dot-confirmada" },
-        new { Cliente = "Laura P.", Servicio = "Corte", Especialista = "Isabella M.", Hora = "11:00", Dia = "Lun 22", Estado = "Confirmada", CssDot = "dot-confirmada" },
-        new { Cliente = "Carme...", Servicio = "Tinte", Especialista = "Valentina...", Hora = "08:00", Dia = "Mar 23", Estado = "Pendiente", CssDot = "dot-pendiente" },
-        new { Cliente = "Isabel...", Servicio = "Keratina", Especialista = "Camila H.", Hora = "08:00", Dia = "Mié 24", Estado = "Confirmada", CssDot = "dot-confirmada" },
-        new { Cliente = "Andre...", Servicio = "Manicura", Especialista = "Lucía M.", Hora = "14:00", Dia = "Jue 25", Estado = "Confirmada", CssDot = "dot-confirmada" },
-        new { Cliente = "Maria G.", Servicio = "Balayag...", Especialista = "Valentina...", Hora = "08:00", Dia = "Vie 26", Estado = "Confirmada", CssDot = "dot-confirmada" },
-        new { Cliente = "Sofía M.", Servicio = "Pedicura", Especialista = "Lucía M.", Hora = "08:00", Dia = "Sáb 27", Estado = "Pendiente", CssDot = "dot-pendiente" }
-    };
+    var citas = (List<CitaCalendario>)ViewBag.Citas;
+    var lunes = (DateTime)ViewBag.Lunes;
+    var sabado = (DateTime)ViewBag.Sabado;
+    var fechaRef = (DateTime)ViewBag.FechaRef;
+    var mesTexto = (string)ViewBag.MesTexto;
+    var detalle = ViewBag.Detalle as CitaDetalle;
+
+    var cultura = new System.Globalization.CultureInfo("es-ES");
+    var prevSemana = lunes.AddDays(-7).ToString("yyyy-MM-dd");
+    var nextSemana = lunes.AddDays(7).ToString("yyyy-MM-dd");
 }
 
 <!DOCTYPE html>
@@ -35,13 +36,18 @@
 
             <ul class="sidebar-menu">
                 <li><a href="@Url.Action("PanelPrinciRecepcionista", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Panel Principal</a></li>
-                <li><a href="@Url.Action("GestionCitas", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>Gestión de Citas</a></li>
+                <li><a href="@Url.Action("GestionCitas", "Gestion")" class="menu-item active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>Gestión de Citas</a></li>
                 <li><a href="@Url.Action("GestionClientes", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Gestión de Clientes</a></li>
                 <li><a href="@Url.Action("GestionPagos", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>Registro de Pagos</a></li>
             </ul>
 
             <div class="sidebar-footer">
-                <a href="#" class="logout-link"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>Cerrar Sesión</a>
+                <form method="post" action="@Url.Action("CerrarSesion","Login")" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="logout-link" style="background:none;border:none;padding:0;cursor:pointer;">
+                        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>Cerrar Sesión
+                    </button>
+                </form>
             </div>
         </aside>
 
@@ -54,9 +60,9 @@
                         <h1>Gestión de Citas</h1>
                     </div>
                     <div class="month-selector">
-                        <button class="btn-arrow">&lt;</button>
-                        <span>Septiembre 2026</span>
-                        <button class="btn-arrow">&gt;</button>
+                        <a href="@Url.Action("GestionCitas", "Gestion", new { semana = prevSemana })" class="btn-arrow" style="text-decoration:none;">&lt;</a>
+                        <span>@mesTexto</span>
+                        <a href="@Url.Action("GestionCitas", "Gestion", new { semana = nextSemana })" class="btn-arrow" style="text-decoration:none;">&gt;</a>
                     </div>
                 </div>
 
@@ -78,154 +84,50 @@
                     <div class="calendar-grid">
                         <!-- Cabecera de Días -->
                         <div class="col-header"></div>
-                        <div class="col-header">Lun 22</div>
-                        <div class="col-header">Mar 23</div>
-                        <div class="col-header">Mié 24</div>
-                        <div class="col-header">Jue 25</div>
-                        <div class="col-header active-day"><span>Vie 26</span></div>
-                        <div class="col-header">Sáb 27</div>
+                        @for (int d = 0; d < 6; d++)
+                        {
+                            var dia = lunes.AddDays(d);
+                            var activo = dia == fechaRef;
+                            if (activo)
+                            {
+                                <div class="col-header active-day"><span>@dia.ToString("ddd d", cultura)</span></div>
+                            }
+                            else
+                            {
+                                <div class="col-header">@dia.ToString("ddd d", cultura)</div>
+                            }
+                        }
 
                         <!-- Horas y Celdas -->
-                        <!-- 8:00 AM -->
-                        <div class="time-label">8:00 AM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell">
-                            <div class="cita-item">
-                                <div class="cita-header"><span>Carme...</span> <span class="cita-status-dot dot-pendiente"></span></div>
-                                <div class="cita-sub">Tinte</div>
-                                <div class="cita-staff">Valentina...</div>
-                            </div>
-                        </div>
-                        <div class="time-cell">
-                            <div class="cita-item">
-                                <div class="cita-header"><span>Isabel...</span> <span class="cita-status-dot dot-confirmada"></span></div>
-                                <div class="cita-sub">Keratina</div>
-                                <div class="cita-staff">Camila H.</div>
-                            </div>
-                        </div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell">
-                            <div class="cita-item active-selected">
-                                <div class="cita-header"><span>Maria G.</span> <span class="cita-status-dot dot-confirmada"></span></div>
-                                <div class="cita-sub">Balayag...</div>
-                                <div class="cita-staff">Valentina...</div>
-                            </div>
-                        </div>
-                        <div class="time-cell">
-                            <div class="cita-item">
-                                <div class="cita-header"><span>Sofía M.</span> <span class="cita-status-dot dot-pendiente"></span></div>
-                                <div class="cita-sub">Pedicura</div>
-                                <div class="cita-staff">Lucía M.</div>
-                            </div>
-                        </div>
+                        @for (int h = 8; h <= 18; h++)
+                        {
+                            var horaTxt = h > 12 ? (h - 12) + ":00 PM" : (h == 12 ? "12:00 PM" : h + ":00 AM");
+                            <div class="time-label">@horaTxt</div>
 
-                        <!-- 9:00 AM -->
-                        <div class="time-label">9:00 AM</div>
-                        <div class="time-cell">
-                            <div class="cita-item">
-                                <div class="cita-header"><span>Maria G.</span> <span class="cita-status-dot dot-confirmada"></span></div>
-                                <div class="cita-sub">Balayage</div>
-                                <div class="cita-staff">Valentina...</div>
-                            </div>
-                        </div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
+                            @for (int d = 0; d < 6; d++)
+                            {
+                                var dia = lunes.AddDays(d);
+                                var c = citas.FirstOrDefault(x => x.Fecha.Date == dia.Date && x.Hora.Hour == h);
 
-                        <!-- 10:00 AM -->
-                        <div class="time-label">10:00 AM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
+                                <div class="time-cell">
+                                    @if (c != null)
+                                    {
+                                        var dotCss = c.Estado == "Confirmada" ? "dot-confirmada"
+                                        : c.Estado == "Pendiente" ? "dot-pendiente"
+                                        : c.Estado == "Cancelada" ? "dot-cancelada"
+                                        : "dot-completada";
 
-                        <!-- 11:00 AM -->
-                        <div class="time-label">11:00 AM</div>
-                        <div class="time-cell">
-                            <div class="cita-item">
-                                <div class="cita-header"><span>Laura P.</span> <span class="cita-status-dot dot-confirmada"></span></div>
-                                <div class="cita-sub">Corte</div>
-                                <div class="cita-staff">Isabella M.</div>
-                            </div>
-                        </div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
+                                        var claseExtra = (dia == fechaRef && c == citas.FirstOrDefault(x => x.Fecha.Date == fechaRef.Date)) ? "active-selected" : "";
 
-                        <!-- 12:00 PM -->
-                        <div class="time-label">12:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-
-                        <!-- 1:00 PM -->
-                        <div class="time-label">1:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-
-                        <!-- 2:00 PM -->
-                        <div class="time-label">2:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell">
-                            <div class="cita-item">
-                                <div class="cita-header"><span>Andre...</span> <span class="cita-status-dot dot-confirmada"></span></div>
-                                <div class="cita-sub">Manicura</div>
-                                <div class="cita-staff">Lucía M.</div>
-                            </div>
-                        </div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-
-                        <!-- 3:00 PM -->
-                        <div class="time-label">3:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-
-                        <!-- 4:00 PM -->
-                        <div class="time-label">4:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-
-                        <!-- 5:00 PM -->
-                        <div class="time-label">5:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-
-                        <!-- 6:00 PM -->
-                        <div class="time-label">6:00 PM</div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
-                        <div class="time-cell"></div>
+                                        <div class="cita-item @claseExtra">
+                                            <div class="cita-header"><span>@c.Cliente</span> <span class="cita-status-dot @dotCss"></span></div>
+                                            <div class="cita-sub">@c.Servicio</div>
+                                            <div class="cita-staff">@c.Especialista</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
                     </div>
 
                     <!-- Leyenda -->
@@ -241,48 +143,57 @@
                 <aside class="detail-card">
                     <h2>Detalle de Cita</h2>
 
-                    <div class="client-profile-box">
-                        <div class="avatar-placeholder">MG</div>
-                        <div class="client-profile-info">
-                            <h3>María García</h3>
-                            <span class="client-vip-badge">Socio VIP Gold</span>
+                    @if (detalle == null)
+                    {
+                        <p style="font-size:0.85rem;color:var(--text-muted);">Selecciona una cita del calendario para ver su detalle.</p>
+                    }
+                    else
+                    {
+                        <div class="client-profile-box">
+                            <div class="avatar-placeholder">@detalle.Iniciales</div>
+                            <div class="client-profile-info">
+                                <h3>@detalle.Cliente</h3>
+                                <span class="client-vip-badge">@(string.IsNullOrWhiteSpace(detalle.Membresia) ? "Cliente" : detalle.Membresia)</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="detail-group">
-                        <div class="detail-label">Servicio</div>
-                        <div class="detail-value">Balayage + Corte Integral</div>
-                    </div>
-
-                    <div class="detail-group">
-                        <div class="detail-label">Especialista</div>
-                        <div class="detail-value">Valentina Rojas</div>
-                    </div>
-
-                    <div class="detail-group">
-                        <div class="detail-label">Horario</div>
-                        <div class="detail-value">Viernes, 26 Sep 2026 — 10:00 AM</div>
-                    </div>
-
-                    <div class="detail-group">
-                        <div class="detail-label">Estado</div>
-                        <div><span class="status-pill-green">Confirmada</span></div>
-                    </div>
-
-                    <div class="detail-group">
-                        <div class="detail-label">Notas de Recepción</div>
-                        <div class="notes-box">
-                            Cliente solicitó café expreso de cortesía al llegar. Viene por cambio de look para sesión fotográfica.
+                        <div class="detail-group">
+                            <div class="detail-label">Servicio</div>
+                            <div class="detail-value">@detalle.Servicio</div>
                         </div>
-                    </div>
 
-                    <div style="margin-top: auto;">
-                        <div class="action-buttons-row">
-                            <button class="btn-outline">Modificar</button>
-                            <button class="btn-outline btn-outline-red">Cancelar</button>
+                        <div class="detail-group">
+                            <div class="detail-label">Especialista</div>
+                            <div class="detail-value">@detalle.Especialista</div>
                         </div>
-                        <button class="btn-gold-full">Confirmar Cita</button>
-                    </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">Horario</div>
+                            <div class="detail-value">@detalle.HorarioTexto</div>
+                        </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">Estado</div>
+                            <div>
+                                <span class="@(detalle.Estado == "Confirmada" ? "status-pill-green" : "status-pill-green")">@detalle.Estado</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">Notas de Recepción</div>
+                            <div class="notes-box">
+                                Sin notas adicionales registradas para esta cita.
+                            </div>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <div class="action-buttons-row">
+                                <button class="btn-outline">Modificar</button>
+                                <button class="btn-outline btn-outline-red">Cancelar</button>
+                            </div>
+                            <button class="btn-gold-full">Confirmar Cita</button>
+                        </div>
+                    }
                 </aside>
             </div>
         </main>

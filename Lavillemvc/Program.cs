@@ -21,6 +21,8 @@ builder.Services.AddScoped<Conexion>();
 // Repositorio para consultar cuentas
 builder.Services.AddScoped<CuentaRepositorio>();
 
+builder.Services.AddScoped<GestionRepositorio>();
+
 // ==========================================
 // 3. SESIONES EXISTENTES DEL PROYECTO
 // ==========================================

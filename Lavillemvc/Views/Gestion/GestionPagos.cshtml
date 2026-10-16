@@ -1,16 +1,23 @@
-﻿@{
+﻿@using Lavillemvc.Models
+@{
     Layout = null;
 
-    // --- DATOS DE EJEMPLO DE TRANSACCIONES ---
-    var transacciones = new[] {
-        new { Factura = "#F-0234", Especialista = "Valentina Rojas", Monto = "Bs. 550", Metodo = "Tarjeta Débito", Fecha = "26 Sep 2026", Estado = "Pagado", BadgeClass = "badge-pagado" },
-        new { Factura = "#F-0233", Especialista = "Lucía Méndez", Monto = "Bs. 180", Metodo = "Efectivo", Fecha = "26 Sep 2026", Estado = "Pagado", BadgeClass = "badge-pagado" },
-        new { Factura = "#F-0232", Especialista = "Camila Hernández", Monto = "Bs. 800", Metodo = "Transferencia", Fecha = "25 Sep 2026", Estado = "Pagado", BadgeClass = "badge-pagado" },
-        new { Factura = "#F-0231", Especialista = "Isabella Marchetti", Monto = "Bs. 350", Metodo = "Tarjeta Crédito", Fecha = "25 Sep 2026", Estado = "Pagado", BadgeClass = "badge-pagado" },
-        new { Factura = "#F-0230", Especialista = "Lucía Méndez", Monto = "Bs. 200", Metodo = "Pendiente", Fecha = "25 Sep 2026", Estado = "Pendiente", BadgeClass = "badge-pendiente" },
-        new { Factura = "#F-0229", Especialista = "Valentina Rojas", Monto = "Bs. 420", Metodo = "Pendiente", Fecha = "24 Sep 2026", Estado = "Pendiente", BadgeClass = "badge-pendiente" },
-        new { Factura = "#F-0228", Especialista = "Equipo", Monto = "Bs. 2,500", Metodo = "Transferencia", Fecha = "24 Sep 2026", Estado = "Pagado", BadgeClass = "badge-pagado" }
-    };
+    var kpis = (KpiPagos)ViewBag.Kpis;
+    var transacciones = (List<PagoTransaccion>)ViewBag.Transacciones;
+    var desglose = (List<DesgloseMetodo>)ViewBag.Desglose;
+
+    // Conic-gradient dinámico con colores reales
+    decimal acum = 0;
+    var stops = new List<string>();
+    foreach (var d in desglose)
+    {
+        var ini = acum;
+        acum += d.Porcentaje;
+        stops.Add($"{d.ColorHex} {ini}% {acum}%");
+    }
+    var gradiente = stops.Count > 0
+        ? "conic-gradient(" + string.Join(", ", stops) + ")"
+        : "conic-gradient(#c8a96a 0% 100%)";
 }
 
 <!DOCTYPE html>
@@ -22,7 +29,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
 </head>
 <body>
 
@@ -35,14 +41,19 @@
             </div>
 
             <ul class="sidebar-menu">
-                <li><a href="@Url.Action("PanelPrinciRecepcionista", "Gestion")" class= "menu-item" ><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Panel Principal</a></li>
+                <li><a href="@Url.Action("PanelPrinciRecepcionista", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Panel Principal</a></li>
                 <li><a href="@Url.Action("GestionCitas", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>Gestión de Citas</a></li>
                 <li><a href="@Url.Action("GestionClientes", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Gestión de Clientes</a></li>
-                <li><a href="@Url.Action("GestionPagos", "Gestion")" class="menu-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>Registro de Pagos</a></li>
+                <li><a href="@Url.Action("GestionPagos", "Gestion")" class="menu-item active"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>Registro de Pagos</a></li>
             </ul>
 
             <div class="sidebar-footer">
-                <a href="#" class="logout-link"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>Cerrar Sesión</a>
+                <form method="post" action="@Url.Action("CerrarSesion","Login")" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="logout-link" style="background:none;border:none;padding:0;cursor:pointer;">
+                        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>Cerrar Sesión
+                    </button>
+                </form>
             </div>
         </aside>
 
@@ -52,7 +63,7 @@
             <header class="page-header">
                 <div class="page-title">
                     <h1>Registro de Pagos</h1>
-                    <div class="filter-label">Filtrado por: <strong>Septiembre 2026</strong></div>
+                    <div class="filter-label">Filtrado por: <strong>@DateTime.Now.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</strong></div>
                 </div>
 
                 <button class="btn-primary-gold">
@@ -70,7 +81,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="4" /></svg>
                         </div>
                     </div>
-                    <div class="kpi-value">Bs. 4,250</div>
+                    <div class="kpi-value">Bs. @kpis.IngresosDia.ToString("N0")</div>
                 </div>
 
                 <div class="kpi-card">
@@ -80,7 +91,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
                         </div>
                     </div>
-                    <div class="kpi-value">Bs. 89,500</div>
+                    <div class="kpi-value">Bs. @kpis.IngresosMes.ToString("N0")</div>
                 </div>
 
                 <div class="kpi-card">
@@ -90,7 +101,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8" /></svg>
                         </div>
                     </div>
-                    <div class="kpi-value">3</div>
+                    <div class="kpi-value">@kpis.Pendientes</div>
                 </div>
 
                 <div class="kpi-card">
@@ -100,7 +111,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="12" y1="18" x2="12" y2="12" /><line x1="9" y1="15" x2="15" y2="15" /></svg>
                         </div>
                     </div>
-                    <div class="kpi-value">8</div>
+                    <div class="kpi-value">@kpis.TransaccionesHoy</div>
                 </div>
             </section>
 
@@ -123,6 +134,10 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @if (transacciones.Count == 0)
+                            {
+                                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin transacciones registradas.</td></tr>
+                            }
                             @foreach (var t in transacciones)
                             {
                                 <tr>
@@ -148,7 +163,7 @@
                     </table>
 
                     <div class="table-pagination">
-                        <span>Mostrando 1-7 de 86 transacciones</span>
+                        <span>Mostrando 1-@transacciones.Count de @transacciones.Count transacciones</span>
                         <div class="pagination-btns">
                             <button class="pagination-btn">&lt;</button>
                             <button class="pagination-btn">&gt;</button>
@@ -161,7 +176,7 @@
                     <h2>Métodos de Pago</h2>
 
                     <div class="chart-container">
-                        <div class="donut-chart">
+                        <div class="donut-chart" style="background: @gradiente;">
                             <div class="donut-center-text">
                                 <span>TOTAL</span>
                                 <strong>100%</strong>
@@ -170,49 +185,23 @@
                     </div>
 
                     <div class="legend-list">
-                        <div class="legend-row">
-                            <div class="legend-info">
-                                <span class="legend-dot dot-efectivo"></span>
-                                <span>Efectivo</span>
+                        @if (desglose.Count == 0)
+                        {
+                            <p style="font-size:0.8rem;color:var(--text-muted);">Sin datos de métodos de pago este mes.</p>
+                        }
+                        @foreach (var d in desglose)
+                        {
+                            <div class="legend-row">
+                                <div class="legend-info">
+                                    <span class="legend-dot" style="background:@d.ColorHex;"></span>
+                                    <span>@d.Metodo</span>
+                                </div>
+                                <div class="legend-values">
+                                    <span class="amount">Bs. @d.Monto.ToString("N0")</span>
+                                    <span class="percent">@d.Porcentaje%</span>
+                                </div>
                             </div>
-                            <div class="legend-values">
-                                <span class="amount">Bs. 1,487</span>
-                                <span class="percent">35%</span>
-                            </div>
-                        </div>
-
-                        <div class="legend-row">
-                            <div class="legend-info">
-                                <span class="legend-dot dot-debito"></span>
-                                <span>Tarjeta Débito</span>
-                            </div>
-                            <div class="legend-values">
-                                <span class="amount">Bs. 1,190</span>
-                                <span class="percent">28%</span>
-                            </div>
-                        </div>
-
-                        <div class="legend-row">
-                            <div class="legend-info">
-                                <span class="legend-dot dot-transferencia"></span>
-                                <span>Transferencia</span>
-                            </div>
-                            <div class="legend-values">
-                                <span class="amount">Bs. 935</span>
-                                <span class="percent">22%</span>
-                            </div>
-                        </div>
-
-                        <div class="legend-row">
-                            <div class="legend-info">
-                                <span class="legend-dot dot-credito"></span>
-                                <span>Tarjeta Crédito</span>
-                            </div>
-                            <div class="legend-values">
-                                <span class="amount">Bs. 638</span>
-                                <span class="percent">15%</span>
-                            </div>
-                        </div>
+                        }
                     </div>
                 </aside>
             </div>
