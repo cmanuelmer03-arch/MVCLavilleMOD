@@ -1,38 +1,30 @@
-﻿@model Lavillemvc.Models.ReservarCita
+﻿@model Lavillemvc.Models.ClienteProcesoPago
 
 @{
     ViewData["Title"] = "Proceso de Pago";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
-
-    decimal precioBase = Model.CostoServicio;
-
-    // Membresía Gold: 10% de descuento
-    decimal descuentoMembresia = precioBase * 0.10m;
-
-    // Por ahora usamos 500 puntos = $50
-    // como está planteado en tu diseño.
-    int puntosUsados = Math.Min(Model.PuntosFidelidad, 500);
-    decimal descuentoPuntos = puntosUsados / 10m;
-
-    decimal total = precioBase
-                    - descuentoMembresia
-                    - descuentoPuntos;
-
-    if (total < 0)
-        total = 0;
 }
 
 <div class="pago">
 
+    <!-- ================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================= -->
+
     <div class="pago-header">
 
         <div>
-            <h1>Proceso de Pago</h1>
+
+            <h1>
+                Proceso de Pago
+            </h1>
 
             <p>
                 Completa el pago seguro para confirmar tu ritual exclusivo en L'Avielle.
             </p>
+
         </div>
+
 
         <div class="pago-pasos">
 
@@ -55,256 +47,556 @@
     </div>
 
 
-    <div class="pago-grid">
+    <!-- ================================= -->
+    <!-- FORMULARIO DE PAGO -->
+    <!-- ================================= -->
+
+    <form action="/Cliente/ProcesarPago"
+          method="post"
+          novalidate>
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="idCita"
+               value="@Model.IdCita" />
+
+        <input type="hidden"
+               name="idPromocion"
+               value="@Context.Request.Query["idPromocion"]" />
 
 
-
-        <div class="pago-izquierda">
-
+        <div class="pago-grid">
 
 
-            <div class="pago-card resumen-pago">
+            <!-- ================================= -->
+            <!-- COLUMNA IZQUIERDA -->
+            <!-- ================================= -->
 
-                <div class="pago-card-titulo">
+            <div class="pago-izquierda">
+
+
+                <!-- ================================= -->
+                <!-- RESUMEN DE LA CITA -->
+                <!-- ================================= -->
+
+                <div class="pago-card resumen-pago">
+
+                    <div class="pago-card-titulo">
+
+                        <h2>
+                            Resumen de la Cita
+                        </h2>
+
+                        <span>
+                            RESERVADO PROVISIONAL
+                        </span>
+
+                    </div>
+
+
+                    <div class="resumen-grid">
+
+
+                        <div>
+
+                            <small>
+                                SERVICIO
+                            </small>
+
+                            <strong>
+                                @Model.ServicioPrincipal
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                PRECIO BASE
+                            </small>
+
+                            <strong>
+                                $ @Model.PrecioBaseServicio.ToString("N2")
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                ESPECIALISTA
+                            </small>
+
+                            <strong>
+                                @(Model.NombreEspecialista ?? "No especificado")
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                SUCURSAL
+                            </small>
+
+                            <strong>
+                                @(Model.NombreSucursal ?? "No especificada")
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                FECHA Y HORA
+                            </small>
+
+                            <strong>
+
+                                @Model.FechaCita.ToString("dd/MM/yyyy")
+
+                                <br>
+
+                                @Model.HoraCita.ToString("HH:mm")
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                DURACIÓN ESTIMADA
+                            </small>
+
+                            <strong>
+                                @(Model.DuracionEstimada ?? "No especificada")
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- MÉTODO DE PAGO -->
+                <!-- ================================= -->
+
+                <div class="pago-card metodo-pago">
 
                     <h2>
-                        Resumen de la Cita
+                        Método de Pago
                     </h2>
 
-                    <span>
-                        RESERVADO PROVISIONAL
-                    </span>
+
+                    <div class="metodos-grid">
+
+
+                        <label class="metodo seleccionado">
+
+                            <input type="radio"
+                                   name="metodoPago"
+                                   value="Tarjeta"
+                                   checked />
+
+                            <span>
+                                Tarjeta de Crédito/Débito
+                            </span>
+
+                        </label>
+
+
+                        <label class="metodo">
+
+                            <input type="radio"
+                                   name="metodoPago"
+                                   value="Pago Móvil" />
+
+                            <span>
+                                Pago Móvil
+                            </span>
+
+                        </label>
+
+
+                        <label class="metodo">
+
+                            <input type="radio"
+                                   name="metodoPago"
+                                   value="Transferencia Bancaria" />
+
+                            <span>
+                                Transferencia Bancaria
+                            </span>
+
+                        </label>
+
+
+                        <label class="metodo">
+
+                            <input type="radio"
+                                   name="metodoPago"
+                                   value="Pagar en Sucursal" />
+
+                            <span>
+                                Pagar en Sucursal
+                            </span>
+
+                        </label>
+
+
+                    </div>
+
+
+                    <div class="datos-tarjeta" id="datosTarjeta">
+
+                        <label for="numeroTarjeta">
+                            NÚMERO DE TARJETA
+                        </label>
+
+                        <input type="text"
+                               id="numeroTarjeta"
+                               name="numeroTarjeta"
+                               autocomplete="off"
+                               inputmode="numeric"
+                               maxlength="19"
+                               placeholder="0000 0000 0000 0000" />
+
+                        <label for="nombreTitular">
+                            NOMBRE DEL TITULAR
+                        </label>
+
+                        <input type="text"
+                               id="nombreTitular"
+                               name="nombreTitular"
+                               autocomplete="off"
+                               maxlength="100"
+                               placeholder="Como aparece en la tarjeta" />
+
+                        <div class="datos-tarjeta-fila">
+
+                            <div>
+
+                                <label for="vencimiento">
+                                    FECHA DE VENCIMIENTO
+                                </label>
+
+                                <input type="text"
+                                       id="vencimiento"
+                                       name="vencimiento"
+                                       autocomplete="off"
+                                       maxlength="5"
+                                       placeholder="MM/AA" />
+
+                            </div>
+
+                            <div>
+
+                                <label for="cvv">
+                                    CVV
+                                </label>
+
+                                <input type="password"
+                                       id="cvv"
+                                       name="cvv"
+                                       autocomplete="off"
+                                       inputmode="numeric"
+                                       maxlength="4"
+                                       placeholder="•••" />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                <!-- ================================= -->
+                <!-- CÓDIGO PROMOCIONAL -->
+                <!-- ================================= -->
+
+                <div class="pago-card promocion-pago">
+
+                    <div>
+
+                        <span>
+                            ▱
+                        </span>
+
+                        <input type="text"
+                               name="CodigoPromocional"
+                               placeholder="Ingresa tu código promocional" />
+
+                    </div>
+
+
+                    <button type="button">
+                        Aplicar
+                    </button>
 
                 </div>
 
-
-                <div class="resumen-grid">
-
-
-                    <div>
-
-                        <small>
-                            SERVICIO
-                        </small>
-
-                        <strong>
-                            Balayage Premium
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <small>
-                            PRECIO BASE
-                        </small>
-
-                        <strong>
-                            Bs. 2,200.00
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <small>
-                            ESPECIALISTA
-                        </small>
-
-                        <strong>
-                            Valentina Rojas
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <small>
-                            SUCURSAL
-                        </small>
-
-                        <strong>
-                            L'Avielle Las Mercedes
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <small>
-                            FECHA Y HORA
-                        </small>
-
-                        <strong>
-                            Martes 4 de Octubre,<br>
-                            2026 · 10:00 AM
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <small>
-                            DURACIÓN ESTIMADA
-                        </small>
-
-                        <strong>
-                            3 horas
-                        </strong>
-
-                    </div>
-
-
-                </div>
 
             </div>
 
 
+            <!-- ================================= -->
+            <!-- COLUMNA DERECHA -->
+            <!-- ================================= -->
 
-            <div class="pago-card metodo-pago">
-
-                <h2>
-                    Método de Pago
-                </h2>
-
-
-                <div class="metodos-grid">
+            <div class="pago-derecha">
 
 
-                    <label class="metodo seleccionado">
+                <!-- ================================= -->
+                <!-- DETALLE DEL PAGO -->
+                <!-- ================================= -->
 
-                        <input type="radio"
-                               name="metodoPago"
-                               checked />
+                <div class="pago-card detalle-pago">
 
-                        <span>
-                            Tarjeta de Crédito/Débito
-                        </span>
-
-                    </label>
+                    <h2>
+                        Detalle del Pago
+                    </h2>
 
 
-                    <label class="metodo">
+                    <!-- SUBTOTAL -->
 
-                        <input type="radio"
-                               name="metodoPago" />
+                    <div class="detalle-linea">
 
                         <span>
-                            Pago Móvil
+                            Subtotal
                         </span>
 
-                    </label>
-
-
-                    <label class="metodo">
-
-                        <input type="radio"
-                               name="metodoPago" />
-
-                        <span>
-                            Transferencia Bancaria
-                        </span>
-
-                    </label>
-
-
-                    <label class="metodo">
-
-                        <input type="radio"
-                               name="metodoPago" />
-
-                        <span>
-                            Pagar en Sucursal
-                        </span>
-
-                    </label>
-
-
-                </div>
-
-
-                <div class="datos-tarjeta">
-
-
-                    <label>
-                        NÚMERO DE TARJETA
-                    </label>
-
-                    <input type="text"
-                           autocomplete="off"
-                           inputmode="numeric"
-                           placeholder="0000 0000 0000 0000" />
-
-
-                    <label>
-                        NOMBRE DEL TITULAR
-                    </label>
-
-                    <input type="text"
-                           autocomplete="off"
-                           placeholder="Como aparece en la tarjeta" />
-
-
-                    <div class="datos-tarjeta-fila">
-
-
-                        <div>
-
-                            <label>
-                                FECHA DE VENCIMIENTO
-                            </label>
-
-                            <input type="text"
-                                   autocomplete="off"
-                                   placeholder="MM/AA" />
-
-                        </div>
-
-
-                        <div>
-
-                            <label>
-                                CVV
-                            </label>
-
-                            <input type="password"
-                                   autocomplete="off"
-                                   inputmode="numeric"
-                                   placeholder="•••" />
-
-                        </div>
-
+                        <strong>
+                            $ @Model.Subtotal.ToString("N2")
+                        </strong>
 
                     </div>
 
+
+                    <!-- DESCUENTO MEMBRESÍA -->
+                    @if (Model.DescuentoMembresiaRegistrado.HasValue &&
+                                             Model.DescuentoMembresiaRegistrado.Value > 0)
+                    {
+
+                        <div class="detalle-linea descuento-pago">
+
+                            <span>
+                                @(Model.NombreMembresia ?? "Membresía")
+                            </span>
+
+                            <strong>
+                                - $ @Model.DescuentoMembresiaRegistrado.Value.ToString("N2")
+                            </strong>
+
+                        </div>
+
+                    }
+
+
+                    <!-- DESCUENTO GENERAL -->
+                    @if (Model.DescuentoGeneralRegistrado.HasValue &&
+                                             Model.DescuentoGeneralRegistrado.Value > 0)
+                    {
+
+                        <div class="detalle-linea descuento-pago">
+
+                            <span>
+                                Descuento
+                            </span>
+
+                            <strong>
+                                - $ @Model.DescuentoGeneralRegistrado.Value.ToString("N2")
+                            </strong>
+
+                        </div>
+
+                    }
+
+
+                    <!-- TOTAL -->
+
+                    <div class="detalle-total">
+
+                        <span>
+                            Total a Pagar
+                        </span>
+
+                        <strong id="totalPago">
+
+                            $ @Model.TotalAPagar.ToString("N2")
+
+                        </strong>
+
+                    </div>
+
+
+                    <!-- PUNTOS -->
+                    @if (Model.PuntosActuales > 0)
+                    {
+
+                        <label class="check-pago">
+
+                            <input type="checkbox"
+                                   id="usarPuntos"
+                                   name="usarPuntos"
+                                   value="true" />
+                            <span>
+
+                                Usar mis
+                                @Model.PuntosActuales
+                                puntos
+
+                                <br />
+
+                                (- $
+                                @Math.Min(
+                                    Model.PuntosActuales / 10m,
+                                    Model.TotalAPagar
+                                ).ToString("N2"))
+
+                            </span>
+
+                        </label>
+
+                    }
+
+
+                    <!-- PUNTOS POR GANAR -->
+
+                    <div class="puntos-bono"
+                         id="textoPuntos">
+
+                        Ganarás
+                        +@(Model.PuntosPorGanar ?? 0)
+                        puntos L'Avielle
+
+                    </div>
+
+
+                    <!-- TÉRMINOS -->
+
+                    <label class="check-pago">
+
+                        <input type="checkbox"
+                               name="AceptaTerminos"
+                               value="true" />
+
+                        <span>
+
+                            Acepto los términos y condiciones del servicio
+                            y las políticas de cancelación.
+
+                        </span>
+
+                    </label>
+
+
+                    <!-- AUTORIZACIÓN -->
+
+                    <label class="check-pago">
+
+                        <input type="checkbox"
+                               name="AutorizaCobro"
+                               value="true" />
+
+                        <span>
+
+                            Autorizo el cargo al método de pago por el
+                            monto total indicado.
+
+                        </span>
+
+                    </label>
+                        <div id="errorPago"
+                             class="mensaje-error"
+                             style="@(TempData["ErrorPago"] != null ? "display:block;" : "display:none;")">
+
+                            @TempData["ErrorPago"]
+
+                        </div>
+
+                    <!-- BOTÓN PAGAR -->
+
+                        <button type="submit"
+                                class="btn-confirmar-pago"
+                                id="btnConfirmarPago">
+
+                            Confirmar y Pagar — $
+                            @Model.TotalAPagar.ToString("N2")
+
+                        </button>
+
+
+                    <!-- CANCELAR -->
+
+                    <a href="/Cliente/ReservarCita"
+                       class="cancelar-reserva">
+
+                        Cancelar Reserva
+
+                    </a>
+
+
                 </div>
 
-            </div>
+
+                <!-- ================================= -->
+                <!-- POLÍTICAS -->
+                <!-- ================================= -->
+
+                <div class="politicas-pago">
+
+                    <h3>
+                        POLÍTICAS DE RESERVA
+                    </h3>
 
 
+                    <p>
+                        • Cancelación gratuita hasta 24 horas antes de la cita.
+                    </p>
 
-            <div class="pago-card promocion-pago">
 
-                <div>
+                    <p>
+                        • Reprogramación con costo hasta 12 horas antes.
+                    </p>
+
+
+                    <p>
+                        • No-show: se aplicará un cargo equivalente al 50% del servicio.
+                    </p>
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- SEGURIDAD -->
+                <!-- ================================= -->
+
+                <div class="seguridad-pago">
 
                     <span>
-                        ▱
+                        Pago Seguro
                     </span>
 
-                    <input type="text"
-                           placeholder="Ingresa tu código promocional" />
+                    <span>
+                        Datos Encriptados
+                    </span>
+
+                    <span>
+                        Garantía L'Avielle
+                    </span>
 
                 </div>
 
-
-                <button type="button">
-                    Aplicar
-                </button>
 
             </div>
 
@@ -312,154 +604,632 @@
         </div>
 
 
-        <div class="pago-derecha">
-
-
-
-            <div class="pago-card detalle-pago">
-
-                <h2>
-                    Detalle del Pago
-                </h2>
-
-
-                <div class="detalle-linea">
-
-                    <span>
-                        Subtotal
-                    </span>
-
-                    <strong>
-                        Bs. 2,200.00
-                    </strong>
-
-                </div>
-
-
-                <div class="detalle-linea descuento-pago">
-
-                    <span>
-                        Membresía Gold (10%)
-                    </span>
-
-                    <strong>
-                        - Bs. 220.00
-                    </strong>
-
-                </div>
-
-
-                <div class="detalle-total">
-
-                    <span>
-                        Total a Pagar
-                    </span>
-
-                    <strong>
-                        Bs. 1,980.00
-                    </strong>
-
-                </div>
-
-
-                <div class="puntos-bono">
-
-                    Ganarás +198 puntos L'Avielle
-
-                </div>
-
-
-                <label class="check-pago">
-
-                    <input type="checkbox" />
-
-                    <span>
-                        Acepto los términos y condiciones del servicio
-                        y las políticas de cancelación.
-                    </span>
-
-                </label>
-
-
-                <label class="check-pago">
-
-                    <input type="checkbox" />
-
-                    <span>
-                        Autorizo el cargo al método de pago por el
-                        monto total indicado.
-                    </span>
-
-                </label>
-
-
-                <button type="button"
-                        class="btn-confirmar-pago">
-
-                    Confirmar y Pagar — Bs. 1,980.00
-
-                </button>
-
-
-                <a href="/Cliente/ReservarCita"
-                   class="cancelar-reserva">
-
-                    Cancelar Reserva
-
-                </a>
-
-
-            </div>
-
-
-
-            <div class="politicas-pago">
-
-                <h3>
-                    POLÍTICAS DE RESERVA
-                </h3>
-
-
-                <p>
-                    • Cancelación gratuita hasta 24 horas antes de la cita.
-                </p>
-
-
-                <p>
-                    • Reprogramación con costo hasta 12 horas antes.
-                </p>
-
-
-                <p>
-                    • No-show: se aplicará un cargo equivalente al 50% del servicio.
-                </p>
-
-
-            </div>
-
-
-      
-
-            <div class="seguridad-pago">
-
-                <span>
-                    Pago Seguro
-                </span>
-
-                <span>
-                    Datos Encriptados
-                </span>
-
-                <span>
-                    Garantía L'Avielle
-                </span>
-
-            </div>
-
-
-        </div>
-
-
-    </div>
+    </form>
 
 </div>
+
+
+<!-- ================================= -->
+<!-- JAVASCRIPT DE PUNTOS -->
+<!-- ================================= -->
+
+    <script>
+
+        const formularioPago =
+            document.querySelector('form[action="/Cliente/ProcesarPago"]');
+
+        const usarPuntos =
+            document.getElementById("usarPuntos");
+
+        const totalPago =
+            document.getElementById("totalPago");
+
+        const botonPago =
+            document.getElementById("btnConfirmarPago");
+
+        const datosTarjeta =
+            document.getElementById("datosTarjeta");
+
+        const numeroTarjeta =
+            document.getElementById("numeroTarjeta");
+
+        const nombreTitular =
+            document.getElementById("nombreTitular");
+
+        const vencimiento =
+            document.getElementById("vencimiento");
+
+        const cvv =
+            document.getElementById("cvv");
+
+        const aceptarTerminos =
+            document.querySelector(
+                'input[name="AceptaTerminos"]'
+            );
+
+        const autorizaCobro =
+            document.querySelector(
+                'input[name="AutorizaCobro"]'
+            );
+
+        const metodosPago =
+            document.querySelectorAll(
+                'input[name="metodoPago"]'
+            );
+
+        const errorPago =
+            document.getElementById("errorPago");
+
+
+        const totalOriginal =
+            @Model.TotalAPagar.ToString(
+            System.Globalization.CultureInfo.InvariantCulture
+            );
+
+        const puntosDisponibles =
+                @Model.PuntosActuales;
+
+
+        // ==========================================
+        // MOSTRAR ERROR
+        // ==========================================
+
+        function mostrarError(mensaje) {
+
+            if (!errorPago) {
+                return;
+            }
+
+            errorPago.textContent = mensaje;
+            errorPago.style.display = "block";
+
+            errorPago.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }
+
+
+        function ocultarError() {
+
+            if (errorPago) {
+                errorPago.textContent = "";
+                errorPago.style.display = "none";
+            }
+        }
+
+
+        // ==========================================
+        // MÉTODO DE PAGO
+        // ==========================================
+
+        function obtenerMetodoPago() {
+
+            const seleccionado =
+                document.querySelector(
+                    'input[name="metodoPago"]:checked'
+                );
+
+            return seleccionado
+                ? seleccionado.value
+                : "";
+        }
+
+
+        function actualizarCamposTarjeta() {
+
+            const metodo =
+                obtenerMetodoPago();
+
+            const esTarjeta =
+                metodo === "Tarjeta";
+
+
+            if (datosTarjeta) {
+
+                datosTarjeta.style.display =
+                    esTarjeta
+                        ? "block"
+                        : "none";
+            }
+
+
+            [
+                numeroTarjeta,
+                nombreTitular,
+                vencimiento,
+                cvv
+            ].forEach(input => {
+
+                if (input) {
+                    input.required = esTarjeta;
+                }
+
+            });
+
+
+            validarFormulario();
+        }
+
+
+        metodosPago.forEach(radio => {
+
+            radio.addEventListener(
+                "change",
+                function () {
+
+                    ocultarError();
+
+                    actualizarCamposTarjeta();
+
+                }
+            );
+
+        });
+
+
+        // ==========================================
+        // VALIDAR TARJETA
+        // ==========================================
+
+        function tarjetaValida() {
+
+            const numero =
+                numeroTarjeta.value
+                    .replace(/\s/g, "");
+
+            if (!/^\d{13,19}$/.test(numero)) {
+
+                return false;
+            }
+
+
+            const nombre =
+                nombreTitular.value.trim();
+
+            if (
+                nombre.length < 3 ||
+                !/^[a-zA-ZÁÉÍÓÚáéíóúÑñÜü\s]+$/.test(nombre)
+            ) {
+
+                return false;
+            }
+
+
+            const fecha =
+                vencimiento.value.trim();
+
+
+            if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(fecha)) {
+
+                return false;
+            }
+
+
+            const partes =
+                fecha.split("/");
+
+            const mes =
+                parseInt(partes[0]);
+
+            const anio =
+                2000 + parseInt(partes[1]);
+
+
+            const fechaActual =
+                new Date();
+
+            const anioActual =
+                fechaActual.getFullYear();
+
+            const mesActual =
+                fechaActual.getMonth() + 1;
+
+
+            if (
+                anio < anioActual ||
+                (
+                    anio === anioActual &&
+                    mes < mesActual
+                )
+            ) {
+
+                return false;
+            }
+
+
+            const codigo =
+                cvv.value.trim();
+
+
+            if (!/^\d{3,4}$/.test(codigo)) {
+
+                return false;
+            }
+
+
+            return true;
+        }
+
+
+        // ==========================================
+        // VALIDAR FORMULARIO
+        // ==========================================
+
+        function validarFormulario() {
+
+            const metodo =
+                obtenerMetodoPago();
+
+            const terminos =
+                aceptarTerminos &&
+                aceptarTerminos.checked;
+
+            const autorizacion =
+                autorizaCobro &&
+                autorizaCobro.checked;
+
+
+            let valido = true;
+
+
+            if (!metodo) {
+
+                valido = false;
+
+            }
+
+
+            if (!terminos) {
+
+                valido = false;
+
+            }
+
+
+            if (!autorizacion) {
+
+                valido = false;
+
+            }
+
+
+            if (
+                metodo === "Tarjeta" &&
+                !tarjetaValida()
+            ) {
+
+                valido = false;
+
+            }
+
+
+            return valido;
+        }
+
+
+        // ==========================================
+        // EVENTOS DE CAMPOS
+        // ==========================================
+
+        [
+            numeroTarjeta,
+            nombreTitular,
+            vencimiento,
+            cvv
+        ].forEach(input => {
+
+            if (!input) {
+                return;
+            }
+
+            input.addEventListener(
+                "input",
+                function () {
+
+                    ocultarError();
+
+                    validarFormulario();
+
+                }
+            );
+
+        });
+
+
+        if (aceptarTerminos) {
+
+            aceptarTerminos.addEventListener(
+                "change",
+                function () {
+
+                    ocultarError();
+
+                    validarFormulario();
+
+                }
+            );
+
+        }
+
+
+        if (autorizaCobro) {
+
+            autorizaCobro.addEventListener(
+                "change",
+                function () {
+
+                    ocultarError();
+
+                    validarFormulario();
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // FORMATO TARJETA
+        // ==========================================
+
+        if (numeroTarjeta) {
+
+            numeroTarjeta.addEventListener(
+                "input",
+                function () {
+
+                    let valor =
+                        this.value
+                            .replace(/\D/g, "")
+                            .substring(0, 16);
+
+                    let grupos = [];
+
+                    for (
+                        let i = 0;
+                        i < valor.length;
+                        i += 4
+                    ) {
+
+                        grupos.push(
+                            valor.substring(i, i + 4)
+                        );
+
+                    }
+
+                    this.value =
+                        grupos.join(" ");
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // FORMATO VENCIMIENTO
+        // ==========================================
+
+        if (vencimiento) {
+
+            vencimiento.addEventListener(
+                "input",
+                function () {
+
+                    let valor =
+                        this.value
+                            .replace(/\D/g, "")
+                            .substring(0, 4);
+
+
+                    if (valor.length >= 3) {
+
+                        this.value =
+                            valor.substring(0, 2) +
+                            "/" +
+                            valor.substring(2);
+
+                    }
+                    else {
+
+                        this.value =
+                            valor;
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // SOLO NÚMEROS EN CVV
+        // ==========================================
+
+        if (cvv) {
+
+            cvv.addEventListener(
+                "input",
+                function () {
+
+                    this.value =
+                        this.value
+                            .replace(/\D/g, "")
+                            .substring(0, 4);
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // CALCULAR TOTAL CON PUNTOS
+        // ==========================================
+
+        function actualizarTotal() {
+
+            let total =
+                totalOriginal;
+
+
+            if (
+                usarPuntos &&
+                usarPuntos.checked
+            ) {
+
+                let descuento =
+                    puntosDisponibles / 10;
+
+
+                if (descuento > total) {
+
+                    descuento =
+                        total;
+
+                }
+
+
+                total =
+                    total - descuento;
+
+            }
+
+
+            if (totalPago) {
+
+                totalPago.textContent =
+                    "$ " +
+                    total.toLocaleString(
+                        "en-US",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+            }
+
+
+            if (botonPago) {
+
+                botonPago.textContent =
+                    "Confirmar y Pagar — $ " +
+                    total.toLocaleString(
+                        "en-US",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+            }
+
+        }
+
+
+        if (usarPuntos) {
+
+            usarPuntos.addEventListener(
+                "change",
+                function () {
+
+                    actualizarTotal();
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // VALIDACIÓN ANTES DE ENVIAR
+        // ==========================================
+
+        if (formularioPago) {
+
+            formularioPago.addEventListener(
+                "submit",
+                function (e) {
+
+                    ocultarError();
+
+
+                    if (!validarFormulario()) {
+
+                        e.preventDefault();
+
+
+                        const metodo =
+                            obtenerMetodoPago();
+
+
+                        if (!metodo) {
+
+                            mostrarError(
+                                "Selecciona un método de pago."
+                            );
+
+                            return;
+
+                        }
+
+
+                        if (
+                            metodo === "Tarjeta" &&
+                            !tarjetaValida()
+                        ) {
+
+                            mostrarError(
+                                "Completa correctamente los datos de la tarjeta."
+                            );
+
+                            return;
+
+                        }
+
+
+                        if (
+                            !aceptarTerminos.checked
+                        ) {
+
+                            mostrarError(
+                                "Debes aceptar los términos y condiciones."
+                            );
+
+                            return;
+
+                        }
+
+
+                        if (
+                            !autorizaCobro.checked
+                        ) {
+
+                            mostrarError(
+                                "Debes autorizar el cobro."
+                            );
+
+                            return;
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // INICIALIZAR
+        // ==========================================
+
+        actualizarCamposTarjeta();
+
+        actualizarTotal();
+
+    </script>

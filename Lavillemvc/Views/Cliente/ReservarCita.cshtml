@@ -87,8 +87,8 @@
     <!-- ================================================= -->
 
     <form asp-controller="Cliente"
-          asp-action="Pago"
-          method="get"
+          asp-action="ConfirmarReserva"
+          method="post"
           id="formReserva">
 
         @Html.AntiForgeryToken()
@@ -96,6 +96,10 @@
         <input type="hidden"
                name="IdCliente"
                value="@Model.IdCliente" />
+
+        <input type="hidden"
+               name="idPromocion"
+               value="@ViewData["IdPromocion"]" />
 
         <input type="hidden"
                name="IdServicio"

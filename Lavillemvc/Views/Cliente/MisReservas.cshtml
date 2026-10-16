@@ -1,6 +1,10 @@
-﻿@{
+﻿@model List<Lavillemvc.Models.ClienteProcesoPago>
+
+@{
     ViewData["Title"] = "Mis Reservas";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+
+    DateOnly hoy = DateOnly.FromDateTime(DateTime.Today);
 }
 
 <div class="reservas-page">
@@ -38,280 +42,208 @@
     </div>
 
 
+    <!-- ================================= -->
+    <!-- PRÓXIMAS CITAS -->
+    <!-- ================================= -->
+
     <section class="proximas-reservas">
 
         <h2>Próximas Citas</h2>
 
-
         <div class="reservas-grid">
 
+            @foreach (var reserva in Model)
+            {
+    <div class="reserva-card">
 
-            <div class="reserva-card">
+        <div class="reserva-card-header">
 
-                <div class="reserva-card-header">
+            <div class="reserva-servicio">
 
-                    <div class="reserva-servicio">
+                <span class="reserva-icono">
+                    ✂
+                </span>
 
-                        <span class="reserva-icono">
-                            ✂
-                        </span>
+                <div>
 
-                        <div>
-                            <h3>Balayage + Corte</h3>
+                    <h3>
+                        @reserva.ServicioPrincipal
+                    </h3>
 
-                            <p>
-                                Con Valentina Rojas
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <span class="estado confirmado">
-                        Confirmada
-                    </span>
-
-                </div>
-
-
-                <div class="reserva-info">
-
-                    <div>
-                        <small>FECHA Y HORA</small>
-
-                        <strong>
-                            Sábado 4 de Octubre, 10:00 AM
-                        </strong>
-                    </div>
-
-                    <div>
-                        <small>SUCURSAL</small>
-
-                        <strong>
-                            L'Avielle Las Mercedes
-                        </strong>
-                    </div>
-
-                </div>
-
-
-                <div class="reserva-acciones">
-
-                    <button type="button">
-                        Ver Detalles
-                    </button>
-
-                    <button type="button">
-                        Modificar
-                    </button>
-
-                    <button type="button" class="btn-cancelar">
-                        Cancelar
-                    </button>
+                    <p>
+                        Con
+                        @(reserva.NombreEspecialista
+                            ?? "Especialista no especificado")
+                    </p>
 
                 </div>
 
             </div>
 
+            @if (reserva.EstadoReserva.Equals(
+                "Confirmada",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                <span class="estado confirmado">
+                    Confirmada
+                </span>
+            }
+            else
+            {
+                <span class="estado pendiente">
+                    Pendiente
+                </span>
+            }
 
-            <div class="reserva-card">
-
-                <div class="reserva-card-header">
-
-                    <div class="reserva-servicio">
-
-                        <span class="reserva-icono">
-                            ✂
-                        </span>
-
-                        <div>
-                            <h3>Manicura Semipermanente</h3>
-
-                            <p>
-                                Con Lucía Méndez
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <span class="estado pendiente">
-                        Pendiente
-                    </span>
-
-                </div>
+        </div>
 
 
-                <div class="reserva-info">
+        <div class="reserva-info">
 
-                    <div>
-                        <small>FECHA Y HORA</small>
+            <div>
 
-                        <strong>
-                            Martes 7 de Octubre, 3:00 PM
-                        </strong>
-                    </div>
+                <small>
+                    FECHA Y HORA
+                </small>
 
-                    <div>
-                        <small>SUCURSAL</small>
+                <strong>
+                    @reserva.FechaCita.ToString("dd/MM/yyyy"),
+                    @reserva.HoraCita.ToString("HH:mm")
+                </strong>
 
-                        <strong>
-                            L'Avielle Altamira
-                        </strong>
-                    </div>
-
-                </div>
+            </div>
 
 
-                <div class="reserva-acciones">
+            <div>
 
-                    <button type="button">
-                        Ver Detalles
-                    </button>
+                <small>
+                    SUCURSAL
+                </small>
 
-                    <button type="button">
-                        Modificar
-                    </button>
-
-                    <button type="button" class="btn-cancelar">
-                        Cancelar
-                    </button>
-
-                </div>
+                <strong>
+                    @(reserva.NombreSucursal
+                        ?? "Sucursal no especificada")
+                </strong>
 
             </div>
 
         </div>
 
+
+        <div class="reserva-acciones">
+
+            <form asp-controller="Cliente"
+                  asp-action="CancelarReserva"
+                  method="post">
+
+                <input type="hidden"
+                       name="idCita"
+                       value="@reserva.IdCita" />
+
+                <button type="submit"
+                        class="btn-cancelar"
+                        onclick="return confirm('¿Seguro que deseas cancelar esta cita?');">
+
+                    Cancelar
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+}
+
+        </div>
+
     </section>
 
+
+    <!-- ================================= -->
+    <!-- HISTORIAL -->
+    <!-- ================================= -->
 
     <section class="historial-reservas">
 
         <h2>Historial de Citas</h2>
 
-
         <div class="historial-lista">
 
+            @foreach (var reserva in Model)
+            {
+                bool esHistorial =
+                    reserva.FechaCita < hoy
+                    ||
+                    reserva.EstadoReserva == null
+                    ||
+                    reserva.EstadoReserva.Equals(
+                        "Cancelada",
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    reserva.EstadoReserva.Equals(
+                        "Completada",
+                        StringComparison.OrdinalIgnoreCase);
 
-            <div class="historial-fila">
+                if (esHistorial)
+                {
+                    <div class="historial-fila">
 
-                <div class="historial-servicio">
+                        <div class="historial-servicio">
 
-                    <strong>
-                        Corte + Peinado
-                    </strong>
+                            <strong>
+                                @reserva.ServicioPrincipal
+                            </strong>
 
-                    <span>
-                        Estilista Isabella Marchetti
-                    </span>
+                            <span>
+                                Con
+                                @(reserva.NombreEspecialista
+                                    ?? "Especialista no especificado")
+                            </span>
 
-                </div>
-
-                <div class="historial-fecha">
-                    15 de Septiembre, 2026
-                </div>
-
-                <span class="estado historial-completada">
-                    Completada
-                </span>
-
-                <a href="@Url.Action("ReservarCita", "Cliente")">
-                    Reservar de Nuevo
-                </a>
-
-            </div>
-
-
-            <div class="historial-fila">
-
-                <div class="historial-servicio">
-
-                    <strong>
-                        Tratamiento Keratina
-                    </strong>
-
-                    <span>
-                        Estilista Camila Hernández
-                    </span>
-
-                </div>
-
-                <div class="historial-fecha">
-                    1 de Septiembre, 2026
-                </div>
-
-                <span class="estado historial-completada">
-                    Completada
-                </span>
-
-                <a href="@Url.Action("ReservarCita", "Cliente")">
-                    Reservar de Nuevo
-                </a>
-
-            </div>
+                        </div>
 
 
-            <div class="historial-fila">
+                        <div class="historial-fecha">
 
-                <div class="historial-servicio">
+                            @reserva.FechaCita.ToString("dd/MM/yyyy")
 
-                    <strong>
-                        Tinte Raíz
-                    </strong>
-
-                    <span>
-                        Estilista Valentina Rojas
-                    </span>
-
-                </div>
-
-                <div class="historial-fecha">
-                    20 de Agosto, 2026
-                </div>
-
-                <span class="estado historial-completada">
-                    Completada
-                </span>
-
-                <a href="@Url.Action("ReservarCita", "Cliente")">
-                    Reservar de Nuevo
-                </a>
-
-            </div>
+                        </div>
 
 
-            <div class="historial-fila">
+                        @if (reserva.EstadoReserva != null &&
+                            reserva.EstadoReserva.Equals(
+                                "Cancelada",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="estado historial-cancelada">
+                                Cancelada
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="estado historial-completada">
+                                Completada
+                            </span>
+                        }
 
-                <div class="historial-servicio">
 
-                    <strong>
-                        Pedicura Spa
-                    </strong>
+                        <a href="@Url.Action("ReservarCita", "Cliente")">
+                            Reservar de Nuevo
+                        </a>
 
-                    <span>
-                        Estilista Lucía Méndez
-                    </span>
-
-                </div>
-
-                <div class="historial-fecha">
-                    10 de Agosto, 2026
-                </div>
-
-                <span class="estado historial-cancelada">
-                    Cancelada
-                </span>
-
-                <a href="@Url.Action("ReservarCita", "Cliente")">
-                    Reservar de Nuevo
-                </a>
-
-            </div>
-
+                    </div>
+                }
+            }
 
         </div>
 
     </section>
 
+
+    <!-- ================================= -->
+    <!-- NUEVA RESERVA -->
+    <!-- ================================= -->
 
     <div class="reservar-nueva">
 

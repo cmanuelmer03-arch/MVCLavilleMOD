@@ -2,6 +2,7 @@
 using Lavillemvc.DAL;
 using Lavillemvc.Models;
 using Npgsql;
+using System.Text.Json;
 
 namespace Lavillemvc.Controllers
 {
@@ -12,6 +13,127 @@ namespace Lavillemvc.Controllers
         public ClienteController(IConfiguration configuration)
         {
             _conexion = new Conexion(configuration);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PerfilCliente()
+        {
+            int idCliente = 1;
+
+            await using var conn = _conexion.GetConnection();
+            await conn.OpenAsync();
+
+            string sql = @"
+        SELECT
+            c.id_cliente,
+            c.nombre,
+            c.apellido,
+            c.correo,
+            c.telefono,
+            c.fecha_nacimiento,
+            c.direccion,
+            c.foto_perfil_url,
+
+            p.tipo_cabello,
+            p.id_especialista_preferido,
+            p.id_sucursal_favorita,
+            p.alergias_condiciones,
+            p.notificaciones_correo,
+            p.recordatorios_sms,
+            p.promociones_especiales,
+            p.boletin_mensual,
+            p.idioma
+
+        FROM public.cliente c
+
+        LEFT JOIN public.preferencias_cliente p
+            ON p.id_cliente = c.id_cliente
+
+        WHERE c.id_cliente = @idCliente
+        LIMIT 1;
+    ";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue(
+                "@idCliente",
+                idCliente);
+
+            await using var reader =
+                await cmd.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+            {
+                return NotFound();
+            }
+
+            PerfilCliente modelo = new PerfilCliente
+            {
+                IdCliente = Convert.ToInt32(
+                    reader["id_cliente"]),
+
+                Nombre = reader["nombre"]?.ToString() ?? "",
+
+                Apellido = reader["apellido"]?.ToString() ?? "",
+
+                Correo = reader["correo"]?.ToString(),
+
+                Telefono = reader["telefono"]?.ToString(),
+
+                FechaNacimiento =
+    reader["fecha_nacimiento"] == DBNull.Value
+        ? null
+        : ((DateOnly)reader["fecha_nacimiento"])
+            .ToDateTime(TimeOnly.MinValue),
+
+                Direccion = reader["direccion"]?.ToString(),
+
+                FotoPerfilUrl =
+                    reader["foto_perfil_url"]?.ToString(),
+
+                TipoCabello =
+                    reader["tipo_cabello"]?.ToString(),
+
+                IdEspecialistaPreferido =
+                    reader["id_especialista_preferido"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(
+                            reader["id_especialista_preferido"]),
+
+                IdSucursalFavorita =
+                    reader["id_sucursal_favorita"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(
+                            reader["id_sucursal_favorita"]),
+
+                AlergiasCondiciones =
+                    reader["alergias_condiciones"]?.ToString(),
+
+                NotificacionesCorreo =
+                    reader["notificaciones_correo"] != DBNull.Value
+                        && Convert.ToBoolean(
+                            reader["notificaciones_correo"]),
+
+                RecordatoriosSms =
+                    reader["recordatorios_sms"] != DBNull.Value
+                        && Convert.ToBoolean(
+                            reader["recordatorios_sms"]),
+
+                PromocionesEspeciales =
+                    reader["promociones_especiales"] != DBNull.Value
+                        && Convert.ToBoolean(
+                            reader["promociones_especiales"]),
+
+                BoletinMensual =
+                    reader["boletin_mensual"] != DBNull.Value
+                        && Convert.ToBoolean(
+                            reader["boletin_mensual"]),
+
+                Idioma =
+                    reader["idioma"]?.ToString() ?? "es"
+            };
+
+            return View(modelo);
         }
 
         public async Task<IActionResult> DashboardCliente()
@@ -99,113 +221,381 @@ namespace Lavillemvc.Controllers
                 HistorialJson = reader["HistorialJson"]?.ToString() ?? "[]",
                 PromocionesJson = reader["PromocionesJson"]?.ToString() ?? "[]"
             };
-
+            
             return View(modelo);
         }
 
-        public IActionResult MisReservas()
+        public async Task<IActionResult> MisReservas()
         {
-            return View();
-        }
+            int idCliente = 1;
 
-        public IActionResult Pago()
-        {
-            return View();
-        }
+            List<ClienteProcesoPago> reservas =
+                new List<ClienteProcesoPago>();
 
-        public async Task<IActionResult> PerfilCliente()
-        {
             await using var conn = _conexion.GetConnection();
             await conn.OpenAsync();
 
             string sql = @"
-        SELECT *
-        FROM public.vw_perfil_cliente
+        SELECT
+            ""IdCita"",
+            ""IdCliente"",
+            ""EstadoReserva"",
+            ""ServicioPrincipal"",
+            ""NombreEspecialista"",
+            ""NombreSucursal"",
+            ""FechaCita"",
+            ""HoraCita""
+        FROM public.vw_proceso_pago_cita
         WHERE ""IdCliente"" = @IdCliente
-        LIMIT 1";
+        ORDER BY ""FechaCita"", ""HoraCita"";
+    ";
 
-            await using var cmd = new NpgsqlCommand(sql, conn);
+            await using var cmd =
+                new NpgsqlCommand(sql, conn);
 
-            // Temporalmente usamos el cliente 1
-            cmd.Parameters.AddWithValue("@IdCliente", 1);
+            cmd.Parameters.AddWithValue(
+                "@IdCliente",
+                idCliente);
 
-            await using var reader = await cmd.ExecuteReaderAsync();
+            await using var reader =
+                await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                ClienteProcesoPago reserva =
+                    new ClienteProcesoPago();
+
+                reserva.IdCita =
+                    Convert.ToInt32(reader["IdCita"]);
+
+                reserva.IdCliente =
+                    Convert.ToInt32(reader["IdCliente"]);
+
+                reserva.EstadoReserva =
+                    reader["EstadoReserva"]?.ToString();
+
+                reserva.ServicioPrincipal =
+                    reader["ServicioPrincipal"]?.ToString()
+                    ?? "";
+
+                reserva.NombreEspecialista =
+                    reader["NombreEspecialista"]?.ToString();
+
+                reserva.NombreSucursal =
+                    reader["NombreSucursal"]?.ToString();
+
+                reserva.FechaCita =
+                    (DateOnly)reader["FechaCita"];
+
+                reserva.HoraCita =
+                    (TimeOnly)reader["HoraCita"];
+
+                reservas.Add(reserva);
+            }
+
+            return View(reservas);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelarReserva(int idCita)
+        {
+            int idCliente = 1;
+
+            if (idCita <= 0)
+            {
+                return BadRequest();
+            }
+
+            await using var conn = _conexion.GetConnection();
+            await conn.OpenAsync();
+
+            string sql = @"
+        UPDATE public.cita
+        SET estado = 'Cancelada'
+        WHERE id_cita = @IdCita
+          AND id_cliente = @IdCliente
+          AND LOWER(COALESCE(estado, '')) IN
+              ('pendiente', 'confirmada');
+    ";
+
+            await using var cmd =
+                new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue(
+                "@IdCita",
+                idCita);
+
+            cmd.Parameters.AddWithValue(
+                "@IdCliente",
+                idCliente);
+
+            await cmd.ExecuteNonQueryAsync();
+
+            return RedirectToAction(
+                nameof(MisReservas));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Pago(int idCita, int? idPromocion)
+        {
+            if (idCita <= 0)
+            {
+                return BadRequest();
+            }
+
+            await using var conn = _conexion.GetConnection();
+            await conn.OpenAsync();
+
+            string sql = @"
+    SELECT
+        p.*,
+        m.nombre AS ""NombreMembresiaBD"",
+        COALESCE(
+            substring(m.beneficios FROM '([0-9]+)%'),
+            '0'
+        )::numeric AS ""DescuentoMembresiaBD"",
+        promo.nombre AS ""NombrePromocionBD"",
+        promo.descuento AS ""DescuentoPromocionBD""
+    FROM public.vw_proceso_pago_cita p
+    LEFT JOIN public.identificador i
+        ON i.id_cliente = p.""IdCliente""
+        AND LOWER(i.estado) = 'activo'
+        AND p.""FechaCita"" >= i.fecha_inicio::date
+        AND p.""FechaCita"" <= i.fecha_fin::date
+    LEFT JOIN public.membresia m
+        ON m.id_membresia = i.id_membresia
+        AND m.activo = true
+    LEFT JOIN public.promocion promo
+        ON promo.id_promocion = @idPromocion
+        AND promo.id_sucursal = p.""IdSucursal""
+    WHERE p.""IdCita"" = @idCita
+    LIMIT 1;
+";
+
+            await using var cmd =
+                new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue(
+                "@idCita",
+                idCita);
+
+            cmd.Parameters.AddWithValue(
+    "@idPromocion",
+    idPromocion.HasValue
+        ? idPromocion.Value
+        : (object)DBNull.Value);
+
+
+            await using var reader =
+                await cmd.ExecuteReaderAsync();
 
             if (!await reader.ReadAsync())
             {
-                return NotFound("No se encontraron datos del perfil.");
+                return NotFound();
             }
 
-            var modelo = new PerfilCliente
+            ClienteProcesoPago modelo =
+                new ClienteProcesoPago();
+
+            // =====================================
+            // CITA
+            // =====================================
+
+            modelo.IdCita =
+                Convert.ToInt32(reader["IdCita"]);
+
+            modelo.IdCliente =
+                Convert.ToInt32(reader["IdCliente"]);
+
+            modelo.EstadoReserva =
+                reader["EstadoReserva"]?.ToString();
+
+
+            // =====================================
+            // CLIENTE
+            // =====================================
+
+            modelo.NombreCliente =
+                reader["NombreCliente"]?.ToString()
+                ?? "";
+
+            modelo.CorreoCliente =
+                reader["CorreoCliente"]?.ToString();
+
+
+            // =====================================
+            // SERVICIO
+            // =====================================
+
+            modelo.IdServicio =
+                Convert.ToInt32(reader["IdServicio"]);
+
+            modelo.ServicioPrincipal =
+                reader["ServicioPrincipal"]?.ToString()
+                ?? "";
+
+            modelo.ServiciosContratados =
+                reader["ServiciosContratados"]?.ToString();
+
+            modelo.PrecioBaseServicio =
+                Convert.ToDecimal(
+                    reader["PrecioBaseServicio"]);
+
+            modelo.Subtotal =
+                Convert.ToDecimal(
+                    reader["SubtotalServicios"]);
+
+
+            // =====================================
+            // ESPECIALISTA
+            // =====================================
+
+            modelo.IdEspecialista =
+                reader["IdEspecialista"] == DBNull.Value
+                    ? null
+                    : Convert.ToInt32(
+                        reader["IdEspecialista"]);
+
+            modelo.NombreEspecialista =
+                reader["NombreEspecialista"]?.ToString();
+
+
+            // =====================================
+            // SUCURSAL
+            // =====================================
+
+            modelo.IdSucursal =
+                reader["IdSucursal"] == DBNull.Value
+                    ? null
+                    : Convert.ToInt32(
+                        reader["IdSucursal"]);
+
+            modelo.NombreSucursal =
+                reader["NombreSucursal"]?.ToString();
+
+            modelo.DireccionSucursal =
+                reader["DireccionSucursal"]?.ToString();
+
+
+            // =====================================
+            // FECHA Y HORA
+            // =====================================
+
+            if (reader["FechaCita"] != DBNull.Value)
             {
-                IdCliente = Convert.ToInt32(reader["IdCliente"]),
-                Nombre = reader["Nombre"]?.ToString() ?? "",
-                Apellido = reader["Apellido"]?.ToString() ?? "",
-                NombreCompleto = reader["NombreCompleto"]?.ToString() ?? "",
-                Correo = reader["Correo"]?.ToString(),
-                Telefono = reader["Telefono"]?.ToString(),
+                modelo.FechaCita =
+                    (DateOnly)reader["FechaCita"];
+            }
 
-                FechaNacimiento = reader["FechaNacimiento"] == DBNull.Value
-    ? null
-    : ((DateOnly)reader["FechaNacimiento"]).ToDateTime(TimeOnly.MinValue),
+            if (reader["HoraCita"] != DBNull.Value)
+            {
+                modelo.HoraCita =
+                    (TimeOnly)reader["HoraCita"];
+            }
 
-                Direccion = reader["Direccion"]?.ToString(),
-                FotoPerfilUrl = reader["FotoPerfilUrl"]?.ToString(),
-                TipoCliente = reader["TipoCliente"]?.ToString(),
 
-                PuntosFidelidad = reader["PuntosFidelidad"] == DBNull.Value
+            // =====================================
+            // DURACIÓN
+            // =====================================
+
+            modelo.DuracionEstimada =
+                reader["DuracionEstimada"]?.ToString();
+
+
+            // =====================================
+            // MEMBRESÍA
+            // =====================================
+
+            if (reader["NombreMembresiaBD"] != DBNull.Value)
+            {
+                modelo.NombreMembresia =
+                    reader["NombreMembresiaBD"]?.ToString();
+            }
+
+            decimal descuentoPorcentaje = 0;
+
+            if (reader["DescuentoMembresiaBD"] != DBNull.Value)
+            {
+                descuentoPorcentaje =
+                    Convert.ToDecimal(
+                        reader["DescuentoMembresiaBD"]);
+            }
+
+            if (descuentoPorcentaje > 0)
+            {
+                modelo.DescuentoMembresiaRegistrado =
+                    modelo.Subtotal *
+                    descuentoPorcentaje / 100m;
+            }
+            else
+            {
+                modelo.DescuentoMembresiaRegistrado = null;
+            }
+            // =====================================
+            // PROMOCIÓN
+            // =====================================
+
+            decimal descuentoPromocion = 0;
+
+            if (reader["DescuentoPromocionBD"] != DBNull.Value)
+            {
+                decimal porcentajePromocion =
+                    Convert.ToDecimal(
+                        reader["DescuentoPromocionBD"]);
+
+                if (porcentajePromocion > 0)
+                {
+                    descuentoPromocion =
+                        modelo.Subtotal *
+                        porcentajePromocion / 100m;
+
+                    modelo.DescuentoGeneralRegistrado =
+                        descuentoPromocion;
+                }
+            }
+
+            // =====================================
+            // PUNTOS
+            // =====================================
+
+            modelo.PuntosActuales =
+                reader["PuntosActuales"] == DBNull.Value
                     ? 0
-                    : Convert.ToInt32(reader["PuntosFidelidad"]),
+                    : Convert.ToInt32(
+                        reader["PuntosActuales"]);
 
-                TotalPedidos = reader["TotalPedidos"] == DBNull.Value
-                    ? 0
-                    : Convert.ToInt32(reader["TotalPedidos"]),
 
-                Membresia = reader["Membresia"]?.ToString(),
-                BeneficiosMembresia = reader["BeneficiosMembresia"]?.ToString(),
+            // =====================================
+            // CALCULAR TOTAL CON MEMBRESÍA
+            // =====================================
 
-                InicioMembresia = reader["InicioMembresia"] == DBNull.Value
-    ? null
-    : ((DateOnly)reader["InicioMembresia"]).ToDateTime(TimeOnly.MinValue),
+            decimal totalConMembresia =
+    modelo.Subtotal
+    - (modelo.DescuentoMembresiaRegistrado ?? 0)
+    - (modelo.DescuentoGeneralRegistrado ?? 0);
 
-                FinMembresia = reader["FinMembresia"] == DBNull.Value
-    ? null
-    : ((DateOnly)reader["FinMembresia"]).ToDateTime(TimeOnly.MinValue),
+            if (totalConMembresia < 0)
+            {
+                totalConMembresia = 0;
+            }
 
-                MiembroDesde = reader["MiembroDesde"] == DBNull.Value
-    ? null
-    : ((DateOnly)reader["MiembroDesde"]).ToDateTime(TimeOnly.MinValue),
 
-                TipoCabello = reader["TipoCabello"]?.ToString(),
+            // =====================================
+            // PUNTOS POR GANAR
+            // =====================================
 
-                IdEspecialistaPreferido = reader["IdEspecialistaPreferido"] == DBNull.Value
-                    ? null
-                    : Convert.ToInt32(reader["IdEspecialistaPreferido"]),
+            modelo.PuntosPorGanar =
+                (int)Math.Floor(
+                    totalConMembresia / 10m);
 
-                EspecialistaPreferido = reader["EspecialistaPreferido"]?.ToString(),
 
-                IdSucursalFavorita = reader["IdSucursalFavorita"] == DBNull.Value
-                    ? null
-                    : Convert.ToInt32(reader["IdSucursalFavorita"]),
+            // =====================================
+            // TOTAL INICIAL
+            // =====================================
 
-                SucursalFavorita = reader["SucursalFavorita"]?.ToString(),
+            modelo.TotalAPagar =
+                totalConMembresia;
 
-                AlergiasCondiciones = reader["AlergiasCondiciones"]?.ToString(),
-
-                NotificacionesCorreo = reader["NotificacionesCorreo"] != DBNull.Value
-                    && Convert.ToBoolean(reader["NotificacionesCorreo"]),
-
-                RecordatoriosSms = reader["RecordatoriosSms"] != DBNull.Value
-                    && Convert.ToBoolean(reader["RecordatoriosSms"]),
-
-                PromocionesEspeciales = reader["PromocionesEspeciales"] != DBNull.Value
-                    && Convert.ToBoolean(reader["PromocionesEspeciales"]),
-
-                BoletinMensual = reader["BoletinMensual"] != DBNull.Value
-                    && Convert.ToBoolean(reader["BoletinMensual"]),
-
-                Idioma = reader["Idioma"]?.ToString() ?? "es"
-            };
 
             return View(modelo);
         }
@@ -350,19 +740,381 @@ namespace Lavillemvc.Controllers
             }
         }
 
-        public IActionResult Promociones()
+        public async Task<IActionResult> Promociones()
         {
-            return View();
+            int idCliente = 1;
+
+            await using var conn =
+                _conexion.GetConnection();
+
+            await conn.OpenAsync();
+
+
+            string sql = @"
+        SELECT
+            ""IdCliente"",
+            ""NombreCompleto"",
+            ""TipoCliente"",
+            ""PuntosFidelidad"",
+            ""FechaReferencia"",
+            ""IdMembresiaActual"",
+            ""MembresiaActual"",
+            ""BeneficiosMembresiaActual"",
+            ""DuracionMembresiaActual"",
+            ""FechaInicioMembresia"",
+            ""FechaFinMembresia"",
+            ""EstadoMembresia"",
+            ""TotalPromocionesActivas"",
+            ""TotalPlanes"",
+            ""PromocionesActivasJson"",
+            ""OfertasTemporadaJson"",
+            ""PlanesMembresiaJson""
+        FROM public.vw_promociones_membresias_cliente
+        WHERE ""IdCliente"" = @idCliente;
+    ";
+
+
+            await using var cmd =
+                new NpgsqlCommand(
+                    sql,
+                    conn);
+
+
+            cmd.Parameters.AddWithValue(
+                "@idCliente",
+                idCliente);
+
+
+            await using var reader =
+                await cmd.ExecuteReaderAsync();
+
+
+            if (!await reader.ReadAsync())
+            {
+                return NotFound();
+            }
+
+
+            ClientePromosMembresias modelo =
+                new ClientePromosMembresias();
+
+
+            // =====================================
+            // CLIENTE
+            // =====================================
+
+            modelo.IdCliente =
+                Convert.ToInt32(
+                    reader["IdCliente"]);
+
+
+            modelo.NombreCompleto =
+                reader["NombreCompleto"]?.ToString()
+                ?? "";
+
+
+            modelo.TipoCliente =
+                reader["TipoCliente"]?.ToString();
+
+
+            modelo.PuntosFidelidad =
+                Convert.ToInt32(
+                    reader["PuntosFidelidad"]);
+
+
+            // =====================================
+            // FECHA
+            // =====================================
+
+            modelo.FechaReferencia =
+                (DateOnly)reader["FechaReferencia"];
+
+
+            // =====================================
+            // MEMBRESÍA
+            // =====================================
+
+            modelo.IdMembresiaActual =
+                reader["IdMembresiaActual"] == DBNull.Value
+                    ? null
+                    : Convert.ToInt32(
+                        reader["IdMembresiaActual"]);
+
+
+            modelo.MembresiaActual =
+                reader["MembresiaActual"]?.ToString();
+
+
+            modelo.BeneficiosMembresiaActual =
+                reader["BeneficiosMembresiaActual"]?.ToString();
+
+
+            modelo.DuracionMembresiaActual =
+                reader["DuracionMembresiaActual"]?.ToString();
+
+
+            modelo.FechaInicioMembresia =
+                reader["FechaInicioMembresia"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(
+                        reader["FechaInicioMembresia"]);
+
+
+            modelo.FechaFinMembresia =
+                reader["FechaFinMembresia"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(
+                        reader["FechaFinMembresia"]);
+
+
+            modelo.EstadoMembresia =
+                reader["EstadoMembresia"]?.ToString();
+
+
+            // =====================================
+            // INDICADORES
+            // =====================================
+
+            modelo.TotalPromocionesActivas =
+                Convert.ToInt32(
+                    reader["TotalPromocionesActivas"]);
+
+
+            modelo.TotalPlanes =
+                Convert.ToInt32(
+                    reader["TotalPlanes"]);
+
+
+            // =====================================
+            // JSON
+            // =====================================
+
+            modelo.PromocionesActivasJson =
+                reader["PromocionesActivasJson"] == DBNull.Value
+                    ? "[]"
+                    : reader["PromocionesActivasJson"]?.ToString()
+                      ?? "[]";
+
+
+            modelo.OfertasTemporadaJson =
+                reader["OfertasTemporadaJson"] == DBNull.Value
+                    ? "[]"
+                    : reader["OfertasTemporadaJson"]?.ToString()
+                      ?? "[]";
+
+
+            modelo.PlanesMembresiaJson =
+                reader["PlanesMembresiaJson"] == DBNull.Value
+                    ? "[]"
+                    : reader["PlanesMembresiaJson"]?.ToString()
+                      ?? "[]";
+
+
+            // =====================================
+            // CONVERTIR JSON A LISTAS
+            // =====================================
+
+            JsonSerializerOptions opciones =
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+
+            modelo.PromocionesActivas =
+                JsonSerializer.Deserialize<
+                    List<ClientePromosMembresias.PromocionCliente>
+                >(
+                    modelo.PromocionesActivasJson,
+                    opciones)
+                ?? new();
+
+
+            modelo.OfertasTemporada =
+                JsonSerializer.Deserialize<
+                    List<ClientePromosMembresias.PromocionCliente>
+                >(
+                    modelo.OfertasTemporadaJson,
+                    opciones)
+                ?? new();
+
+
+            modelo.PlanesMembresia =
+                JsonSerializer.Deserialize<
+                    List<ClientePromosMembresias.PlanMembresia>
+                >(
+                    modelo.PlanesMembresiaJson,
+                    opciones)
+                ?? new();
+
+          
+
+            return View(modelo);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ContratarMembresia(int idMembresia)
+        {
+            int idCliente = 1;
+
+            if (idMembresia <= 0)
+            {
+                return BadRequest();
+            }
+
+            await using var conn = _conexion.GetConnection();
+            await conn.OpenAsync();
+
+            // Verificar que la membresía exista y esté activa
+            string sqlMembresia = @"
+        SELECT
+            id_membresia,
+            nombre,
+            duracion
+        FROM public.membresia
+        WHERE id_membresia = @idMembresia
+          AND activo = true
+        LIMIT 1;
+    ";
+
+            int idMembresiaReal;
+            string duracion;
+
+            await using (var cmdMembresia =
+                new NpgsqlCommand(sqlMembresia, conn))
+            {
+                cmdMembresia.Parameters.AddWithValue(
+                    "@idMembresia",
+                    idMembresia);
+
+                await using var reader =
+                    await cmdMembresia.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                {
+                    return NotFound();
+                }
+
+                idMembresiaReal =
+                    Convert.ToInt32(reader["id_membresia"]);
+
+                duracion =
+                    reader["duracion"]?.ToString()
+                    ?? "1 mes";
+            }
+
+            // Determinar duración
+            int meses = 1;
+
+            if (duracion.ToLower().Contains("3"))
+            {
+                meses = 3;
+            }
+            else if (duracion.ToLower().Contains("6"))
+            {
+                meses = 6;
+            }
+            else if (duracion.ToLower().Contains("12"))
+            {
+                meses = 12;
+            }
+
+            DateTime fechaInicio = DateTime.Now;
+            DateTime fechaFin = fechaInicio.AddMonths(meses);
+
+            await using var transaction =
+                await conn.BeginTransactionAsync();
+
+            try
+            {
+                // Desactivar membresías anteriores
+                string sqlDesactivar = @"
+            UPDATE public.identificador
+            SET estado = 'Inactivo'
+            WHERE id_cliente = @idCliente
+              AND LOWER(estado) = 'activo';
+        ";
+
+                await using (var cmdDesactivar =
+                    new NpgsqlCommand(
+                        sqlDesactivar,
+                        conn,
+                        transaction))
+                {
+                    cmdDesactivar.Parameters.AddWithValue(
+                        "@idCliente",
+                        idCliente);
+
+                    await cmdDesactivar.ExecuteNonQueryAsync();
+                }
+
+                // Registrar nueva membresía
+                string sqlInsertar = @"
+            INSERT INTO public.identificador
+            (
+                id_cliente,
+                id_membresia,
+                fecha_inicio,
+                fecha_fin,
+                estado
+            )
+            VALUES
+            (
+                @idCliente,
+                @idMembresia,
+                @fechaInicio,
+                @fechaFin,
+                'Activo'
+            );
+        ";
+
+                await using (var cmdInsertar =
+                    new NpgsqlCommand(
+                        sqlInsertar,
+                        conn,
+                        transaction))
+                {
+                    cmdInsertar.Parameters.AddWithValue(
+                        "@idCliente",
+                        idCliente);
+
+                    cmdInsertar.Parameters.AddWithValue(
+                        "@idMembresia",
+                        idMembresiaReal);
+
+                    cmdInsertar.Parameters.AddWithValue(
+                        "@fechaInicio",
+                        fechaInicio);
+
+                    cmdInsertar.Parameters.AddWithValue(
+                        "@fechaFin",
+                        fechaFin);
+
+                    await cmdInsertar.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+
+                return RedirectToAction(nameof(Promociones));
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                return RedirectToAction(nameof(Promociones));
+            }
         }
 
         public async Task<IActionResult> ReservarCita(
-    int? idServicio,
-    int? idEspecialista,
-    int? idSucursal,
-    DateTime? fechaCita,
-    string? especialista,
-    string? servicio,
-    string? sucursal)
+       int? idServicio,
+       int? idEspecialista,
+       int? idSucursal,
+       DateTime? fechaCita,
+       string? especialista,
+       string? servicio,
+       string? sucursal,
+       int? idPromocion)
         {
             await using var conn = _conexion.GetConnection();
             await conn.OpenAsync();
@@ -677,7 +1429,8 @@ namespace Lavillemvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmarReserva(
-            ReservarCita modelo)
+    ReservarCita modelo,
+    int? idPromocion)
         {
             modelo.IdCliente = 1;
 
@@ -978,7 +1731,12 @@ namespace Lavillemvc.Controllers
                     "Cita reservada correctamente.";
 
                 return RedirectToAction(
-                    nameof(MisReservas));
+     nameof(Pago),
+     new
+     {
+         idCita = idCita,
+         idPromocion = idPromocion
+     });
             }
             catch
             {
@@ -1318,6 +2076,436 @@ ReservarCita modelo)
             }
 
             return resultado.ToString();
+        }
+
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> ProcesarPago(
+    int idCita,
+    int? idPromocion,
+    string metodoPago,
+    bool AceptaTerminos,
+    bool AutorizaCobro,
+    bool usarPuntos = false,
+    string? numeroTarjeta = null,
+    string? nombreTitular = null,
+    string? vencimiento = null,
+    string? cvv = null)
+        {
+            if (idCita <= 0)
+            {
+                return BadRequest();
+            }
+
+            // =====================================
+            // VALIDACIÓN DEL FORMULARIO DE PAGO
+            // =====================================
+
+            if (!AceptaTerminos)
+            {
+                TempData["ErrorPago"] =
+                    "Debes aceptar los términos y condiciones.";
+
+                return RedirectToAction(
+                    nameof(Pago),
+                    new
+                    {
+                        idCita = idCita,
+                        idPromocion = idPromocion
+                    });
+            }
+
+
+            if (!AutorizaCobro)
+            {
+                TempData["ErrorPago"] =
+                    "Debes autorizar el cobro.";
+
+                return RedirectToAction(
+                    nameof(Pago),
+                    new
+                    {
+                        idCita = idCita,
+                        idPromocion = idPromocion
+                    });
+            }
+
+
+            string[] metodosPermitidos =
+            {
+    "Tarjeta",
+    "Pago Móvil",
+    "Transferencia Bancaria",
+    "Pagar en Sucursal"
+};
+
+
+            if (string.IsNullOrWhiteSpace(metodoPago) ||
+                !metodosPermitidos.Contains(metodoPago))
+            {
+                TempData["ErrorPago"] =
+                    "Selecciona un método de pago válido.";
+
+                return RedirectToAction(
+                    nameof(Pago),
+                    new
+                    {
+                        idCita = idCita,
+                        idPromocion = idPromocion
+                    });
+            }
+
+
+            // =====================================
+            // VALIDAR DATOS DE TARJETA
+            // SOLO SI SE USA TARJETA
+            // =====================================
+
+            if (metodoPago == "Tarjeta")
+            {
+                string numeroLimpio =
+                    (numeroTarjeta ?? "")
+                        .Replace(" ", "")
+                        .Trim();
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(
+                        numeroLimpio,
+                        @"^\d{13,19}$"))
+                {
+                    TempData["ErrorPago"] =
+                        "El número de tarjeta no es válido.";
+
+                    return RedirectToAction(
+                        nameof(Pago),
+                        new
+                        {
+                            idCita = idCita,
+                            idPromocion = idPromocion
+                        });
+                }
+
+
+                if (string.IsNullOrWhiteSpace(nombreTitular) ||
+                    nombreTitular.Trim().Length < 3)
+                {
+                    TempData["ErrorPago"] =
+                        "Ingresa el nombre del titular.";
+
+                    return RedirectToAction(
+                        nameof(Pago),
+                        new
+                        {
+                            idCita = idCita,
+                            idPromocion = idPromocion
+                        });
+                }
+
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(
+                        vencimiento ?? "",
+                        @"^(0[1-9]|1[0-2])\/\d{2}$"))
+                {
+                    TempData["ErrorPago"] =
+                        "La fecha de vencimiento debe tener el formato MM/AA.";
+
+                    return RedirectToAction(
+                        nameof(Pago),
+                        new
+                        {
+                            idCita = idCita,
+                            idPromocion = idPromocion
+                        });
+                }
+
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(
+                        cvv ?? "",
+                        @"^\d{3,4}$"))
+                {
+                    TempData["ErrorPago"] =
+                        "El CVV debe tener 3 o 4 dígitos.";
+
+                    return RedirectToAction(
+                        nameof(Pago),
+                        new
+                        {
+                            idCita = idCita,
+                            idPromocion = idPromocion
+                        });
+                }
+            }
+
+            if (!AceptaTerminos || !AutorizaCobro)
+            {
+                return RedirectToAction(
+                    nameof(Pago),
+                    new { idCita = idCita });
+            }
+
+            await using var conn =
+                _conexion.GetConnection();
+
+            await conn.OpenAsync();
+
+
+            // =====================================
+            // DATOS DE LA CITA
+            // =====================================
+
+            string sqlDatos = @"
+        SELECT
+            ""IdCliente"",
+            ""Subtotal"",
+            ""TotalAPagar""
+        FROM public.vw_proceso_pago_cita
+        WHERE ""IdCita"" = @idCita;
+    ";
+
+            await using var cmdDatos =
+                new NpgsqlCommand(
+                    sqlDatos,
+                    conn);
+
+            cmdDatos.Parameters.AddWithValue(
+                "@idCita",
+                idCita);
+
+            await using var reader =
+                await cmdDatos.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+            {
+                return NotFound();
+            }
+
+            int idCliente =
+                Convert.ToInt32(
+                    reader["IdCliente"]);
+
+            decimal subtotal =
+                Convert.ToDecimal(
+                    reader["Subtotal"]);
+
+            decimal total =
+                Convert.ToDecimal(
+                    reader["TotalAPagar"]);
+
+            await reader.CloseAsync();
+
+
+            // =====================================
+            // TRANSACCIÓN
+            // =====================================
+
+            await using var transaction =
+                await conn.BeginTransactionAsync();
+
+            try
+            {
+                // =====================================
+                // PUNTOS ACTUALES
+                // =====================================
+
+                string sqlPuntos = @"
+            SELECT puntos_fidelidad
+            FROM public.cliente
+            WHERE id_cliente = @idCliente
+            FOR UPDATE;
+        ";
+
+                int puntosActuales;
+
+                await using (var cmdPuntos =
+                    new NpgsqlCommand(
+                        sqlPuntos,
+                        conn,
+                        transaction))
+                {
+                    cmdPuntos.Parameters.AddWithValue(
+                        "@idCliente",
+                        idCliente);
+
+                    puntosActuales =
+                        Convert.ToInt32(
+                            await cmdPuntos.ExecuteScalarAsync());
+                }
+
+
+                // =====================================
+                // CALCULAR PUNTOS USADOS
+                // =====================================
+
+                int puntosUsados = 0;
+
+                if (usarPuntos)
+                {
+                    int maximoPorPrecio =
+                        (int)Math.Floor(
+                            total * 10m);
+
+                    puntosUsados =
+                        Math.Min(
+                            puntosActuales,
+                            maximoPorPrecio);
+                }
+
+
+                // =====================================
+                // DESCUENTO POR PUNTOS
+                // =====================================
+
+                decimal descuentoPuntos =
+                    puntosUsados / 10m;
+
+                decimal totalFinal =
+                    total - descuentoPuntos;
+
+
+                if (totalFinal < 0)
+                {
+                    totalFinal = 0;
+                }
+
+
+                // =====================================
+                // PUNTOS QUE GANA
+                // =====================================
+
+                int puntosGanados =
+    (int)Math.Floor(
+        totalFinal / 20m);
+
+                // =====================================
+                // REGISTRAR PAGO
+                // =====================================
+
+                string sqlPago = @"
+            INSERT INTO public.pago
+            (
+                id_cita,
+                id_cliente,
+                subtotal,
+                total,
+                monto,
+                moneda,
+                metodo_pago,
+                estado_pago,
+                fecha_pago
+            )
+            VALUES
+            (
+                @idCita,
+                @idCliente,
+                @subtotal,
+                @total,
+                @total,
+                'USD',
+                @metodoPago,
+                'Pagado',
+                CURRENT_TIMESTAMP
+            );
+        ";
+
+                await using var cmdPago =
+                    new NpgsqlCommand(
+                        sqlPago,
+                        conn,
+                        transaction);
+
+                cmdPago.Parameters.AddWithValue(
+                    "@idCita",
+                    idCita);
+
+                cmdPago.Parameters.AddWithValue(
+                    "@idCliente",
+                    idCliente);
+
+                cmdPago.Parameters.AddWithValue(
+                    "@subtotal",
+                    subtotal);
+
+                cmdPago.Parameters.AddWithValue(
+                    "@total",
+                    totalFinal);
+
+                cmdPago.Parameters.AddWithValue(
+                    "@metodoPago",
+                    metodoPago);
+
+                await cmdPago.ExecuteNonQueryAsync();
+
+
+                // =====================================
+                // ACTUALIZAR PUNTOS DEL CLIENTE
+                // =====================================
+
+                string sqlActualizarPuntos = @"
+            UPDATE public.cliente
+            SET puntos_fidelidad =
+                puntos_fidelidad
+                - @puntosUsados
+                + @puntosGanados
+            WHERE id_cliente = @idCliente;
+        ";
+
+                await using var cmdActualizarPuntos =
+                    new NpgsqlCommand(
+                        sqlActualizarPuntos,
+                        conn,
+                        transaction);
+
+                cmdActualizarPuntos.Parameters.AddWithValue(
+                    "@puntosUsados",
+                    puntosUsados);
+
+                cmdActualizarPuntos.Parameters.AddWithValue(
+                    "@puntosGanados",
+                    puntosGanados);
+
+                cmdActualizarPuntos.Parameters.AddWithValue(
+                    "@idCliente",
+                    idCliente);
+
+                await cmdActualizarPuntos.ExecuteNonQueryAsync();
+
+
+                // =====================================
+                // CONFIRMAR CITA
+                // =====================================
+
+                string sqlCita = @"
+            UPDATE public.cita
+            SET estado = 'Confirmada'
+            WHERE id_cita = @idCita;
+        ";
+
+                await using var cmdCita =
+                    new NpgsqlCommand(
+                        sqlCita,
+                        conn,
+                        transaction);
+
+                cmdCita.Parameters.AddWithValue(
+                    "@idCita",
+                    idCita);
+
+                await cmdCita.ExecuteNonQueryAsync();
+
+
+
+                await transaction.CommitAsync();
+
+                return RedirectToAction(
+                    nameof(MisReservas));
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                return Content(
+                    "Error al procesar el pago: "
+                    + ex.Message);
+            }
         }
     }
 }

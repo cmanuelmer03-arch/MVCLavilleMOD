@@ -1,9 +1,178 @@
-﻿@{
+﻿@using System.Text.Json
+@using System.Globalization
+
+@model Lavillemvc.Models.ClientePromosMembresias
+
+@{
     ViewData["Title"] = "Promociones";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+
+
+    // ==========================================
+    // LEER PROMOCIONES DESDE EL JSON DE LA BD
+    // ==========================================
+
+    var promociones =
+        new List<Dictionary<string, JsonElement>>();
+
+    var ofertas =
+        new List<Dictionary<string, JsonElement>>();
+
+    var planes =
+        new List<Dictionary<string, JsonElement>>();
+
+
+    try
+    {
+        var lista =
+            JsonSerializer.Deserialize<
+                List<Dictionary<string, JsonElement>>
+            >(
+                Model.PromocionesActivasJson ?? "[]"
+            );
+
+        if (lista != null)
+        {
+            promociones = lista;
+        }
+    }
+    catch
+    {
+    }
+
+
+    try
+    {
+        var lista =
+            JsonSerializer.Deserialize<
+                List<Dictionary<string, JsonElement>>
+            >(
+                Model.OfertasTemporadaJson ?? "[]"
+            );
+
+        if (lista != null)
+        {
+            ofertas = lista;
+        }
+    }
+    catch
+    {
+    }
+
+
+    try
+    {
+        var lista =
+            JsonSerializer.Deserialize<
+                List<Dictionary<string, JsonElement>>
+            >(
+                Model.PlanesMembresiaJson ?? "[]"
+            );
+
+        if (lista != null)
+        {
+            planes = lista;
+        }
+    }
+    catch
+    {
+    }
+
+
+    // ==========================================
+    // OBTENER TEXTO DEL JSON
+    // ==========================================
+
+    string ObtenerTexto(
+        Dictionary<string, JsonElement> item,
+        params string[] nombres)
+    {
+        foreach (var dato in item)
+        {
+            foreach (var nombre in nombres)
+            {
+                if (dato.Key.Equals(
+                    nombre,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    if (dato.Value.ValueKind ==
+                        JsonValueKind.Null)
+                    {
+                        return "";
+                    }
+
+                    return dato.Value.ValueKind ==
+                           JsonValueKind.String
+                        ? dato.Value.GetString() ?? ""
+                        : dato.Value.ToString();
+                }
+            }
+        }
+
+        return "";
+    }
+
+
+    // ==========================================
+    // OBTENER NÚMERO DEL JSON
+    // ==========================================
+
+    decimal? ObtenerNumero(
+        Dictionary<string, JsonElement> item,
+        params string[] nombres)
+    {
+        string texto =
+            ObtenerTexto(item, nombres);
+
+        if (decimal.TryParse(
+            texto,
+            NumberStyles.Any,
+            CultureInfo.InvariantCulture,
+            out decimal numero))
+        {
+            return numero;
+        }
+
+        if (decimal.TryParse(
+            texto,
+            out numero))
+        {
+            return numero;
+        }
+
+        return null;
+    }
+
+
+    // ==========================================
+    // OBTENER FECHA DEL JSON
+    // ==========================================
+
+    string ObtenerFecha(
+        Dictionary<string, JsonElement> item,
+        params string[] nombres)
+    {
+        string texto =
+            ObtenerTexto(item, nombres);
+
+        if (DateTime.TryParse(
+            texto,
+            out DateTime fecha))
+        {
+            return fecha.ToString("dd MMM yyyy");
+        }
+
+        return texto;
+    }
 }
 
+
 <div class="promociones-page">
+
+
+    <!-- ========================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================== -->
 
     <div class="promociones-header">
 
@@ -18,7 +187,9 @@
     </div>
 
 
+    <!-- ========================================== -->
     <!-- PROMOCIONES ACTIVAS -->
+    <!-- ========================================== -->
 
     <section class="promociones-activas">
 
@@ -26,131 +197,149 @@
             Promociones Activas
         </h2>
 
+
         <div class="promociones-cards">
 
+            @if (promociones.Count > 0)
+            {
 
-            <!-- PROMOCIÓN 1 -->
+                int numeroImagen = 1;
 
-            <div class="promocion-card">
+                foreach (var promocion in promociones)
+                {
 
-                <img src="/Images/promocion1.jpeg"
-                     alt="Primera Visita" />
+                    string nombre =
+                        ObtenerTexto(
+                            promocion,
+                            "Nombre",
+                            "NombrePromocion",
+                            "Titulo");
 
-                <div class="promocion-contenido">
+                    string descripcion =
+                        ObtenerTexto(
+                            promocion,
+                            "Descripcion");
 
-                    <h3>
-                        Primera Visita -20%
-                    </h3>
+                    decimal? descuento =
+                        ObtenerNumero(
+                            promocion,
+                            "Descuento");
 
-                    <p>
-                        Obtén un 20% de descuento en cualquier servicio durante tu primera visita.
-                        ¡Bienvenida a L'Avielle!
-                    </p>
+                    string fechaFin =
+                        ObtenerFecha(
+                            promocion,
+                            "FechaFin",
+                            "FechaFinPromocion");
 
-                    <div class="promocion-footer">
+                    string idPromocion =
+                        ObtenerTexto(
+                            promocion,
+                            "IdPromocion");
 
-                        <small>
-                            Válido hasta 31 Dic 2026
-                        </small>
 
-                        <button type="button">
-                            Aplicar Promoción
-                        </button>
+                    string imagen =
+                        numeroImagen % 2 == 0
+                            ? "/Images/promocion2.jpeg"
+                            : "/Images/promocion1.jpeg";
+
+
+                    <div class="promocion-card">
+
+                        <img src="@imagen"
+                             alt="@nombre" />
+
+
+                        <div class="promocion-contenido">
+
+                            <h3>
+                                @nombre
+                            </h3>
+
+
+                            <p>
+                                @descripcion
+                            </p>
+
+
+                            @if (descuento.HasValue &&
+                                 descuento.Value > 0)
+                            {
+
+                                <div class="precio-especial">
+
+                                    Descuento:
+
+                                    <strong>
+                                        @descuento.Value.ToString("N0")%
+                                    </strong>
+
+                                </div>
+
+                            }
+
+
+                            <div class="promocion-footer">
+
+                                <small>
+
+                                    @if (!string.IsNullOrWhiteSpace(fechaFin))
+                                    {
+                                        <span>
+                                            Válido hasta @fechaFin
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            Promoción activa
+                                        </span>
+                                    }
+
+                                </small>
+
+
+                                <a href="@Url.Action("ReservarCita", "Cliente", new { idPromocion = idPromocion })"
+                                   class="btn-promocion">
+
+                                    Aplicar Promoción
+
+                                </a>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                </div>
 
-            </div>
+                    numeroImagen++;
+                }
 
+            }
+            else
+            {
 
-            <!-- PROMOCIÓN 2 -->
+                <p>
+                    No hay promociones activas en este momento.
+                </p>
 
-            <div class="promocion-card">
-
-                <img src="/Images/promocion2.jpeg"
-                     alt="Pack Novia Completo" />
-
-                <div class="promocion-contenido">
-
-                    <h3>
-                        Pack Novia Completo
-                    </h3>
-
-                    <p>
-                        Maquillaje, peinado, manicura y tratamiento facial en un solo paquete
-                        con precio especial para tu día soñado.
-                    </p>
-
-                    <div class="precio-especial">
-
-                        Precio Especial:
-                        <strong>
-                            Bs. 2,500
-                        </strong>
-
-                    </div>
-
-                    <div class="promocion-footer">
-
-                        <small>
-                            Reservar cita previa requerida
-                        </small>
-
-                        <button type="button">
-                            Reservar Pack
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- PROMOCIÓN 3 -->
-
-            <div class="promocion-card">
-
-                <img src="/Images/promocion1.jpeg"
-                     alt="Martes de Color" />
-
-                <div class="promocion-contenido">
-
-                    <h3>
-                        Martes de Color
-                    </h3>
-
-                    <p>
-                        Todos los martes, servicios de coloración con 15% de descuento.
-                        Incluye tintes, mechas y balayage.
-                    </p>
-
-                    <div class="promocion-footer">
-
-                        <small>
-                            Válido todos los martes
-                        </small>
-
-                        <button type="button">
-                            Ver Disponibilidad
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            }
 
         </div>
 
     </section>
 
 
+    <!-- ========================================== -->
     <!-- OFERTAS Y MEMBRESÍA -->
+    <!-- ========================================== -->
 
     <section class="ofertas-membresia">
+
+
+        <!-- ====================================== -->
+        <!-- OFERTAS -->
+        <!-- ====================================== -->
 
         <div class="ofertas-columna">
 
@@ -159,35 +348,81 @@
             </h2>
 
 
-            <div class="oferta-temporada">
+            @if (ofertas.Count > 0)
+            {
 
-                <h3>
-                    Renovación de Otoño
-                </h3>
+                foreach (var oferta in ofertas)
+                {
 
-                <p>
-                    Tratamiento capilar nutritivo + corte estilizado de temporada
-                    desde Bs. 400. Válido todo el mes.
-                </p>
+                    string nombreOferta =
+                        ObtenerTexto(
+                            oferta,
+                            "Nombre",
+                            "NombrePromocion",
+                            "Titulo");
 
-            </div>
+                    string descripcionOferta =
+                        ObtenerTexto(
+                            oferta,
+                            "Descripcion");
+
+                    decimal? descuentoOferta =
+                        ObtenerNumero(
+                            oferta,
+                            "Descuento");
 
 
-            <div class="oferta-referidos">
+                    <div class="oferta-temporada">
 
-                <h3>
-                    Referí a una Amiga
-                </h3>
+                        <h3>
+                            @nombreOferta
+                        </h3>
 
-                <p>
-                    Invita a tus amigas queridas. Al agendar su primera cita,
-                    ambas reciben un 10% de descuento automático.
-                </p>
 
-            </div>
+                        <p>
+                            @descripcionOferta
+                        </p>
+
+
+                        @if (descuentoOferta.HasValue &&
+                             descuentoOferta.Value > 0)
+                        {
+
+                            <strong>
+                                @descuentoOferta.Value.ToString("N0")%
+                                de descuento
+                            </strong>
+
+                        }
+
+                    </div>
+
+                }
+
+            }
+            else
+            {
+
+                <div class="oferta-temporada">
+
+                    <h3>
+                        No hay ofertas de temporada
+                    </h3>
+
+                    <p>
+                        Actualmente no hay ofertas adicionales disponibles.
+                    </p>
+
+                </div>
+
+            }
 
         </div>
 
+
+        <!-- ====================================== -->
+        <!-- MEMBRESÍA ACTUAL -->
+        <!-- ====================================== -->
 
         <div class="membresia-columna">
 
@@ -198,11 +433,16 @@
 
             <div class="membresia-promociones">
 
+
                 <div class="membresia-promociones-header">
 
                     <span>
-                        Membresía Gold
+
+                        @(Model.MembresiaActual
+                            ?? "Sin membresía")
+
                     </span>
+
 
                     <span>
                         ◉
@@ -212,8 +452,9 @@
 
 
                 <strong>
-                    2,450
+                    @Model.PuntosFidelidad.ToString("N0")
                 </strong>
+
 
                 <small>
                     PUNTOS ACUMULADOS
@@ -222,7 +463,7 @@
 
                 <div class="barra-promociones">
 
-                    <div></div>
+                    <div style="width: 100%;"></div>
 
                 </div>
 
@@ -230,11 +471,17 @@
                 <div class="membresia-puntos">
 
                     <span>
-                        Faltan 550 pts para Platinum
+
+                        @(
+                            Model.EstadoMembresia
+                            ?? "Estado no disponible"
+                        )
+
                     </span>
 
+
                     <strong>
-                        80%
+                        @Model.PuntosFidelidad pts
                     </strong>
 
                 </div>
@@ -244,20 +491,37 @@
 
                     Próxima renovación
 
+
                     <strong>
-                        01 Nov. 2026
+
+                        @if (Model.FechaFinMembresia.HasValue)
+                        {
+                            @Model.FechaFinMembresia.Value.ToString(
+                                "dd MMM yyyy")
+                        }
+                        else
+                        {
+                            <span>
+                                No registrada
+                            </span>
+                        }
+
                     </strong>
 
                 </div>
+
 
             </div>
 
         </div>
 
+
     </section>
 
 
+    <!-- ========================================== -->
     <!-- PLANES DE MEMBRESÍA -->
+    <!-- ========================================== -->
 
     <section class="planes-membresia">
 
@@ -269,180 +533,217 @@
         <div class="planes-grid">
 
 
-            <!-- SILVER -->
+            @if (planes.Count > 0)
+            {
 
-            <div class="plan-card">
+                foreach (var plan in planes)
+                {
 
-                <h3>
-                    Silver
-                </h3>
+                    string nombrePlan =
+                        ObtenerTexto(
+                            plan,
+                            "Nombre");
 
+                    string beneficios =
+                        ObtenerTexto(
+                            plan,
+                            "Beneficios");
 
-                <div class="plan-precio">
+                    string duracion =
+                        ObtenerTexto(
+                            plan,
+                            "Duracion");
 
-                    <span>
-                        Bs.
-                    </span>
+                    decimal? precio =
+                        ObtenerNumero(
+                            plan,
+                            "PrecioMensual");
 
-                    <strong>
-                        99
-                    </strong>
+                    string idMembresia =
+                        ObtenerTexto(
+                            plan,
+                            "IdMembresia");
 
-                    <small>
-                        /mes
-                    </small>
 
-                </div>
+                    bool esActual =
+                        !string.IsNullOrWhiteSpace(
+                            Model.MembresiaActual)
+                        &&
+                        nombrePlan.Equals(
+                            Model.MembresiaActual,
+                            StringComparison.OrdinalIgnoreCase);
 
 
-                <hr />
+                    string clasePlan =
+                        nombrePlan.Contains(
+                            "Premium",
+                            StringComparison.OrdinalIgnoreCase)
+                        ? "plan-card plan-gold"
+                        : "plan-card";
 
 
-                <ul>
+                    <div class="@clasePlan">
 
-                    <li>
-                        5% de descuento permanente
-                    </li>
 
-                    <li>
-                        Reservas prioritarias
-                    </li>
+                        @if (nombrePlan.Contains(
+                            "Premium",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
 
-                    <li>
-                        Newsletter exclusivo
-                    </li>
+                            <div class="recomendado">
+                                RECOMENDADO
+                            </div>
 
-                </ul>
+                        }
 
 
-                <button type="button">
-                    Elegir Plan
-                </button>
+                        @if (esActual)
+                        {
 
-            </div>
+                            <div class="recomendado">
+                                PLAN ACTUAL
+                            </div>
 
+                        }
 
-            <!-- GOLD -->
 
-            <div class="plan-card plan-gold">
+                        <h3>
+                            @nombrePlan
+                        </h3>
 
-                <div class="recomendado">
-                    RECOMENDADO
-                </div>
 
+                        <div class="plan-precio">
 
-                <h3>
-                    Gold
-                </h3>
 
+                            @if (precio.HasValue)
+                            {
 
-                <div class="plan-precio">
+                                <span>
+                                    $
+                                </span>
 
-                    <span>
-                        Bs.
-                    </span>
 
-                    <strong>
-                        199
-                    </strong>
+                                <strong>
+                                    @precio.Value.ToString("N0")
+                                </strong>
 
-                    <small>
-                        /mes
-                    </small>
 
-                </div>
+                                <small>
+                                    /mes
+                                </small>
 
+                            }
+                            else
+                            {
 
-                <hr />
+                                <strong>
+                                    Consultar
+                                </strong>
 
+                            }
 
-                <ul>
+                        </div>
 
-                    <li>
-                        10% de descuento permanente
-                    </li>
 
-                    <li>
-                        Reservas prioritarias
-                    </li>
+                        <hr />
 
-                    <li>
-                        Productos gratis mensuales
-                    </li>
 
-                    <li>
-                        Acceso a eventos exclusivos
-                    </li>
+                        <ul>
 
-                </ul>
+                            @if (!string.IsNullOrWhiteSpace(
+                                beneficios))
+                            {
 
+                                var listaBeneficios =
+                                    beneficios.Split(
+                                        ',',
+                                        StringSplitOptions.RemoveEmptyEntries);
 
-                <button type="button">
-                    Elegir Plan
-                </button>
 
-            </div>
+                                foreach (
+                                    var beneficio
+                                    in listaBeneficios)
+                                {
 
+                                    <li>
+                                        @beneficio.Trim()
+                                    </li>
 
-            <!-- PLATINUM -->
+                                }
 
-            <div class="plan-card">
+                            }
+                            else
+                            {
 
-                <h3>
-                    Platinum
-                </h3>
+                                <li>
+                                    Beneficios no especificados.
+                                </li>
 
+                            }
 
-                <div class="plan-precio">
+                        </ul>
 
-                    <span>
-                        Bs.
-                    </span>
 
-                    <strong>
-                        349
-                    </strong>
+                        @if (!string.IsNullOrWhiteSpace(
+                            duracion))
+                        {
 
-                    <small>
-                        /mes
-                    </small>
+                            <small>
+                                Duración: @duracion
+                            </small>
 
-                </div>
+                        }
 
 
-                <hr />
+                        @if (esActual)
+                        {
 
+                            <button type="button"
+                                    disabled>
 
-                <ul>
+                                Membresía Actual
 
-                    <li>
-                        25% de descuento permanente
-                    </li>
+                            </button>
 
-                    <li>
-                        Especialista personal asignado
-                    </li>
+                        }
+                        else
+                        {
+                            <form asp-controller="Cliente"
+                                  asp-action="ContratarMembresia"
+                                  method="post">
 
-                    <li>
-                        Productos premium mensuales
-                    </li>
+                                @Html.AntiForgeryToken()
 
-                    <li>
-                        Invitaciones VIP y domicilio
-                    </li>
+                                <input type="hidden"
+                                       name="idMembresia"
+                                       value="@idMembresia" />
 
-                </ul>
+                                <button type="submit">
+                                    Elegir Plan
+                                </button>
 
+                            </form>
+                        }
 
-                <button type="button">
-                    Elegir Plan
-                </button>
 
-            </div>
+                    </div>
+
+                }
+
+            }
+            else
+            {
+
+                <p>
+                    No hay planes de membresía disponibles.
+                </p>
+
+            }
 
 
         </div>
 
     </section>
+
 
 </div>
