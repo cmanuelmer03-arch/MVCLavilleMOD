@@ -9,7 +9,14 @@
 
     var opciones = Model.OpcionesDisponibles ?? new List<Lavillemvc.Models.ReservarCita.ReservaOpcion>();
 
-    var servicios = opciones
+    var serviciosPrincipales = opciones
+    .Where(x => !x.IdServicioPadre.HasValue)
+    .GroupBy(x => x.IdServicio)
+    .Select(x => x.First())
+    .ToList();
+
+    var subservicios = opciones
+        .Where(x => x.IdServicioPadre.HasValue)
         .GroupBy(x => x.IdServicio)
         .Select(x => x.First())
         .ToList();
@@ -67,13 +74,8 @@
             Puntos
         </div>
 
-        <div class="paso" id="paso5">
-            <span>5</span>
-            Horarios
-        </div>
-
         <div class="paso" id="paso6">
-            <span>6</span>
+            <span>5</span>
             Confirmación
         </div>
 
@@ -85,8 +87,8 @@
     <!-- ================================================= -->
 
     <form asp-controller="Cliente"
-          asp-action="ConfirmarReserva"
-          method="post"
+          asp-action="Pago"
+          method="get"
           id="formReserva">
 
         @Html.AntiForgeryToken()
@@ -134,27 +136,26 @@
                     Selecciona tu Servicio
                 </h2>
 
-                <label class="estado-pendiente"
-                       id="estadoServicio">
+                <label class="estado-pendiente" id="estadoServicio">
                     Pendiente
                 </label>
 
             </div>
 
+            <!-- SERVICIOS PRINCIPALES -->
 
-            <div class="servicios-grid"
-                 id="serviciosGrid">
+            <div class="servicios-grid" id="serviciosPrincipalesGrid">
 
-                @for (int i = 0; i < servicios.Count; i++)
+                @for (int i = 0; i < serviciosPrincipales.Count; i++)
                 {
-                    var servicio = servicios[i];
+                    var servicio = serviciosPrincipales[i];
 
                     var imagen =
                         $"/Images/servicio{(i % 6) + 1}.jpeg";
 
                     <button type="button"
-                            class="servicio-card"
-                            data-id-servicio="@servicio.IdServicio">
+                            class="servicio-card servicio-principal-card"
+                            data-id-servicio-principal="@servicio.IdServicio">
 
                         <img class="servicio-imagen"
                              src="@imagen"
@@ -167,7 +168,7 @@
                             </h3>
 
                             <p>
-                                Bs. @servicio.CostoServicio.ToString("N2")
+                                Selecciona para ver opciones
                             </p>
 
                         </div>
@@ -175,17 +176,64 @@
                     </button>
                 }
 
-                @if (!servicios.Any())
-                {
-                    <p>
-                        No hay servicios disponibles actualmente.
-                    </p>
-                }
+            </div>
+
+
+            <!-- SUBSERVICIOS -->
+
+            <div id="subserviciosContainer"
+                 style="display:none; margin-top:25px;">
+
+                <div class="seccion-titulo">
+
+                    <h2>
+                        <span>1</span>
+                        Selecciona el servicio específico
+                    </h2>
+
+                </div>
+
+                <div class="servicios-grid"
+                     id="subserviciosGrid">
+
+                    @for (int i = 0; i < subservicios.Count; i++)
+                    {
+                        var sub = subservicios[i];
+
+                        var imagen =
+                            $"/Images/servicio{((i + 1) % 6) + 1}.jpeg";
+
+                        <button type="button"
+                                class="servicio-card subservicio-card"
+                                data-id-servicio="@sub.IdServicio"
+                                data-id-servicio-padre="@sub.IdServicioPadre"
+                                style="display:none;">
+
+                            <img class="servicio-imagen"
+                                 src="@imagen"
+                                 alt="@sub.Servicio" />
+
+                            <div class="servicio-info">
+
+                                <h3>
+                                    @sub.Servicio
+                                </h3>
+
+                                <p>
+                                    Bs. @sub.CostoServicio.ToString("N2")
+                                </p>
+
+                            </div>
+
+                        </button>
+                    }
+
+                </div>
 
             </div>
 
 
-            <!-- DETALLE DEL SERVICIO -->
+            <!-- DETALLE -->
 
             <div class="servicio-especifico"
                  id="detalleServicio"
@@ -292,9 +340,8 @@
 
         </section>
 
-
         <!-- ================================================= -->
-        <!-- 3. ESPECIALISTA -->
+        <!-- 3. ESPECIALISTA Y HORARIO -->
         <!-- ================================================= -->
 
         <section class="reserva-seccion"
@@ -305,7 +352,7 @@
 
                 <h2>
                     <span>3</span>
-                    Selecciona tu Especialista
+                    Selecciona tu Especialista y Horario
                 </h2>
 
                 <label class="estado-pendiente"
@@ -316,24 +363,31 @@
             </div>
 
 
+            <!-- ESPECIALISTAS -->
+
             <div class="especialistas-grid"
                  id="especialistasGrid">
 
                 @foreach (var especialista in especialistas)
                 {
-                    var combinaciones = string.Join(
-                        "|",
-                        opciones
-                            .Where(x =>
-                                x.IdEspecialista == especialista.IdEspecialista)
-                            .Select(x =>
-                                $"{x.IdServicio}:{x.IdSucursal}")
-                            .Distinct()
-                    );
+                    var horario = especialista.HorarioEspecialista ?? "";
+
+                    var diasHorario = horario.ToLowerInvariant();
 
                     <div class="especialista-card"
                          data-id-especialista="@especialista.IdEspecialista"
-                         data-combinaciones="@combinaciones">
+                         data-combinaciones="@(
+                         string.Join(
+                             "|",
+                             opciones
+                                 .Where(x =>
+                                     x.IdEspecialista ==
+                                     especialista.IdEspecialista)
+                                 .Select(x =>
+                                     $"{x.IdServicio}:{x.IdSucursal}")
+                                 .Distinct()
+                         )
+                     )">
 
                         <img src="/Images/avatar.jpeg"
                              alt="@especialista.Especialista" />
@@ -353,13 +407,143 @@
                                 años de experiencia
                             </p>
 
-                            @if (!string.IsNullOrWhiteSpace(
-                                especialista.HorarioEspecialista))
-                            {
+
+                            <!-- HORARIO -->
+
+                            <div class="horario-especialista">
+
+                                <strong>Horario:</strong>
+
+                                @if (!string.IsNullOrWhiteSpace(horario))
+                                {
+                                    <span>
+                                        @horario
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        Horario no disponible
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <!-- DÍAS -->
+
+                            <div class="dias-especialista">
+
+                                <strong>
+                                    Días disponibles:
+                                </strong>
+
+                                <div class="dias-botones">
+
+                                    @if (
+                                        diasHorario.Contains("lunes") ||
+                                        diasHorario.Contains("lun")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="1">
+                                            Lun
+                                        </button>
+                                    }
+
+                                    @if (
+                                        diasHorario.Contains("martes") ||
+                                        diasHorario.Contains("mar")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="2">
+                                            Mar
+                                        </button>
+                                    }
+
+                                    @if (
+                                        diasHorario.Contains("miércoles") ||
+                                        diasHorario.Contains("miercoles") ||
+                                        diasHorario.Contains("mié") ||
+                                        diasHorario.Contains("mie")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="3">
+                                            Mié
+                                        </button>
+                                    }
+
+                                    @if (
+                                        diasHorario.Contains("jueves") ||
+                                        diasHorario.Contains("jue")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="4">
+                                            Jue
+                                        </button>
+                                    }
+
+                                    @if (
+                                        diasHorario.Contains("viernes") ||
+                                        diasHorario.Contains("vie")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="5">
+                                            Vie
+                                        </button>
+                                    }
+
+                                    @if (
+                                        diasHorario.Contains("sábado") ||
+                                        diasHorario.Contains("sabado") ||
+                                        diasHorario.Contains("sáb") ||
+                                        diasHorario.Contains("sab")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="6">
+                                            Sáb
+                                        </button>
+                                    }
+
+                                    @if (
+                                        diasHorario.Contains("domingo") ||
+                                        diasHorario.Contains("dom")
+                                    )
+                                    {
+                                        <button type="button"
+                                                class="btn-dia-especialista"
+                                                data-dia="0">
+                                            Dom
+                                        </button>
+                                    }
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- FECHA Y HORARIOS -->
+
+                            <div class="horarios-especialista"
+                                 data-horarios-especialista="@especialista.IdEspecialista">
+
                                 <p>
-                                    @especialista.HorarioEspecialista
+                                    Selecciona uno de los días para consultar horarios.
                                 </p>
-                            }
+
+                            </div>
+
 
                             <button type="button"
                                     class="btn-especialista">
@@ -375,9 +559,12 @@
 
             </div>
 
+
             <p id="sinEspecialistas"
                style="display:none;">
+
                 No hay especialistas disponibles para esta combinación.
+
             </p>
 
         </section>
@@ -470,116 +657,6 @@
             </div>
 
         </section>
-
-
-        <!-- ================================================= -->
-        <!-- 5. FECHA Y HORA -->
-        <!-- ================================================= -->
-
-        <section class="reserva-seccion"
-                 id="seccionFecha"
-                 style="display:none;">
-
-            <div class="seccion-titulo">
-
-                <h2>
-                    <span>5</span>
-                    Selecciona Fecha y Hora
-                </h2>
-
-                <label class="estado-pendiente"
-                       id="estadoFecha">
-                    Pendiente
-                </label>
-
-            </div>
-
-
-            <div class="fecha-hora-grid">
-
-
-                <!-- CALENDARIO -->
-
-                <div class="calendario-card">
-
-                    <div class="calendario-header">
-
-                        <button type="button"
-                                class="btn-mes"
-                                id="mesAnterior">
-                            ‹
-                        </button>
-
-                        <strong id="mesActual">
-                        </strong>
-
-                        <button type="button"
-                                class="btn-mes"
-                                id="mesSiguiente">
-                            ›
-                        </button>
-
-                    </div>
-
-
-                    <table class="calendario-real">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>L</th>
-                                <th>M</th>
-                                <th>M</th>
-                                <th>J</th>
-                                <th>V</th>
-                                <th>S</th>
-                                <th>D</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="calendarioBody">
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <!-- HORARIOS -->
-
-                <div class="horarios-card">
-
-                    <div class="horarios-header">
-
-                        <strong id="tituloHorarios">
-                            Selecciona una fecha
-                        </strong>
-
-                        <span id="fechaHorario">
-                            --
-                        </span>
-
-                    </div>
-
-
-                    <div class="horarios-grid"
-                         id="horariosGrid">
-
-                        <p>
-                            Primero selecciona una fecha.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
 
         <!-- ================================================= -->
         <!-- 6. CONFIRMACIÓN -->
@@ -778,7 +855,7 @@
                             id="btnConfirmar"
                             disabled>
 
-                        Confirmar Reserva →
+                        Proceder al Pago →
 
                     </button>
 
@@ -794,1107 +871,1507 @@
 
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-    /* =========================================================
-       DATOS DE LA BASE DE DATOS
-       ========================================================= */
+        // =====================================================
+        // DATOS
+        // =====================================================
 
-    const opciones = @Html.Raw(opcionesJson);
+        const opciones = @Html.Raw(
+                        System.Text.Json.JsonSerializer.Serialize(opciones)
+                        );
+
+        let idServicio = 0;
+        let idSucursal = 0;
+        let idEspecialista = 0;
+
+        let fechaSeleccionada = "";
+        let horaSeleccionada = "";
 
 
-    /* =========================================================
-       ESTADO ACTUAL
-       ========================================================= */
+        // =====================================================
+        // ELEMENTOS
+        // =====================================================
 
-    let idServicio = @(idServicioInicial);
-    let idSucursal = @(idSucursalInicial);
-    let idEspecialista = @(idEspecialistaInicial);
+        const subserviciosContainer =
+            document.getElementById("subserviciosContainer");
 
-    let fechaSeleccionada = "@fechaInicial";
-    let horaSeleccionada = "@horaInicial";
+        const subserviciosGrid =
+            document.getElementById("subserviciosGrid");
 
-    let mesActual = new Date();
+        const sucursalesGrid =
+            document.getElementById("sucursalesGrid");
 
-    if (fechaSeleccionada) {
+        const seccionSucursal =
+            document.getElementById("seccionSucursal");
 
-        const partes = fechaSeleccionada.split("-");
+        const especialistasGrid =
+            document.getElementById("especialistasGrid");
 
-        if (partes.length === 3) {
+        const seccionEspecialista =
+            document.getElementById("seccionEspecialista");
 
-            mesActual = new Date(
-                parseInt(partes[0]),
-                parseInt(partes[1]) - 1,
-                1
-            );
+        const seccionPuntos =
+            document.getElementById("seccionPuntos");
 
+        const seccionConfirmacion =
+            document.getElementById("seccionConfirmacion");
+
+       
+
+        // =====================================================
+        // FUNCIONES GENERALES
+        // =====================================================
+
+        function mostrar(elemento) {
+
+            if (elemento) {
+                elemento.style.display = "block";
+            }
         }
 
-    }
+
+        function ocultar(elemento) {
+
+            if (elemento) {
+                elemento.style.display = "none";
+            }
+        }
 
 
-    /* =========================================================
-       ELEMENTOS
-       ========================================================= */
+        function limpiarPasosPosteriores() {
 
-    const seccionSucursal =
-        document.getElementById("seccionSucursal");
+            idSucursal = 0;
+            idEspecialista = 0;
 
-    const seccionEspecialista =
-        document.getElementById("seccionEspecialista");
+            fechaSeleccionada = "";
+            horaSeleccionada = "";
 
-    const seccionPuntos =
-        document.getElementById("seccionPuntos");
+            document.getElementById("IdSucursal").value = "";
+            document.getElementById("IdEspecialista").value = "";
+            document.getElementById("FechaCita").value = "";
+            document.getElementById("HoraCita").value = "";
 
-    const seccionFecha =
-        document.getElementById("seccionFecha");
+            ocultar(seccionSucursal);
+            ocultar(seccionEspecialista);
+            ocultar(seccionPuntos);
+            ocultar(seccionConfirmacion);
 
-    const seccionConfirmacion =
-        document.getElementById("seccionConfirmacion");
+            document
+                .querySelectorAll(".sucursal-card")
+                .forEach(card => {
 
-
-    /* =========================================================
-       SERVICIO
-       ========================================================= */
-
-    document
-        .querySelectorAll(".servicio-card")
-        .forEach(card => {
-
-            card.addEventListener("click", function () {
-
-                idServicio =
-                    parseInt(this.dataset.idServicio);
-
-                document.getElementById("IdServicio").value =
-                    idServicio;
+                    card.classList.remove("seleccionado");
+                    card.style.display = "none";
+                });
 
 
-                document
-                    .querySelectorAll(".servicio-card")
-                    .forEach(x =>
-                        x.classList.remove("seleccionado")
+            document
+                .querySelectorAll(".especialista-card")
+                .forEach(card => {
+
+                    card.classList.remove("seleccionado");
+                    card.style.display = "none";
+                });
+
+
+            document
+                .querySelectorAll(".horarios-especialista")
+                .forEach(horario => {
+
+                    horario.innerHTML =
+                        "<p>Selecciona una fecha para ver horarios.</p>";
+                });
+
+
+            const btnConfirmar =
+                document.getElementById("btnConfirmar");
+
+            if (btnConfirmar) {
+                btnConfirmar.disabled = true;
+            }
+        }
+
+
+        // =====================================================
+        // 1. SERVICIO PRINCIPAL
+        // =====================================================
+
+        document
+            .querySelectorAll(".servicio-principal-card")
+            .forEach(card => {
+
+                card.addEventListener("click", function () {
+
+                    const idPrincipal =
+                        parseInt(
+                            this.dataset.idServicioPrincipal
+                        );
+
+
+                    // Reiniciar selección anterior
+
+                    idServicio = 0;
+
+                    document.getElementById(
+                        "IdServicio"
+                    ).value = "";
+
+
+                    limpiarPasosPosteriores();
+
+
+                    // Marcar servicio principal
+
+                    document
+                        .querySelectorAll(
+                            ".servicio-principal-card"
+                        )
+                        .forEach(x =>
+                            x.classList.remove(
+                                "seleccionado"
+                            )
+                        );
+
+
+                    this.classList.add("seleccionado");
+
+
+                    // Buscar subservicios
+
+                    const hijos =
+                        opciones.filter(x =>
+                            Number(x.IdServicioPadre) ===
+                            idPrincipal
+                        );
+
+
+                    // =================================================
+                    // SI TIENE SUBSERVICIOS
+                    // =================================================
+
+                    if (hijos.length > 0) {
+
+                        mostrar(
+                            subserviciosContainer
+                        );
+
+
+                        subserviciosGrid
+                            .querySelectorAll(
+                                ".subservicio-card"
+                            )
+                            .forEach(sub => {
+
+                                const idPadre =
+                                    parseInt(
+                                        sub.dataset
+                                            .idServicioPadre
+                                    );
+
+
+                                if (
+                                    idPadre ===
+                                    idPrincipal
+                                ) {
+
+                                    sub.style.display =
+                                        "block";
+
+                                } else {
+
+                                    sub.style.display =
+                                        "none";
+                                }
+
+
+                                sub.classList.remove(
+                                    "seleccionado"
+                                );
+                            });
+
+
+                        document.getElementById(
+                            "estadoServicio"
+                        ).textContent =
+                            "Selecciona una opción";
+
+
+                        return;
+                    }
+
+
+                    // =================================================
+                    // SI NO TIENE SUBSERVICIOS
+                    // =================================================
+
+                    ocultar(
+                        subserviciosContainer
                     );
 
-                this.classList.add("seleccionado");
+
+                    seleccionarServicio(
+                        idPrincipal
+                    );
+                });
+            });
 
 
-                const opcion =
-                    opciones.find(x =>
-                        x.IdServicio === idServicio
+        // =====================================================
+        // 2. SERVICIO ESPECÍFICO
+        // =====================================================
+
+        document
+            .querySelectorAll(".subservicio-card")
+            .forEach(card => {
+
+                card.addEventListener("click", function () {
+
+                    idServicio =
+                        parseInt(
+                            this.dataset.idServicio
+                        );
+
+
+                    document.getElementById(
+                        "IdServicio"
+                    ).value =
+                        idServicio;
+
+
+                    document
+                        .querySelectorAll(
+                            ".subservicio-card"
+                        )
+                        .forEach(x =>
+                            x.classList.remove(
+                                "seleccionado"
+                            )
+                        );
+
+
+                    this.classList.add(
+                        "seleccionado"
                     );
 
-                if (opcion) {
 
+                    // Mostrar sucursales
+
+                    seleccionarServicio(
+                        idServicio
+                    );
+                });
+            });
+
+
+        // =====================================================
+        // 3. SELECCIONAR SERVICIO
+        // =====================================================
+
+        function seleccionarServicio(id) {
+
+            idServicio = id;
+
+
+            document.getElementById(
+                "IdServicio"
+            ).value =
+                idServicio;
+
+
+            // Limpiar sucursal, especialista,
+            // fecha y hora anteriores
+
+            idSucursal = 0;
+            idEspecialista = 0;
+            fechaSeleccionada = "";
+            horaSeleccionada = "";
+
+
+            document.getElementById(
+                "IdSucursal"
+            ).value = "";
+
+
+            document.getElementById(
+                "IdEspecialista"
+            ).value = "";
+
+
+            document.getElementById(
+                "FechaCita"
+            ).value = "";
+
+
+            document.getElementById(
+                "HoraCita"
+            ).value = "";
+
+
+            ocultar(seccionEspecialista);
+            ocultar(seccionPuntos);
+            ocultar(seccionConfirmacion);
+
+
+            // =================================================
+            // DETALLE DEL SERVICIO
+            // =================================================
+
+            const opcion =
+                opciones.find(x =>
+                    Number(x.IdServicio) ===
+                    idServicio
+                );
+
+
+            if (opcion) {
+
+                const nombre =
                     document.getElementById(
                         "detalleServicioNombre"
-                    ).textContent =
-                        opcion.Servicio;
+                    );
 
+                const descripcion =
                     document.getElementById(
                         "detalleServicioDescripcion"
-                    ).textContent =
-                        opcion.DescripcionServicio || "";
+                    );
 
+                const precio =
                     document.getElementById(
                         "detalleServicioPrecio"
-                    ).textContent =
-                        "Bs. " +
-                        Number(opcion.CostoServicio)
-                            .toFixed(2);
+                    );
 
+
+                if (nombre) {
+                    nombre.textContent =
+                        opcion.Servicio || "";
+                }
+
+
+                if (descripcion) {
+                    descripcion.textContent =
+                        opcion.DescripcionServicio || "";
+                }
+
+
+                if (precio) {
+
+                    precio.textContent =
+                        "Bs. " +
+                        Number(
+                            opcion.CostoServicio || 0
+                        ).toLocaleString(
+                            "es-SV",
+                            {
+                                minimumFractionDigits: 2
+                            }
+                        );
+                }
+
+
+                mostrar(
                     document.getElementById(
                         "detalleServicio"
-                    ).style.display = "block";
+                    )
+                );
+            }
 
+
+            // =================================================
+            // MOSTRAR SUCURSALES
+            // =================================================
+
+            mostrarSucursales(
+                idServicio
+            );
+
+
+            mostrar(
+                seccionSucursal
+            );
+
+
+            setTimeout(function () {
+
+                if (seccionSucursal) {
+
+                    seccionSucursal.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
                 }
 
-
-                resetearDesdeSucursal();
-
-                filtrarSucursales();
-
-                seccionSucursal.style.display = "block";
-
-                marcarPaso("paso2");
-
-            });
-
-        });
-
-
-    /* =========================================================
-       SUCURSALES
-       ========================================================= */
-
-    function filtrarSucursales() {
-
-        let cantidad = 0;
-
-        document
-            .querySelectorAll(".sucursal-card")
-            .forEach(card => {
-
-                const ids =
-                    card.dataset.servicios
-                        .split(",")
-                        .map(Number);
-
-                const disponible =
-                    ids.includes(idServicio);
-
-                if (disponible) {
-
-                    card.style.display = "";
-                    cantidad++;
-
-                } else {
-
-                    card.style.display = "none";
-
-                }
-
-            });
-
-
-        document.getElementById(
-            "sinSucursales"
-        ).style.display =
-            cantidad === 0 ? "block" : "none";
-
-    }
-
-
-    document
-        .querySelectorAll(".btn-sucursal")
-        .forEach(button => {
-
-            button.addEventListener("click", function () {
-
-                const card =
-                    this.closest(".sucursal-card");
-
-                idSucursal =
-                    parseInt(card.dataset.idSucursal);
-
-                document.getElementById("IdSucursal").value =
-                    idSucursal;
-
-
-                document
-                    .querySelectorAll(".sucursal-card")
-                    .forEach(x =>
-                        x.classList.remove("seleccionado")
-                    );
-
-                card.classList.add("seleccionado");
-
-
-                resetearDesdeEspecialista();
-
-                filtrarEspecialistas();
-
-                seccionEspecialista.style.display =
-                    "block";
-
-                marcarPaso("paso3");
-
-            });
-
-        });
-
-
-    /* =========================================================
-       ESPECIALISTAS
-       ========================================================= */
-
-    function filtrarEspecialistas() {
-
-        let cantidad = 0;
-
-        document
-            .querySelectorAll(".especialista-card")
-            .forEach(card => {
-
-                const combinaciones =
-                    card.dataset.combinaciones
-                        .split("|");
-
-                const combinacion =
-                    idServicio + ":" + idSucursal;
-
-                const disponible =
-                    combinaciones.includes(combinacion);
-
-                if (disponible) {
-
-                    card.style.display = "";
-                    cantidad++;
-
-                } else {
-
-                    card.style.display = "none";
-
-                }
-
-            });
-
-
-        document.getElementById(
-            "sinEspecialistas"
-        ).style.display =
-            cantidad === 0 ? "block" : "none";
-
-    }
-
-
-    document
-        .querySelectorAll(".btn-especialista")
-        .forEach(button => {
-
-            button.addEventListener("click", function () {
-
-                const card =
-                    this.closest(".especialista-card");
-
-                idEspecialista =
-                    parseInt(card.dataset.idEspecialista);
-
-                document.getElementById(
-                    "IdEspecialista"
-                ).value =
-                    idEspecialista;
-
-
-                document
-                    .querySelectorAll(".especialista-card")
-                    .forEach(x =>
-                        x.classList.remove("seleccionado")
-                    );
-
-                card.classList.add("seleccionado");
-
-
-                seccionPuntos.style.display =
-                    "block";
-
-                seccionFecha.style.display =
-                    "block";
-
-                marcarPaso("paso4");
-
-                cargarCalendario();
-
-            });
-
-        });
-
-
-    /* =========================================================
-       PUNTOS
-       ========================================================= */
-
-    const usarPuntos =
-        document.getElementById("usarPuntos");
-
-    usarPuntos.addEventListener("change", function () {
-
-        const resumen =
-            document.getElementById("resumenPuntos");
-
-        if (this.checked) {
-
-            resumen.style.display = "flex";
-
-            document.getElementById(
-                "textoDescuento"
-            ).textContent =
-                "Puntos disponibles: " +
-                Number(@Model.PuntosFidelidad)
-                    .toLocaleString();
-
-        } else {
-
-            resumen.style.display = "none";
-
-        }
-
-        actualizarResumen();
-
-    });
-
-
-    /* =========================================================
-       CALENDARIO
-       ========================================================= */
-
-    const nombresMeses = [
-        "Enero",
-        "Febrero",
-        "Marzo",
-        "Abril",
-        "Mayo",
-        "Junio",
-        "Julio",
-        "Agosto",
-        "Septiembre",
-        "Octubre",
-        "Noviembre",
-        "Diciembre"
-    ];
-
-
-    function cargarCalendario() {
-
-        const year =
-            mesActual.getFullYear();
-
-        const month =
-            mesActual.getMonth();
-
-
-        document.getElementById(
-            "mesActual"
-        ).textContent =
-            nombresMeses[month] + " " + year;
-
-
-        const tbody =
-            document.getElementById(
-                "calendarioBody"
-            );
-
-        tbody.innerHTML = "";
-
-
-        const primerDia =
-            new Date(
-                year,
-                month,
-                1
-            );
-
-
-        let diaSemana =
-            primerDia.getDay();
-
-        /*
-         * JavaScript:
-         * domingo = 0
-         * lunes = 1
-         */
-
-        diaSemana =
-            diaSemana === 0
-                ? 6
-                : diaSemana - 1;
-
-
-        const diasMes =
-            new Date(
-                year,
-                month + 1,
-                0
-            ).getDate();
-
-
-        let fila =
-            document.createElement("tr");
-
-
-        for (let i = 0; i < diaSemana; i++) {
-
-            const td =
-                document.createElement("td");
-
-            fila.appendChild(td);
-
+            }, 100);
         }
 
 
-        for (
-            let dia = 1;
-            dia <= diasMes;
-            dia++
-        ) {
+        // =====================================================
+        // 4. MOSTRAR SUCURSALES
+        // =====================================================
 
-            if (fila.children.length === 7) {
+        function mostrarSucursales(id) {
 
-                tbody.appendChild(fila);
-
-                fila =
-                    document.createElement("tr");
-
-            }
-
-
-            const td =
-                document.createElement("td");
-
-            const enlace =
-                document.createElement("a");
-
-            enlace.href = "#";
-
-            enlace.textContent = dia;
-
-
-            const fecha =
-                new Date(
-                    year,
-                    month,
-                    dia
-                );
-
-
-            const hoy =
-                new Date();
-
-            hoy.setHours(0, 0, 0, 0);
-
-
-            if (fecha < hoy) {
-
-                enlace.style.color =
-                    "#d8cec6";
-
-                enlace.style.pointerEvents =
-                    "none";
-
-            } else {
-
-                enlace.addEventListener(
-                    "click",
-                    function (event) {
-
-                        event.preventDefault();
-
-                        seleccionarFecha(
-                            year,
-                            month,
-                            dia,
-                            enlace
-                        );
-
-                    }
-                );
-
-            }
-
-
-            if (
-                fechaSeleccionada ===
-                formatearFecha(fecha)
-            ) {
-
-                enlace.style.background =
-                    "#cba45b";
-
-                enlace.style.color =
-                    "white";
-
-            }
-
-
-            td.appendChild(enlace);
-
-            fila.appendChild(td);
-
-        }
-
-
-        while (
-            fila.children.length < 7
-        ) {
-
-            fila.appendChild(
-                document.createElement("td")
-            );
-
-        }
-
-
-        tbody.appendChild(fila);
-
-    }
-
-
-    function seleccionarFecha(
-        year,
-        month,
-        day,
-        enlace
-    ) {
-
-        const fecha =
-            new Date(
-                year,
-                month,
-                day
-            );
-
-
-        fechaSeleccionada =
-            formatearFecha(fecha);
-
-
-        document.getElementById(
-            "FechaCita"
-        ).value =
-            fechaSeleccionada;
-
-
-        document
-            .querySelectorAll(
-                ".calendario-real a"
-            )
-            .forEach(x => {
-
-                x.style.background =
-                    "";
-
-                x.style.color =
-                    "";
-
-            });
-
-
-        enlace.style.background =
-            "#cba45b";
-
-        enlace.style.color =
-            "white";
-
-
-        horaSeleccionada = "";
-
-        document.getElementById(
-            "HoraCita"
-        ).value = "";
-
-
-        cargarHorasDisponibles();
-
-    }
-
-
-    function formatearFecha(fecha) {
-
-        const year =
-            fecha.getFullYear();
-
-        const month =
-            String(
-                fecha.getMonth() + 1
-            ).padStart(2, "0");
-
-        const day =
-            String(
-                fecha.getDate()
-            ).padStart(2, "0");
-
-
-        return `${year}-${month}-${day}`;
-
-    }
-
-
-    document.getElementById(
-        "mesAnterior"
-    ).addEventListener(
-        "click",
-        function () {
-
-            mesActual.setMonth(
-                mesActual.getMonth() - 1
-            );
-
-            cargarCalendario();
-
-        }
-    );
-
-
-    document.getElementById(
-        "mesSiguiente"
-    ).addEventListener(
-        "click",
-        function () {
-
-            mesActual.setMonth(
-                mesActual.getMonth() + 1
-            );
-
-            cargarCalendario();
-
-        }
-    );
-
-
-    /* =========================================================
-       HORARIOS
-       ========================================================= */
-
-    async function cargarHorasDisponibles() {
-
-        const grid =
-            document.getElementById(
-                "horariosGrid"
-            );
-
-
-        if (
-            !idEspecialista ||
-            !idSucursal ||
-            !fechaSeleccionada
-        ) {
-
-            grid.innerHTML =
-                "<p>Selecciona una fecha.</p>";
-
-            return;
-
-        }
-
-
-        grid.innerHTML =
-            "<p>Consultando disponibilidad...</p>";
-
-
-        document.getElementById(
-            "tituloHorarios"
-        ).textContent =
-            "Horarios disponibles";
-
-
-        document.getElementById(
-            "fechaHorario"
-        ).textContent =
-            fechaSeleccionada;
-
-
-        try {
-
-            const url =
-                '@Url.Action("ObtenerHorasDisponibles", "Cliente")'
-                +
-                '?idEspecialista='
-                +
-                encodeURIComponent(idEspecialista)
-                +
-                '&idSucursal='
-                +
-                encodeURIComponent(idSucursal)
-                +
-                '&fecha='
-                +
-                encodeURIComponent(fechaSeleccionada);
-
-
-            const respuesta =
-                await fetch(url);
-
-
-            if (!respuesta.ok) {
-
-                throw new Error(
-                    "No se pudieron obtener los horarios."
-                );
-
-            }
-
-
-            const horas =
-                await respuesta.json();
-
-
-            grid.innerHTML = "";
-
-
-            if (
-                !horas ||
-                horas.length === 0
-            ) {
-
-                grid.innerHTML =
-                    "<p>No hay horarios disponibles para esta fecha.</p>";
-
+            if (!sucursalesGrid) {
                 return;
+            }
 
+            // Buscar el servicio seleccionado
+            const servicioSeleccionado = opciones.find(x =>
+                Number(x.IdServicio) === Number(id)
+            );
+
+            // Si es un subservicio, también tendremos en cuenta
+            // el servicio principal.
+            const idPadre =
+                servicioSeleccionado &&
+                    servicioSeleccionado.IdServicioPadre != null
+                    ? Number(servicioSeleccionado.IdServicioPadre)
+                    : Number(id);
+
+            let encontradas = 0;
+
+            sucursalesGrid
+                .querySelectorAll(".sucursal-card")
+                .forEach(card => {
+
+                    const idSucursalCard =
+                        Number(card.dataset.idSucursal);
+
+                    const serviciosSucursal =
+                        (card.dataset.servicios || "")
+                            .split(",")
+                            .map(x => Number(x))
+                            .filter(x => !isNaN(x));
+
+                    // La sucursal sirve si tiene:
+                    // - el servicio específico seleccionado
+                    // O
+                    // - el servicio principal/padre
+                    const tieneServicio =
+                        serviciosSucursal.includes(Number(id)) ||
+                        serviciosSucursal.includes(idPadre);
+
+                    // Verificamos que exista una opción real
+                    // para esa sucursal.
+                    const existeEnOpciones =
+                        opciones.some(x =>
+                            Number(x.IdSucursal) === idSucursalCard &&
+                            (
+                                Number(x.IdServicio) === Number(id) ||
+                                Number(x.IdServicio) === idPadre
+                            )
+                        );
+
+                    const existe =
+                        tieneServicio &&
+                        existeEnOpciones;
+
+                    if (existe) {
+
+                        card.style.display = "block";
+
+                        encontradas++;
+
+                    } else {
+
+                        card.style.display = "none";
+                    }
+
+                    card.classList.remove("seleccionado");
+                });
+
+
+            const sinSucursales =
+                document.getElementById("sinSucursales");
+
+            if (sinSucursales) {
+
+                sinSucursales.style.display =
+                    encontradas === 0
+                        ? "block"
+                        : "none";
             }
 
 
-            horas.forEach(hora => {
+            console.log(
+                "Servicio seleccionado:",
+                id
+            );
 
-                let textoHora =
-                    String(hora);
+            console.log(
+                "Servicio padre:",
+                idPadre
+            );
 
+            console.log(
+                "Sucursales encontradas:",
+                encontradas
+            );
+        }
 
-                if (
-                    textoHora.length >= 5
-                ) {
+        // =====================================================
+        // 5. SELECCIONAR SUCURSAL
+        // =====================================================
 
-                    textoHora =
-                        textoHora.substring(
-                            0,
-                            5
-                        );
-
-                }
-
-
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-                button.type =
-                    "button";
-
-                button.textContent =
-                    textoHora;
-
-
-                if (
-                    horaSeleccionada ===
-                    textoHora
-                ) {
-
-                    button.classList.add(
-                        "hora-seleccionada"
-                    );
-
-                }
-
+        document
+            .querySelectorAll(".btn-sucursal")
+            .forEach(button => {
 
                 button.addEventListener(
                     "click",
-                    function () {
+                    function (e) {
+
+                        e.preventDefault();
+
+
+                        const card =
+                            this.closest(
+                                ".sucursal-card"
+                            );
+
+
+                        if (!card) {
+                            return;
+                        }
+
+
+                        idSucursal =
+                            parseInt(
+                                card.dataset
+                                    .idSucursal
+                            );
+
+
+                        document.getElementById(
+                            "IdSucursal"
+                        ).value =
+                            idSucursal;
+
 
                         document
                             .querySelectorAll(
-                                "#horariosGrid button"
+                                ".sucursal-card"
                             )
                             .forEach(x =>
                                 x.classList.remove(
-                                    "hora-seleccionada"
+                                    "seleccionado"
                                 )
                             );
 
 
-                        this.classList.add(
-                            "hora-seleccionada"
+                        card.classList.add(
+                            "seleccionado"
                         );
 
 
-                        horaSeleccionada =
-                            textoHora;
+                        // Mostrar especialistas
+
+                        mostrarEspecialistas();
 
 
+                        setTimeout(function () {
+
+                            if (
+                                seccionEspecialista
+                            ) {
+
+                                seccionEspecialista
+                                    .scrollIntoView({
+                                        behavior:
+                                            "smooth",
+                                        block:
+                                            "start"
+                                    });
+                            }
+
+                        }, 100);
+                    }
+                );
+            });
+
+        // =====================================================
+        // 6. MOSTRAR ESPECIALISTAS
+        // =====================================================
+
+        function mostrarEspecialistas() {
+
+            if (!especialistasGrid) {
+                return;
+            }
+
+            mostrar(seccionEspecialista);
+
+            const servicioSeleccionado = opciones.find(x =>
+                Number(x.IdServicio) === Number(idServicio)
+            );
+
+            const idPadre =
+                servicioSeleccionado &&
+                    servicioSeleccionado.IdServicioPadre != null
+                    ? Number(servicioSeleccionado.IdServicioPadre)
+                    : Number(idServicio);
+
+            let encontrados = 0;
+
+            especialistasGrid
+                .querySelectorAll(".especialista-card")
+                .forEach(card => {
+
+                    const idEspecialistaCard =
+                        Number(card.dataset.idEspecialista);
+
+                    /*
+                     * Permitimos el servicio seleccionado
+                     * o su servicio padre.
+                     */
+                    const existe = opciones.some(x =>
+                        Number(x.IdSucursal) === Number(idSucursal) &&
+                        Number(x.IdEspecialista) === idEspecialistaCard &&
+                        (
+                            Number(x.IdServicio) === Number(idServicio) ||
+                            Number(x.IdServicio) === Number(idPadre)
+                        )
+                    );
+
+                    if (existe) {
+
+                        card.style.display = "block";
+                        encontrados++;
+
+                    } else {
+
+                        card.style.display = "none";
+                    }
+
+                    card.classList.remove("seleccionado");
+
+                    card.querySelectorAll(".btn-dia-especialista")
+                        .forEach(btn => {
+
+                            btn.classList.remove(
+                                "dia-seleccionado"
+                            );
+
+                            btn.disabled = false;
+                        });
+
+                    const horarios =
+                        card.querySelector(
+                            ".horarios-especialista"
+                        );
+
+                    if (horarios) {
+
+                        horarios.innerHTML =
+                            "<p>Selecciona un día para consultar disponibilidad.</p>";
+                    }
+                });
+
+
+            const sinEspecialistas =
+                document.getElementById(
+                    "sinEspecialistas"
+                );
+
+            if (sinEspecialistas) {
+
+                sinEspecialistas.style.display =
+                    encontrados === 0
+                        ? "block"
+                        : "none";
+            }
+
+
+            console.log(
+                "Especialistas encontrados:",
+                encontrados
+            );
+        }
+
+
+        // =====================================================
+        // 7. FUNCIONES DE FECHA
+        // =====================================================
+
+        function formatearFecha(fecha) {
+
+            return fecha.getFullYear() +
+                "-" +
+                String(
+                    fecha.getMonth() + 1
+                ).padStart(2, "0") +
+                "-" +
+                String(
+                    fecha.getDate()
+                ).padStart(2, "0");
+        }
+
+
+        function formatearFechaVisible(fecha) {
+
+            return fecha.toLocaleDateString(
+                "es-SV",
+                {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long"
+                }
+            );
+        }
+
+
+        // =====================================================
+        // 8. OBTENER HORARIOS
+        // =====================================================
+
+        async function obtenerHoras(
+            idEsp,
+            fecha
+        ) {
+
+            const url =
+                '@Url.Action("ObtenerHorasDisponibles", "Cliente")' +
+                "?idEspecialista=" +
+                encodeURIComponent(idEsp) +
+                "&idSucursal=" +
+                encodeURIComponent(idSucursal) +
+                "&fecha=" +
+                encodeURIComponent(fecha);
+
+
+            const response =
+                await fetch(url);
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "No se pudieron obtener los horarios."
+                );
+            }
+
+
+            return await response.json();
+        }
+
+
+        // =====================================================
+        // 9. BUSCAR PRÓXIMA FECHA DISPONIBLE
+        // =====================================================
+
+        async function buscarProximaDisponibilidad(
+            idEsp,
+            diaSemana
+        ) {
+
+            const hoy = new Date();
+
+            hoy.setHours(
+                0,
+                0,
+                0,
+                0
+            );
+
+
+            /*
+             * Busca ese día durante las
+             * próximas 8 semanas.
+             */
+            for (
+                let i = 0;
+                i < 56;
+                i++
+            ) {
+
+                const fecha =
+                    new Date(hoy);
+
+                fecha.setDate(
+                    hoy.getDate() + i
+                );
+
+
+                if (
+                    fecha.getDay() !==
+                    diaSemana
+                ) {
+
+                    continue;
+                }
+
+
+                const fechaTexto =
+                    formatearFecha(
+                        fecha
+                    );
+
+
+                const horas =
+                    await obtenerHoras(
+                        idEsp,
+                        fechaTexto
+                    );
+
+
+                /*
+                 * Si encontró aunque sea
+                 * una hora, esta es una
+                 * fecha realmente disponible.
+                 */
+                if (
+                    horas &&
+                    horas.length > 0
+                ) {
+
+                    return {
+                        fecha: fecha,
+                        fechaTexto: fechaTexto,
+                        horas: horas
+                    };
+                }
+            }
+
+
+            return null;
+        }
+
+
+        // =====================================================
+        // 10. SELECCIONAR ESPECIALISTA
+        // =====================================================
+
+        document
+            .querySelectorAll(
+                ".btn-especialista"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    function (e) {
+
+                        e.preventDefault();
+
+
+                        const card =
+                            this.closest(
+                                ".especialista-card"
+                            );
+
+
+                        if (!card) {
+                            return;
+                        }
+
+
+                        seleccionarEspecialista(
+                            card
+                        );
+                    }
+                );
+            });
+
+
+        function seleccionarEspecialista(
+            card
+        ) {
+
+            idEspecialista =
+                Number(
+                    card.dataset.idEspecialista
+                );
+
+
+            document.getElementById(
+                "IdEspecialista"
+            ).value =
+                idEspecialista;
+
+
+            document
+                .querySelectorAll(
+                    ".especialista-card"
+                )
+                .forEach(x =>
+                    x.classList.remove(
+                        "seleccionado"
+                    )
+                );
+
+
+            card.classList.add(
+                "seleccionado"
+            );
+
+
+            /*
+             * Limpiar una selección
+             * anterior de horario.
+             */
+            horaSeleccionada = "";
+
+            document.getElementById(
+                "HoraCita"
+            ).value = "";
+
+
+            ocultar(
+                seccionPuntos
+            );
+
+            ocultar(
+                seccionConfirmacion
+            );
+
+
+            const horarios =
+                card.querySelector(
+                    ".horarios-especialista"
+                );
+
+
+            if (horarios) {
+
+                horarios.innerHTML =
+                    "<p>Ahora selecciona uno de los días disponibles.</p>";
+            }
+
+
+            const estado =
+                document.getElementById(
+                    "estadoEspecialista"
+                );
+
+
+            if (estado) {
+
+                estado.textContent =
+                    "Selecciona un día";
+            }
+        }
+
+
+        // =====================================================
+        // 11. SELECCIONAR DÍA
+        // =====================================================
+
+        document
+            .querySelectorAll(
+                ".btn-dia-especialista"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    async function (e) {
+
+                        e.preventDefault();
+
+
+                        const card =
+                            this.closest(
+                                ".especialista-card"
+                            );
+
+
+                        if (!card) {
+                            return;
+                        }
+
+
+                        /*
+                         * Seleccionamos automáticamente
+                         * al especialista.
+                         */
+                        seleccionarEspecialista(
+                            card
+                        );
+
+
+                        const botonesDia =
+                            card.querySelectorAll(
+                                ".btn-dia-especialista"
+                            );
+
+
+                        botonesDia.forEach(
+                            x =>
+                                x.classList.remove(
+                                    "dia-seleccionado"
+                                )
+                        );
+
+
+                        this.classList.add(
+                            "dia-seleccionado"
+                        );
+
+
+                        const diaSemana =
+                            Number(
+                                this.dataset.dia
+                            );
+
+
+                        const horariosGrid =
+                            card.querySelector(
+                                ".horarios-especialista"
+                            );
+
+
+                        if (horariosGrid) {
+
+                            horariosGrid.innerHTML =
+                                "<p>Buscando la próxima fecha disponible...</p>";
+                        }
+
+
+                        this.disabled = true;
+
+
+                        try {
+
+                            const disponibilidad =
+                                await buscarProximaDisponibilidad(
+                                    idEspecialista,
+                                    diaSemana
+                                );
+
+
+                            /*
+                             * No encontró una fecha
+                             * disponible en las próximas
+                             * 8 semanas.
+                             */
+                            if (!disponibilidad) {
+
+                                if (horariosGrid) {
+
+                                    horariosGrid.innerHTML =
+                                        "<p>No hay citas disponibles próximamente para este día.</p>";
+                                }
+
+                                return;
+                            }
+
+
+                            /*
+                             * Guardar la fecha real
+                             * encontrada.
+                             */
+                            fechaSeleccionada =
+                                disponibilidad.fechaTexto;
+
+
+                            document.getElementById(
+                                "FechaCita"
+                            ).value =
+                                fechaSeleccionada;
+
+
+                            mostrarHoras(
+                                card,
+                                disponibilidad.horas,
+                                disponibilidad.fecha
+                            );
+
+
+                            const estado =
+                                document.getElementById(
+                                    "estadoEspecialista"
+                                );
+
+
+                            if (estado) {
+
+                                estado.textContent =
+                                    "Selecciona un horario";
+                            }
+
+
+                        } catch (error) {
+
+                            console.error(
+                                error
+                            );
+
+
+                            if (horariosGrid) {
+
+                                horariosGrid.innerHTML =
+                                    "<p>Error al consultar la disponibilidad.</p>";
+                            }
+
+                        } finally {
+
+                            this.disabled =
+                                false;
+                        }
+                    }
+                );
+            });
+
+
+        // =====================================================
+        // 12. MOSTRAR HORAS
+        // =====================================================
+
+        function mostrarHoras(
+            card,
+            horas,
+            fecha
+        ) {
+
+            const horariosGrid =
+                card.querySelector(
+                    ".horarios-especialista"
+                );
+
+
+            if (!horariosGrid) {
+                return;
+            }
+
+
+            horariosGrid.innerHTML =
+                "";
+
+
+            const titulo =
+                document.createElement(
+                    "p"
+                );
+
+
+            titulo.textContent =
+                "Disponibilidad para " +
+                formatearFechaVisible(
+                    fecha
+                ) +
+                ":";
+
+
+            horariosGrid.appendChild(
+                titulo
+            );
+
+
+            horas.forEach(
+                hora => {
+
+                    const boton =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    boton.type =
+                        "button";
+
+
+                    boton.className =
+                        "btn-hora";
+
+
+                    boton.textContent =
+                        String(hora)
+                            .substring(
+                                0,
+                                5
+                            );
+
+
+                    boton.addEventListener(
+                        "click",
+                        function () {
+
+                            horariosGrid
+                                .querySelectorAll(
+                                    ".btn-hora"
+                                )
+                                .forEach(
+                                    x =>
+                                        x.classList.remove(
+                                            "hora-seleccionada"
+                                        )
+                                );
+
+
+                            boton.classList.add(
+                                "hora-seleccionada"
+                            );
+
+
+                            horaSeleccionada =
+                                String(hora)
+                                    .substring(
+                                        0,
+                                        5
+                                    );
+
+
+                            document.getElementById(
+                                "HoraCita"
+                            ).value =
+                                horaSeleccionada;
+
+
+                            const estado =
+                                document.getElementById(
+                                    "estadoEspecialista"
+                                );
+
+
+                            if (estado) {
+
+                                estado.textContent =
+                                    "Completado";
+                            }
+
+
+                            /*
+                             * Pasar al siguiente paso.
+                             */
+                            mostrar(
+                                seccionPuntos
+                            );
+
+
+                            actualizarConfirmacion();
+                        }
+                    );
+
+
+                    horariosGrid.appendChild(
+                        boton
+                    );
+                }
+            );
+        }
+
+
+        // =====================================================
+        // 10. PUNTOS
+        // =====================================================
+
+        const usarPuntos =
+            document.getElementById(
+                "usarPuntos"
+            );
+
+
+        if (usarPuntos) {
+
+            usarPuntos.addEventListener(
+                "change",
+                function () {
+
+                    const resumenPuntos =
                         document.getElementById(
-                            "HoraCita"
-                        ).value =
-                            horaSeleccionada;
+                            "resumenPuntos"
+                        );
 
 
-                        seccionConfirmacion
-                            .style.display =
-                            "block";
+                    if (resumenPuntos) {
+
+                        resumenPuntos.style.display =
+                            this.checked
+                                ? "block"
+                                : "none";
+                    }
 
 
-                        marcarPaso("paso6");
+                    actualizarConfirmacion();
+                }
+            );
+        }
 
-                        actualizarResumen();
 
+        // =====================================================
+        // 11. CONFIRMACIÓN
+        // =====================================================
+
+        function actualizarConfirmacion() {
+
+            if (
+                !idServicio ||
+                !idSucursal ||
+                !idEspecialista ||
+                !fechaSeleccionada ||
+                !horaSeleccionada
+            ) {
+                return;
+            }
+
+
+            const servicio =
+                opciones.find(x =>
+                    Number(x.IdServicio) ===
+                    idServicio
+                );
+
+
+            const sucursal =
+                opciones.find(x =>
+                    Number(x.IdServicio) ===
+                    idServicio &&
+                    Number(x.IdSucursal) ===
+                    idSucursal
+                );
+
+
+            const especialista =
+                opciones.find(x =>
+                    Number(x.IdServicio) ===
+                    idServicio &&
+                    Number(x.IdSucursal) ===
+                    idSucursal &&
+                    Number(x.IdEspecialista) ===
+                    idEspecialista
+                );
+
+
+            document.getElementById(
+                "resumenServicio"
+            ).textContent =
+                servicio?.Servicio || "-";
+
+
+            document.getElementById(
+                "resumenSucursal"
+            ).textContent =
+                sucursal?.Sucursal || "-";
+
+
+            document.getElementById(
+                "resumenEspecialista"
+            ).textContent =
+                especialista?.Especialista || "-";
+
+
+            const fecha =
+                new Date(
+                    fechaSeleccionada +
+                    "T00:00:00"
+                );
+
+
+            document.getElementById(
+                "resumenFecha"
+            ).textContent =
+                fecha.toLocaleDateString(
+                    "es-SV",
+                    {
+                        weekday:
+                            "long",
+                        day:
+                            "numeric",
+                        month:
+                            "long",
+                        year:
+                            "numeric"
                     }
                 );
 
 
-                grid.appendChild(button);
-
-            });
-
-        }
-        catch (error) {
-
-            grid.innerHTML =
-                "<p>Error al consultar los horarios disponibles.</p>";
-
-            console.error(error);
-
-        }
-
-    }
+            document.getElementById(
+                "resumenHora"
+            ).textContent =
+                horaSeleccionada;
 
 
-    /* =========================================================
-       RESUMEN
-       ========================================================= */
+            const precio =
+                Number(
+                    servicio?.CostoServicio ||
+                    0
+                );
 
-    function actualizarResumen() {
 
-        const opcion =
-            opciones.find(x =>
-                x.IdServicio === idServicio &&
-                x.IdSucursal === idSucursal &&
-                x.IdEspecialista === idEspecialista
+            const precioTexto =
+                "Bs. " +
+                precio.toLocaleString(
+                    "es-SV",
+                    {
+                        minimumFractionDigits:
+                            2
+                    }
+                );
+
+
+            document.getElementById(
+                "resumenPrecio"
+            ).textContent =
+                precioTexto;
+
+
+            document.getElementById(
+                "resumenTotal"
+            ).textContent =
+                precioTexto;
+
+
+            mostrar(
+                seccionConfirmacion
             );
 
 
-        if (!opcion) {
+            const aceptar =
+                document.getElementById(
+                    "aceptarTerminos"
+                );
 
-            return;
 
-        }
+            const btnConfirmar =
+                document.getElementById(
+                    "btnConfirmar"
+                );
 
 
-        document.getElementById(
-            "resumenServicio"
-        ).textContent =
-            opcion.Servicio;
+            if (
+                aceptar &&
+                btnConfirmar
+            ) {
 
-
-        document.getElementById(
-            "resumenSucursal"
-        ).textContent =
-            opcion.Sucursal;
-
-
-        document.getElementById(
-            "resumenEspecialista"
-        ).textContent =
-            opcion.Especialista;
-
-
-        document.getElementById(
-            "resumenFecha"
-        ).textContent =
-            fechaSeleccionada || "-";
-
-
-        document.getElementById(
-            "resumenHora"
-        ).textContent =
-            horaSeleccionada || "-";
-
-
-        const precio =
-            Number(
-                opcion.CostoServicio
-            );
-
-
-        document.getElementById(
-            "resumenPrecio"
-        ).textContent =
-            "Bs. " +
-            precio.toFixed(2);
-
-
-        /*
-         * La aplicación real del descuento
-         * debe hacerse también en el Controller.
-         */
-
-        document.getElementById(
-            "resumenDescuento"
-        ).textContent =
-            "- Bs. 0.00";
-
-
-        document.getElementById(
-            "resumenTotal"
-        ).textContent =
-            "Bs. " +
-            precio.toFixed(2);
-
-
-        comprobarFormulario();
-
-    }
-
-
-    /* =========================================================
-       VALIDACIÓN
-       ========================================================= */
-
-    const terminos =
-        document.getElementById(
-            "aceptarTerminos"
-        );
-
-
-    terminos.addEventListener(
-        "change",
-        comprobarFormulario
-    );
-
-
-    function comprobarFormulario() {
-
-        const completo =
-            idServicio > 0 &&
-            idSucursal > 0 &&
-            idEspecialista > 0 &&
-            fechaSeleccionada !== "" &&
-            horaSeleccionada !== "" &&
-            terminos.checked;
-
-
-        document.getElementById(
-            "btnConfirmar"
-        ).disabled =
-            !completo;
-
-    }
-
-
-    /* =========================================================
-       REINICIOS
-       ========================================================= */
-
-    function resetearDesdeSucursal() {
-
-        idSucursal = 0;
-
-        idEspecialista = 0;
-
-        fechaSeleccionada = "";
-
-        horaSeleccionada = "";
-
-
-        document.getElementById(
-            "IdSucursal"
-        ).value = "";
-
-
-        document.getElementById(
-            "IdEspecialista"
-        ).value = "";
-
-
-        document.getElementById(
-            "FechaCita"
-        ).value = "";
-
-
-        document.getElementById(
-            "HoraCita"
-        ).value = "";
-
-
-        seccionEspecialista.style.display =
-            "none";
-
-        seccionPuntos.style.display =
-            "none";
-
-        seccionFecha.style.display =
-            "none";
-
-        seccionConfirmacion.style.display =
-            "none";
-
-    }
-
-
-    function resetearDesdeEspecialista() {
-
-        idEspecialista = 0;
-
-        fechaSeleccionada = "";
-
-        horaSeleccionada = "";
-
-
-        document.getElementById(
-            "IdEspecialista"
-        ).value = "";
-
-
-        document.getElementById(
-            "FechaCita"
-        ).value = "";
-
-
-        document.getElementById(
-            "HoraCita"
-        ).value = "";
-
-
-        seccionPuntos.style.display =
-            "none";
-
-        seccionFecha.style.display =
-            "none";
-
-        seccionConfirmacion.style.display =
-            "none";
-
-    }
-
-
-    /* =========================================================
-       PASOS
-       ========================================================= */
-
-    function marcarPaso(id) {
-
-        const pasos =
-            document.querySelectorAll(
-                ".paso"
-            );
-
-
-        pasos.forEach(paso =>
-            paso.classList.remove(
-                "activo"
-            )
-        );
-
-
-        const actual =
-            document.getElementById(id);
-
-
-        if (actual) {
-
-            actual.classList.add(
-                "activo"
-            );
-
-        }
-
-    }
-
-
-    /* =========================================================
-       INICIALIZACIÓN
-       ========================================================= */
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-            cargarCalendario();
-
-
-            if (idServicio > 0) {
-
-                const cardServicio =
-                    document.querySelector(
-                        `.servicio-card[data-id-servicio="${idServicio}"]`
-                    );
-
-                if (cardServicio) {
-
-                    cardServicio.click();
-
-                }
-
+                btnConfirmar.disabled =
+                    !aceptar.checked;
             }
-
         }
-    );
 
+
+        // =====================================================
+        // TÉRMINOS
+        // =====================================================
+
+        const aceptarTerminos =
+            document.getElementById(
+                "aceptarTerminos"
+            );
+
+
+        if (aceptarTerminos) {
+
+            aceptarTerminos.addEventListener(
+                "change",
+                actualizarConfirmacion
+            );
+        }
+
+
+        // =====================================================
+        // INICIALIZAR CALENDARIO
+        // =====================================================
+
+
+        console.log(
+            "Reserva de cita cargada correctamente."
+        );
+
+
+        console.log(
+            "Opciones:",
+            opciones
+        );
+
+    });
 </script>

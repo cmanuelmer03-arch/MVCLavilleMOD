@@ -72,12 +72,13 @@ namespace Lavillemvc.Controllers
                 ProximoServicio = reader["ProximoServicio"]?.ToString(),
 
                 FechaProximaCita = reader["FechaProximaCita"] == DBNull.Value
-                    ? null
-                    : Convert.ToDateTime(reader["FechaProximaCita"]),
+    ? null
+    : ((DateOnly)reader["FechaProximaCita"])
+        .ToDateTime(TimeOnly.MinValue),
 
                 HoraProximaCita = reader["HoraProximaCita"] == DBNull.Value
-                    ? null
-                    : (TimeSpan?)reader["HoraProximaCita"],
+    ? null
+    : ((TimeOnly)reader["HoraProximaCita"]).ToTimeSpan(),
 
                 EstadoProximaCita = reader["EstadoProximaCita"]?.ToString(),
                 EspecialistaProximaCita = reader["EspecialistaProximaCita"]?.ToString(),
@@ -391,12 +392,11 @@ namespace Lavillemvc.Controllers
             {
                 var opcion = new ReservarCita.ReservaOpcion
                 {
-                    IdServicio = Convert.ToInt32(reader["IdServicio"]),
 
-                    IdServicioPadre =
-                        reader["IdServicioPadre"] == DBNull.Value
-                            ? null
-                            : Convert.ToInt32(reader["IdServicioPadre"]),
+                    IdServicioPadre = reader["IdServicioPadre"] == DBNull.Value
+    ? null
+    : Convert.ToInt32(reader["IdServicioPadre"]),
+                    IdServicio = Convert.ToInt32(reader["IdServicio"]),
 
                     Servicio =
                         reader["Servicio"]?.ToString() ?? "",
@@ -448,7 +448,23 @@ namespace Lavillemvc.Controllers
                             : Convert.ToInt32(reader["IdEspecialidad"]),
 
                     Especialidad =
-                        reader["Especialidad"]?.ToString()
+                        reader["Especialidad"]?.ToString(),
+
+                    ServicioDisponible =
+    reader["ServicioDisponible"] != DBNull.Value
+        && Convert.ToBoolean(reader["ServicioDisponible"]),
+
+                    EspecialistaDisponible =
+    reader["EspecialistaDisponible"] != DBNull.Value
+        && Convert.ToBoolean(reader["EspecialistaDisponible"]),
+
+                    ServicioSucursalDisponible =
+    reader["ServicioSucursalDisponible"] != DBNull.Value
+        && Convert.ToBoolean(reader["ServicioSucursalDisponible"]),
+
+                    SucursalAbierta =
+    reader["SucursalAbierta"] != DBNull.Value
+        && Convert.ToBoolean(reader["SucursalAbierta"])
                 };
 
                 modelo.OpcionesDisponibles.Add(opcion);
@@ -975,9 +991,9 @@ namespace Lavillemvc.Controllers
             }
         }
 
-       
-                    private async Task<IActionResult> RecargarReserva(
-    ReservarCita modelo)
+
+        private async Task<IActionResult> RecargarReserva(
+ReservarCita modelo)
         {
             await using var conn = _conexion.GetConnection();
             await conn.OpenAsync();
@@ -1071,7 +1087,23 @@ namespace Lavillemvc.Controllers
                                     reader["IdEspecialidad"]),
 
                         Especialidad =
-                            reader["Especialidad"]?.ToString()
+                            reader["Especialidad"]?.ToString(),
+
+                        ServicioDisponible =
+    reader["ServicioDisponible"] != DBNull.Value
+        && Convert.ToBoolean(reader["ServicioDisponible"]),
+
+                        EspecialistaDisponible =
+    reader["EspecialistaDisponible"] != DBNull.Value
+        && Convert.ToBoolean(reader["EspecialistaDisponible"]),
+
+                        ServicioSucursalDisponible =
+    reader["ServicioSucursalDisponible"] != DBNull.Value
+        && Convert.ToBoolean(reader["ServicioSucursalDisponible"]),
+
+                        SucursalAbierta =
+    reader["SucursalAbierta"] != DBNull.Value
+        && Convert.ToBoolean(reader["SucursalAbierta"])
                     });
             }
 
@@ -1079,39 +1111,60 @@ namespace Lavillemvc.Controllers
         }
 
         private bool EspecialistaTrabajaEseDia(
-            string horario,
-            DayOfWeek dia)
+      string horario,
+      DayOfWeek dia)
         {
             if (string.IsNullOrWhiteSpace(horario))
                 return false;
 
-            string texto =
-                horario.ToLowerInvariant();
+            string texto = horario
+                .ToLowerInvariant()
+                .Normalize(
+                    System.Text.NormalizationForm.FormD)
+                .Replace(
+                    "á", "a")
+                .Replace(
+                    "é", "e")
+                .Replace(
+                    "í", "i")
+                .Replace(
+                    "ó", "o")
+                .Replace(
+                    "ú", "u");
 
-            var dias = new Dictionary<string, DayOfWeek>
+            var nombresDias = new Dictionary<DayOfWeek, string[]>
     {
-        { "domingo", DayOfWeek.Sunday },
-        { "lunes", DayOfWeek.Monday },
-        { "martes", DayOfWeek.Tuesday },
-        { "miércoles", DayOfWeek.Wednesday },
-        { "miercoles", DayOfWeek.Wednesday },
-        { "jueves", DayOfWeek.Thursday },
-        { "viernes", DayOfWeek.Friday },
-        { "sábado", DayOfWeek.Saturday },
-        { "sabado", DayOfWeek.Saturday }
+        {
+            DayOfWeek.Monday,
+            new[] { "lunes", "lun" }
+        },
+        {
+            DayOfWeek.Tuesday,
+            new[] { "martes", "mar" }
+        },
+        {
+            DayOfWeek.Wednesday,
+            new[] { "miercoles", "mie" }
+        },
+        {
+            DayOfWeek.Thursday,
+            new[] { "jueves", "jue" }
+        },
+        {
+            DayOfWeek.Friday,
+            new[] { "viernes", "vie" }
+        },
+        {
+            DayOfWeek.Saturday,
+            new[] { "sabado", "sab" }
+        },
+        {
+            DayOfWeek.Sunday,
+            new[] { "domingo", "dom" }
+        }
     };
 
-            foreach (var item in dias)
-            {
-                if (!texto.Contains(item.Key))
-                    continue;
-
-                if (item.Value == dia)
-                    return true;
-            }
-
-            // Manejar horarios del tipo:
-            // "Lunes a Viernes"
+            // Caso: "Lunes a Viernes"
             if (texto.Contains("lunes") &&
                 texto.Contains("viernes"))
             {
@@ -1119,9 +1172,33 @@ namespace Lavillemvc.Controllers
                        dia <= DayOfWeek.Friday;
             }
 
+            // Caso: "Lunes a Sábado"
+            if (texto.Contains("lunes") &&
+                texto.Contains("sabado"))
+            {
+                return dia >= DayOfWeek.Monday &&
+                       dia <= DayOfWeek.Saturday;
+            }
+
+            // Caso: "Lunes a Domingo"
+            if (texto.Contains("lunes") &&
+                texto.Contains("domingo"))
+            {
+                return true;
+            }
+
+            // Revisar días individuales y abreviaturas
+            if (nombresDias.TryGetValue(dia, out var nombres))
+            {
+                foreach (var nombre in nombres)
+                {
+                    if (texto.Contains(nombre))
+                        return true;
+                }
+            }
+
             return false;
         }
-
 
         private bool ObtenerRangoHorario(
             string horario,

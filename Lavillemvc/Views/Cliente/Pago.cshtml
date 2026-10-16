@@ -1,6 +1,25 @@
-﻿@{
+﻿@model Lavillemvc.Models.ReservarCita
+
+@{
     ViewData["Title"] = "Proceso de Pago";
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+
+    decimal precioBase = Model.CostoServicio;
+
+    // Membresía Gold: 10% de descuento
+    decimal descuentoMembresia = precioBase * 0.10m;
+
+    // Por ahora usamos 500 puntos = $50
+    // como está planteado en tu diseño.
+    int puntosUsados = Math.Min(Model.PuntosFidelidad, 500);
+    decimal descuentoPuntos = puntosUsados / 10m;
+
+    decimal total = precioBase
+                    - descuentoMembresia
+                    - descuentoPuntos;
+
+    if (total < 0)
+        total = 0;
 }
 
 <div class="pago">
