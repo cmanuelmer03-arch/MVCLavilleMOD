@@ -1,0 +1,664 @@
+﻿/* L'Avielle: módulo aislado de accesibilidad.
+   No redefinimos .card, .container, .dashboard, etc. */
+:root {
+    --la-page-bg: #fcf7f3;
+    --la-surface: #ffffff;
+    --la-text: #342b28;
+    --la-muted: #846c60;
+    --la-border: #e9dfd7;
+    --la-accent: #795543;
+    --la-accent-text: #ffffff;
+    --la-font-scale: 1;
+}
+
+html[data-la-theme="dark"] {
+    color-scheme: dark;
+    --la-page-bg: #191716;
+    --la-surface: #292522;
+    --la-text: #f1e9e4;
+    --la-muted: #c9b6ab;
+    --la-border: #57473e;
+    --la-accent: #d5ae73;
+    --la-accent-text: #1c1714;
+}
+/* El ajuste de raíz funciona con los tamaños definidos en rem. */
+html[data-la-font="normal"] {
+    font-size: 16px;
+    --la-font-scale: 1;
+}
+
+html[data-la-font="large"] {
+    font-size: 18px;
+    --la-font-scale: 1.125;
+}
+
+html[data-la-font="xlarge"] {
+    font-size: 20px;
+    --la-font-scale: 1.25;
+}
+
+/* Clases optativas para integrar el tema sin alterar CSS existente. */
+.la-theme-page {
+    background-color: var(--la-page-bg);
+    color: var(--la-text);
+}
+
+.la-theme-surface {
+    background-color: var(--la-surface);
+    color: var(--la-text);
+    border-color: var(--la-border);
+}
+
+.la-theme-muted {
+    color: var(--la-muted);
+}
+
+.la-theme-text {
+    color: var(--la-text);
+}
+
+/* Menú flotante autónomo */
+.la-a11y {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 2147483000;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--la-text);
+}
+
+    .la-a11y *, .la-a11y *::before, .la-a11y *::after {
+        box-sizing: border-box;
+    }
+
+.la-a11y__details {
+    position: relative;
+}
+
+.la-a11y__trigger {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 2px solid var(--la-border);
+    background: var(--la-surface);
+    color: var(--la-text);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,.12);
+    cursor: pointer;
+    list-style: none;
+}
+
+    .la-a11y__trigger::-webkit-details-marker {
+        display: none;
+    }
+
+    .la-a11y__trigger::marker {
+        content: "";
+    }
+
+.la-a11y__content {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 12px);
+    width: min(330px, calc(100vw - 32px));
+    padding: 18px;
+    border: 1px solid var(--la-border);
+    border-radius: 14px;
+    background: var(--la-surface);
+    color: var(--la-text);
+    box-shadow: 0 12px 35px rgba(0,0,0,.2);
+}
+
+.la-a11y__heading {
+    margin: 0 0 12px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--la-text);
+}
+
+.la-a11y__fieldset {
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+    .la-a11y__fieldset legend {
+        margin-bottom: 7px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--la-text);
+    }
+
+.la-a11y__choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+    .la-a11y__choices button, .la-a11y__reset {
+        min-height: 44px;
+        padding: 8px 11px;
+        border: 1px solid var(--la-border);
+        border-radius: 8px;
+        background: var(--la-surface);
+        color: var(--la-text);
+        font: inherit;
+        cursor: pointer;
+    }
+
+        .la-a11y__choices button[aria-pressed="true"] {
+            background: var(--la-accent);
+            border-color: var(--la-accent);
+            color: var(--la-accent-text);
+            font-weight: 700;
+        }
+
+.la-a11y__note {
+    margin: 6px 0 12px;
+    color: var(--la-muted);
+    font-size: 12px;
+}
+
+.la-a11y__reset {
+    width: 100%;
+}
+
+.la-a11y :is(button, summary):focus-visible {
+    outline: 3px solid #1d79d3;
+    outline-offset: 3px;
+}
+
+@media (max-width: 500px) {
+    .la-a11y {
+        right: 10px;
+        bottom: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .la-a11y *, .la-a11y *::before, .la-a11y *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+
+/* L'Avielle: temas de accesibilidad SOLO para el layout del Especialista.
+   Cargar AL FINAL del <head> de _LayoutEspecialista.cshtml,
+   DESPUÉS de RenderSectionAsync("Styles", ...).
+   No altera las reglas de Admin, Cliente, Gerente o Recepción. */
+
+/* Claro: recuperar el esquema del proyecto al cambiar desde oscuro. */
+html[data-la-theme="light"] body {
+    color-scheme: light;
+}
+
+/* Oscuro: respetar los valores que establece accesibilidad-lavielle.css */
+html[data-la-theme="dark"] body {
+    color-scheme: dark;
+    background: var(--la-page-bg);
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] :is(.especialista-layout, .contenido-especialista, .especialista-page, .especialista-agenda, .disponibilidad-page) {
+    background-color: var(--la-page-bg);
+    color: var(--la-text);
+}
+
+/* Navegación lateral y pie de página; conservar la identidad L'Avielle */
+html[data-la-theme="dark"] .sidebar-especialista,
+html[data-la-theme="dark"] .footer {
+    background: #151312;
+    color: var(--la-text);
+}
+
+    html[data-la-theme="dark"] .sidebar-especialista a,
+    html[data-la-theme="dark"] .sidebar-especialista strong,
+    html[data-la-theme="dark"] .sidebar-especialista span,
+    html[data-la-theme="dark"] .cerrar-especialista {
+        color: #f0dfd3;
+    }
+
+        html[data-la-theme="dark"] .sidebar-especialista a:hover,
+        html[data-la-theme="dark"] .sidebar-especialista a:focus-visible {
+            background-color: #423329;
+            color: #ffdda4;
+        }
+
+/* Textos generales del módulo (sin tocar el menú flotante) */
+html[data-la-theme="dark"] :is(.especialista-page, .especialista-agenda, .disponibilidad-page)
+:is(h1, h2, h3, h4, strong, label, p) {
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] :is(.especialista-page, .especialista-agenda, .disponibilidad-page)
+:is(small, .agenda-identidad, .agenda-rango, .disp-ayuda) {
+    color: var(--la-muted);
+}
+
+/* Mi Agenda: tarjetas, formularios y resumen */
+html[data-la-theme="dark"] .especialista-agenda :is( .agenda-resumen > div, .cita-card, .agenda-vacia, .proxima-cita, .resumen-dia ) {
+    background: var(--la-surface);
+    border-color: var(--la-border);
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-agenda :is( .agenda-resumen strong, .cita-hora strong, .cita-datos strong, .cliente-proxima strong, .resumen-dia strong ) {
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-agenda :is( .cita-datos span, .cita-datos small, .cliente-proxima small, .detalle-cita small, .agenda-resumen small ) {
+    color: var(--la-muted);
+}
+
+html[data-la-theme="dark"] .especialista-agenda :is( a.filtro-agenda, .agenda-fecha-form input ) {
+    background: var(--la-surface);
+    border-color: var(--la-border);
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-agenda a.filtro-agenda.activo {
+    background: #4b392c;
+    color: #f5d9a8;
+    box-shadow: 0 0 0 1px #9a7752 inset;
+}
+
+html[data-la-theme="dark"] .especialista-agenda .cliente-foto {
+    background: #574638;
+    color: #fff2e7;
+}
+
+html[data-la-theme="dark"] .especialista-agenda hr {
+    border-color: var(--la-border);
+}
+
+/* Mi Disponibilidad: este módulo usa variables propias --disp-*. */
+html[data-la-theme="dark"] .disponibilidad-page {
+    --disp-cafe: #f1e1d3;
+    --disp-texto: #f1e9e4;
+    --disp-secundario: #c9b6ab;
+    --disp-borde: #57473e;
+    --disp-fondo: #26211e;
+    color: var(--disp-texto);
+}
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( .horarios-card, .ausencias-card, .resumen-semanal ) {
+        background: var(--la-surface);
+        border-color: var(--la-border);
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( .horarios-card h2, .ausencia-item, .dia-horario.apagado ) {
+        background: var(--disp-fondo);
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page .dia-horario {
+        border-bottom-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( input[type="time"], input[type="date"], input[type="text"], select, textarea, .btn-restablecer ) {
+        background: #211d1a;
+        color: var(--la-text);
+        border-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( input[type="time"], input[type="date"], input[type="text"], select, textarea ):disabled {
+        background: #302923;
+        color: var(--la-muted);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page :is( .resumen-semanal strong, .ausencia-item strong, .disp-ausencia-form label ) {
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page .almuerzo-horario {
+        border-left-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] .disponibilidad-page .disp-ausencia-form {
+        border-top-color: var(--la-border);
+    }
+
+/* Mi Perfil: los contenedores heredados del CSS compartido */
+html[data-la-theme="dark"] .especialista-layout :is( .perfil-presentacion, .perfil .card, .accion, .perfil-derecha .card ) {
+    background: var(--la-surface);
+    color: var(--la-text);
+    border-color: var(--la-border);
+}
+
+html[data-la-theme="dark"] .especialista-layout .perfil :is( .perfil-titulo h1, .perfil-nombre h2, .perfil-datos p, .card h2, .campo label, .preferencia strong, .contacto-opcion strong ) {
+    color: var(--la-text);
+}
+
+html[data-la-theme="dark"] .especialista-layout .perfil :is( input, select, textarea ) {
+    background: #211d1a;
+    border-color: var(--la-border);
+    color: var(--la-text);
+}
+
+/* Contraste visible para navegación de teclado */
+html[data-la-theme="dark"] .especialista-layout :is(a, button, input, select, textarea):focus-visible {
+    outline: 3px solid #f0c377;
+    outline-offset: 2px;
+}
+
+
+/* L'AVIELLE · TEMA CLARO/OSCURO DE GERENTE
+   Importar DESPUES de RenderSectionAsync("Styles") en _LayoutGerente.cshtml.
+   Solo cargar en _LayoutGerente. No edita CSS ajenos.
+   Compatible con accesibilidad-lavielle.js (html[data-la-theme]). */
+
+html[data-la-theme="dark"] body,
+html[data-la-theme="dark"] .gerente-layout,
+html[data-la-theme="dark"] .gerente-principal,
+html[data-la-theme="dark"] .gerente-contenido,
+html[data-la-theme="dark"] .contenido,
+html[data-la-theme="dark"] .dashboard-sucursal {
+    background-color: var(--la-page-bg, #191716);
+    color: var(--la-text, #f1e9e4);
+}
+
+/* Layout: menu lateral y pie de pagina, sin alterar posiciones ni tamanos */
+html[data-la-theme="dark"] .sidebar-gerente,
+html[data-la-theme="dark"] .gerente-sidebar,
+html[data-la-theme="dark"] .barra-lateral-gerente,
+html[data-la-theme="dark"] .footer-gerente,
+html[data-la-theme="dark"] .gerente-footer {
+    background: #151312;
+    color: #f1e9e4;
+}
+
+html[data-la-theme="dark"] :is(.gerente-enlace, .gerente-logo-enlace):not(.activo) {
+    color: #e4d1c2;
+}
+
+html[data-la-theme="dark"] .gerente-enlace:is(:hover, :focus-visible) {
+    background-color: #403129;
+    color: #ffe0ad;
+}
+
+/* Dashboard. Selectores limitados a su propio wrapper. */
+html[data-la-theme="dark"] .dashboard-sucursal :is(h1, h2, h3, h4, strong, label) {
+    color: var(--la-text, #f1e9e4);
+}
+
+html[data-la-theme="dark"] .dashboard-sucursal :is(p, small, .dashboard-subtitulo) {
+    color: var(--la-muted, #c9b6ab);
+}
+
+html[data-la-theme="dark"] .dashboard-sucursal :is( .card, .tarjeta, .kpi-card, .resumen-card, .dashboard-card, .dashboard-panel, .indicador-card, .metrica-card, .panel, .sucursal-card, .grafica-card, .tabla-card ) {
+    background-color: var(--la-surface, #292522);
+    border-color: var(--la-border, #57473e);
+    color: var(--la-text, #f1e9e4);
+}
+
+html[data-la-theme="dark"] .dashboard-sucursal :is(table, th, td) {
+    border-color: var(--la-border, #57473e);
+    color: var(--la-text, #f1e9e4);
+}
+
+/* Empleados: estos tokens se usan dentro del CSS del modulo. */
+html[data-la-theme="dark"] .gerente-empleados {
+    --em-cafe: #f1d5b8;
+    --em-dorado: #edc98b;
+    --em-texto: #f1e9e4;
+    --em-claro: #191716;
+    --em-borde: #57473e;
+    background: var(--la-page-bg, #191716);
+    color: var(--la-text, #f1e9e4);
+}
+
+    html[data-la-theme="dark"] .gerente-empleados :is( .empleados-card, .estructura-card, .vista-semanal, .buscador ) {
+        background: var(--la-surface, #292522);
+        border-color: var(--la-border, #57473e);
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados .tabla-empleados thead,
+    html[data-la-theme="dark"] .gerente-empleados .tabla-empleados tbody tr:nth-child(even) {
+        background: #332c28;
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados .tabla-empleados td {
+        border-color: var(--la-border, #57473e);
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados :is( .empleado-nombre, .horario-fila strong, .tabla-empleados th, .estructura-card strong, .estructura-equipo h2 ) {
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados :is( .empleados-header-texto p, .especialidad, .estructura-card small, .estructura-etiqueta, .horario-titulos, .sin-horarios, .leyenda-horario, .tabla-vacia, .filtro ) {
+        color: var(--la-muted, #c9b6ab);
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados .filtro.activo {
+        color: #f1d5b8;
+        border-bottom-color: #edc98b;
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados .buscador button {
+        background: #44362e;
+        color: #f4dfca;
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados .turno.vacio {
+        background: #51433b;
+    }
+
+    html[data-la-theme="dark"] .gerente-empleados .turno.disponible {
+        background: #80b68b;
+    }
+
+/* Promociones: variables de color que ya usa su CSS. */
+html[data-la-theme="dark"] .promociones-contenido {
+    --gp-cafe: #f1d5b8;
+    --gp-dorado: #edc98b;
+    --gp-texto: #f1e9e4;
+    --gp-sec: #c9b6ab;
+    --gp-fondo: #191716;
+    --gp-borde: #57473e;
+    --gp-verde: #9bd3a4;
+    background: var(--la-page-bg, #191716);
+    color: var(--la-text, #f1e9e4);
+}
+
+    html[data-la-theme="dark"] .promociones-contenido :is( .resumen-promo-card, .promo-card, .proxima-promo, .tabla-finalizadas-contenedor, .promo-estado-fila, .buscador-promocion, .filtro-promo, .promo-aviso ) {
+        background: var(--la-surface, #292522);
+        border-color: var(--la-border, #57473e);
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido :is( .resumen-promo-card strong, .promo-card h3, .proxima-promo h3, .promo-estado-fila strong, .tabla-finalizadas td, .resumen-promo-card small ) {
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido :is( .promo-card p, .proxima-promo p, .proxima-promo small, .promo-detalles, .promo-estado-fila small, .promo-vacio, .resumen-descripcion ) {
+        color: var(--la-muted, #c9b6ab);
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido .filtro-promo.activo {
+        background: #694e3d;
+        border-color: #b68c62;
+        color: #fff0e1;
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido .tabla-finalizadas thead,
+    html[data-la-theme="dark"] .promociones-contenido .tabla-finalizadas tbody tr:hover {
+        background: #332c28;
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido .tabla-finalizadas td {
+        border-color: var(--la-border, #57473e);
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido .descuento {
+        background: #57412a;
+        color: #ffdeab;
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido .programada {
+        background: #263b51;
+        color: #b7d8ff;
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido .estado-promo {
+        background: #254534;
+        color: #a4dfb5;
+    }
+
+    html[data-la-theme="dark"] .promociones-contenido :is(.promo-chip-pausada, .accion-eliminar) {
+        background: #513c29;
+        color: #ffd9a0;
+        border-color: #765a3d;
+    }
+
+/* Dialogos independientes: suelen estar fuera del wrapper de las pantallas. */
+html[data-la-theme="dark"] :is(.modal-empleado, .dialogo-promocion) {
+    background: var(--la-surface, #292522);
+    border-color: var(--la-border, #57473e);
+    color: var(--la-text, #f1e9e4);
+    color-scheme: dark;
+}
+
+    html[data-la-theme="dark"] :is(.modal-empleado, .dialogo-promocion) :is( h2, h3, label, strong, dt, dd, .campo, .modal-titulo h2 ) {
+        color: var(--la-text, #f1e9e4);
+    }
+
+    html[data-la-theme="dark"] :is(.modal-empleado, .dialogo-promocion) :is( .nota-form, .campo small, .detalle-lista dt, .modal-cerrar, .dialogo-cerrar ) {
+        color: var(--la-muted, #c9b6ab);
+    }
+
+    html[data-la-theme="dark"] :is(.modal-empleado, .dialogo-promocion) :is( input:not([type="checkbox"]), textarea, select ) {
+        background: #342d29;
+        border-color: #786252;
+        color: #f1e9e4;
+    }
+
+    html[data-la-theme="dark"] :is(.modal-empleado, .dialogo-promocion) :is(input,textarea,select)::placeholder {
+        color: #c9b6ab;
+    }
+
+/* Controles de busqueda de los modulos */
+html[data-la-theme="dark"] :is(.gerente-empleados, .promociones-contenido) :is(input, textarea, select) {
+    color: var(--la-text, #f1e9e4);
+    accent-color: #edc98b;
+}
+
+    html[data-la-theme="dark"] :is(.gerente-empleados, .promociones-contenido) :is(input, textarea, select)::placeholder {
+        color: var(--la-muted, #c9b6ab);
+    }
+
+/* Contraste visual del foco en controles propios de gerente */
+:is(.gerente-empleados, .promociones-contenido, .modal-empleado, .dialogo-promocion)
+:is(a, button, input, select, textarea):focus-visible {
+    outline: 3px solid #d4a463;
+    outline-offset: 3px;
+}
+
+/* La tipografia original usa px en numerosos componentes. La opcion de tamano
+   solo escala automaticamente los textos definidos con rem; revisar cada modulo
+   progresivamente, sin usar transform:scale ni zoom para toda la aplicacion. */
+
+
+
+
+/* ===== MÓDULO ÚNICO: REGLAS COMPARTIDAS POR TODOS LOS LAYOUTS ===== */
+/* Las páginas con colores CSS fijos precisan compatibilidad: sin filtro invert().
+   No se modifican imágenes, logotipos ni gradientes decorativos. */
+html[data-la-theme="dark"] {
+    background-color: var(--la-page-bg);
+}
+
+    html[data-la-theme="dark"] body {
+        background-color: var(--la-page-bg);
+        color: var(--la-text);
+    }
+    /* Contenedores habituales de los distintos roles. */
+    html[data-la-theme="dark"] :is( main, .contenido-principal, .contenido-especialista, .admin-contenido, .recepcion-contenido, .cliente-contenido, .dashboard, .contenido ) {
+        color: var(--la-text);
+    }
+    /* Superficies de aplicación, sin aplicar a imágenes ni banners. */
+    html[data-la-theme="dark"] :is( .card, .panel, .tarjeta, .dashboard-card, .resumen-card, .stat-card, .metric-card, .kpi-card, .form-card, .login-card, .modal-content, .table-container, .tabla-contenedor, .detalle-card, .reserva-card ) {
+        background-color: var(--la-surface);
+        border-color: var(--la-border);
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] :is( input:not([type="checkbox"]):not([type="radio"]), textarea, select ) {
+        background-color: #302925;
+        color: var(--la-text);
+        border-color: #796554;
+        color-scheme: dark;
+    }
+
+    html[data-la-theme="dark"] :is(input, textarea)::placeholder {
+        color: var(--la-muted);
+        opacity: 1;
+    }
+
+    html[data-la-theme="dark"] :is(table, th, td) {
+        color: var(--la-text);
+        border-color: var(--la-border);
+    }
+
+    html[data-la-theme="dark"] :is( .card, .panel, .tarjeta, .dashboard-card, .resumen-card, .stat-card, .metric-card, .kpi-card, .form-card, .login-card, .modal-content, .table-container, .reserva-card ) :is(h1, h2, h3, h4, strong, label) {
+        color: var(--la-text);
+    }
+
+    html[data-la-theme="dark"] :is( .card, .panel, .tarjeta, .dashboard-card, .resumen-card, .stat-card, .metric-card, .kpi-card, .form-card, .login-card, .modal-content, .table-container, .reserva-card ) :is(p, small, .descripcion, .subtitulo) {
+        color: var(--la-muted);
+    }
+
+    html[data-la-theme="dark"] :is(a, button, input, select, textarea, summary):focus-visible {
+        outline: 3px solid #f0c377;
+        outline-offset: 2px;
+    }
+/* Compatibilidad básica de escalado con CSS que sigue usando px.
+   Para lograr 100% de cobertura deben migrarse los font-size fijos a rem. */
+html[data-la-font="large"] :is( .menu-especialista a, .gerente-enlace, .sidebar a, nav a, .cita-datos, .dia-horario, .tabla-empleados td, .promo-card p ) {
+    font-size: max(1rem, 1em);
+}
+
+html[data-la-font="xlarge"] :is( .menu-especialista a, .gerente-enlace, .sidebar a, nav a, .cita-datos, .dia-horario, .tabla-empleados td, .promo-card p ) {
+    font-size: max(1.125rem, 1em);
+}
+/* Interfaz accesible en pantallas pequeñas */
+@media (max-width: 400px) {
+    .la-a11y {
+        right: 8px;
+        bottom: 8px;
+    }
+
+    .la-a11y__content {
+        width: min(320px, calc(100vw - 16px));
+    }
+}
+
+/* El panel oculto no debe ocupar espacio ni poder recibir foco. */
+.la-a11y [hidden] {
+    display: none !important;
+}
+
+.la-a11y__trigger {
+    user-select: none;
+}
+
+    .la-a11y__trigger[aria-expanded="true"] {
+        border-color: var(--la-accent);
+    }
+
+.la-a11y__content {
+    max-height: min(80vh, 600px);
+    overflow: auto;
+}
