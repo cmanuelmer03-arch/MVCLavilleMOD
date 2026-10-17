@@ -171,6 +171,23 @@
 
                 </a>
 
+                <div class="cerrar-gerente">
+
+                    <form action="@Url.Action("CerrarSesion", "Login")"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn-cerrar-sesion">
+                            Cerrar Sesión
+                        </button>
+
+                    </form>
+
+                </div>
+
+
 
             </section>
 
