@@ -44,6 +44,9 @@
 <link rel="stylesheet"
       href="~/css/accesibilidad-especialista-temas.css"
       asp-append-version="true" />
+      
+<script src="@Url.Content("~/js/accesibilidad-global.js")"></script>
+
 </head>
 
 
@@ -100,11 +103,23 @@
             </nav>
 
 
-            <div class="cerrar-especialista">
+            
+<div class="cerrar-especialista">
 
-                Cerrar Sesión
+    <form action="@Url.Action("CerrarSesion", "Login")"
+          method="post">
 
-            </div>
+        @Html.AntiForgeryToken()
+
+        <button type="submit"
+                class="btn-cerrar-sesion">
+            Cerrar Sesión
+        </button>
+
+    </form>
+
+</div>
+
 
 
         </aside>

@@ -22,6 +22,9 @@
 
     @await RenderSectionAsync("Styles", required: false)
 
+    <script src="@Url.Content("~/js/accesibilidad-global.js")"></script>
+
+
 </head>
 
 <body class="pagina-gerente">
@@ -167,6 +170,23 @@
                     <span>Gestión de Promociones</span>
 
                 </a>
+
+                <div class="cerrar-gerente">
+
+                    <form action="@Url.Action("CerrarSesion", "Login")"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn-cerrar-sesion">
+                            Cerrar Sesión
+                        </button>
+
+                    </form>
+
+                </div>
+
 
 
             </section>
