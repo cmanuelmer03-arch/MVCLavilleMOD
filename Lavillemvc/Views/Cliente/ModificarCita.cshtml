@@ -1,0 +1,83 @@
+﻿@model Lavillemvc.Models.ReservarCita
+
+@{
+    ViewData["Title"] = "Modificar Cita";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<div class="container">
+
+    <h1>Modificar Cita</h1>
+
+    <p>
+        Cambia la fecha y hora de tu cita.
+    </p>
+
+    @if (ViewBag.Mensaje != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Mensaje
+        </div>
+    }
+
+    <form asp-controller="Cliente"
+          asp-action="ModificarCita"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="IdCita"
+               value="@Model.IdCita" />
+
+        <div class="form-group">
+
+            <label for="FechaCita">
+                Nueva fecha
+            </label>
+
+            <input type="date"
+                   id="FechaCita"
+                   name="FechaCita"
+                   value="@(Model.FechaCita.HasValue ? Model.FechaCita.Value.ToString("yyyy-MM-dd") : "")"
+                   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                   required />
+
+        </div>
+
+        <br />
+
+        <div class="form-group">
+
+            <label for="HoraCita">
+                Nueva hora
+            </label>
+
+            <input type="time"
+                   id="HoraCita"
+                   name="HoraCita"
+                   value="@(Model.HoraCita.HasValue ? Model.HoraCita.Value.ToString(@"hh\:mm") : "")"
+                   required />
+
+        </div>
+
+        <br />
+
+        <div class="botones-cita">
+
+            <button type="submit"
+                    class="btn-guardar-cita">
+                Guardar cambios
+            </button>
+
+            <a asp-controller="Cliente"
+               asp-action="MisReservas"
+               class="btn-cancelar-cita">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>

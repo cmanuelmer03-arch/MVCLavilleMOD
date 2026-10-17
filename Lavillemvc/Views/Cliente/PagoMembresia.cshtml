@@ -1,0 +1,288 @@
+﻿@model Lavillemvc.Models.ClientePromosMembresias.PlanMembresia
+
+@{
+    ViewData["Title"] = "Pago de Membresía";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<div class="pago-membresia-page">
+
+    <div class="pago-membresia-card">
+
+        <h1>Pago de Membresía</h1>
+
+        <p class="pago-membresia-subtitulo">
+            Completa el pago para activar tu membresía.
+        </p>
+
+
+        <!-- ==========================================
+             INFORMACIÓN DEL PLAN
+             ========================================== -->
+
+        <div class="plan-seleccionado">
+
+            <h2>
+                Plan @Model.Nombre
+            </h2>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Beneficios))
+            {
+                <p>
+                    @Model.Beneficios
+                </p>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.Duracion))
+            {
+                <span>
+                    Duración: @Model.Duracion
+                </span>
+            }
+
+            <div class="precio-membresia">
+
+                @if (Model.Precio.HasValue)
+                {
+                    <strong>
+                        $@Model.Precio.Value.ToString("N2")
+                    </strong>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             MENSAJE DE ERROR
+             ========================================== -->
+        @if (TempData["ErrorPagoMembresia"] != null)
+        {
+            <div class="error-pago-membresia">
+                @TempData["ErrorPagoMembresia"]
+            </div>
+        }
+
+
+        <!-- ==========================================
+             FORMULARIO
+             ========================================== -->
+
+        <form asp-controller="Cliente"
+              asp-action="ProcesarPagoMembresia"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="idMembresia"
+                   value="@Model.IdMembresia" />
+
+
+            <!-- MÉTODO DE PAGO -->
+
+            <div class="campo-pago-membresia">
+
+                <label for="metodoPago">
+                    Método de pago
+                </label>
+
+                <select id="metodoPago"
+                        name="metodoPago"
+                        required>
+
+                    <option value="">
+                        Selecciona un método
+                    </option>
+
+                    <option value="Tarjeta">
+                        Tarjeta
+                    </option>
+
+                    <option value="Pago Móvil">
+                        Pago Móvil
+                    </option>
+
+                    <option value="Transferencia Bancaria">
+                        Transferencia Bancaria
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- DATOS DE TARJETA -->
+
+            <div id="datosTarjeta"
+                 class="datos-tarjeta-membresia">
+
+                <div class="campo-pago-membresia">
+
+                    <label for="numeroTarjeta">
+                        Número de tarjeta
+                    </label>
+
+                    <input type="text"
+                           id="numeroTarjeta"
+                           name="numeroTarjeta"
+                           maxlength="19"
+                           placeholder="1234 5678 9012 3456" />
+
+                </div>
+
+
+                <div class="campo-pago-membresia">
+
+                    <label for="nombreTitular">
+                        Nombre del titular
+                    </label>
+
+                    <input type="text"
+                           id="nombreTitular"
+                           name="nombreTitular"
+                           placeholder="Nombre del titular" />
+
+                </div>
+
+
+                <div class="campos-tarjeta-membresia">
+
+                    <div class="campo-pago-membresia">
+
+                        <label for="vencimiento">
+                            Vencimiento
+                        </label>
+
+                        <input type="text"
+                               id="vencimiento"
+                               name="vencimiento"
+                               maxlength="5"
+                               placeholder="MM/AA" />
+
+                    </div>
+
+
+                    <div class="campo-pago-membresia">
+
+                        <label for="cvv">
+                            CVV
+                        </label>
+
+                        <input type="password"
+                               id="cvv"
+                               name="cvv"
+                               maxlength="4"
+                               placeholder="123" />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TÉRMINOS -->
+
+            <div class="check-pago-membresia">
+
+                <label>
+
+                    <input type="checkbox"
+                           name="AceptaTerminos"
+                           value="true"
+                           required />
+
+                    Acepto los términos y condiciones
+                    de la membresía.
+
+                </label>
+
+            </div>
+
+
+            <!-- AUTORIZACIÓN -->
+
+            <div class="check-pago-membresia">
+
+                <label>
+
+                    <input type="checkbox"
+                           name="AutorizaCobro"
+                           value="true"
+                           required />
+
+                    Autorizo el cobro del monto total
+                    indicado.
+
+                </label>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="acciones-pago-membresia">
+
+                <button type="submit"
+                        class="btn-pagar-membresia">
+
+                    Confirmar y Pagar
+
+                    @if (Model.Precio.HasValue)
+                    {
+                        @: — $@Model.Precio.Value.ToString("N2")
+                    }
+
+                </button>
+
+
+                <a asp-controller="Cliente"
+                   asp-action="Promociones"
+                   class="btn-cancelar-pago-membresia">
+
+                    Cancelar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const metodoPago =
+        document.getElementById("metodoPago");
+
+    const datosTarjeta =
+        document.getElementById("datosTarjeta");
+
+    function actualizarMetodoPago() {
+
+        if (metodoPago.value === "Tarjeta") {
+
+            datosTarjeta.style.display = "block";
+
+        }
+        else {
+
+            datosTarjeta.style.display = "none";
+
+        }
+
+    }
+
+    metodoPago.addEventListener(
+        "change",
+        actualizarMetodoPago
+    );
+
+    actualizarMetodoPago();
+
+</script>

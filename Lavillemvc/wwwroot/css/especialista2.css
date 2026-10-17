@@ -3622,3 +3622,401 @@ body .cancelar-reserva {
         grid-template-columns: 1fr !important;
     }
 }
+/* ==========================================
+   BOTONES DE ACCIONES DE RESERVA
+   ========================================== */
+
+.reservas-page .reserva-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #eaded7;
+}
+
+    .reservas-page .reserva-acciones form {
+        margin: 0;
+        padding: 0;
+    }
+
+
+/* BOTÓN MODIFICAR */
+
+.reservas-page a.btn-modificar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border: 1px solid #7b4f42;
+    border-radius: 7px;
+    background: #7b4f42;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .reservas-page a.btn-modificar:hover {
+        background: #624037;
+        border-color: #624037;
+        color: #ffffff !important;
+        text-decoration: none !important;
+    }
+
+
+/* BOTÓN CANCELAR */
+
+.reservas-page button.btn-cancelar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border: 1px solid #c9aaa0;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #7b4f42;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .reservas-page button.btn-cancelar:hover {
+        background: #f7eeea;
+        border-color: #7b4f42;
+        color: #624037;
+    }
+
+/* ==========================================
+   BOTÓN MODIFICAR CITA
+   ========================================== */
+
+.reservas-page a.btn-modificar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border: 1px solid #7b4f42;
+    border-radius: 7px;
+    background: #7b4f42;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .reservas-page a.btn-modificar:hover {
+        background: #624037;
+        border-color: #624037;
+        color: #ffffff !important;
+        text-decoration: none !important;
+    }
+
+
+/* ==========================================
+   PAGO DE MEMBRESÍA
+   ========================================== */
+
+.pago-membresia-page {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+    box-sizing: border-box;
+}
+
+.pago-membresia-card {
+    background: #ffffff;
+    border: 1px solid #eadbd2;
+    border-radius: 14px;
+    padding: 35px 40px;
+    box-sizing: border-box;
+    box-shadow: 0 3px 12px rgba(75, 55, 45, 0.05);
+}
+
+    .pago-membresia-card h1 {
+        margin: 0 0 8px;
+        color: #5f4035;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 32px;
+        font-weight: 500;
+    }
+
+.pago-membresia-subtitulo {
+    margin: 0 0 30px;
+    color: #9a6657;
+    font-size: 15px;
+}
+
+
+/* ==========================================
+   PLAN SELECCIONADO
+   ========================================== */
+
+.plan-seleccionado {
+    background: #f8f2ed;
+    border: 1px solid #e5d4ca;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 30px;
+}
+
+    .plan-seleccionado h2 {
+        margin: 0 0 12px;
+        color: #5f4035;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 24px;
+        font-weight: 500;
+    }
+
+    .plan-seleccionado p {
+        margin: 0 0 12px;
+        color: #5d514b;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .plan-seleccionado > span {
+        display: block;
+        color: #7b6258;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+.precio-membresia {
+    border-top: 1px solid #dfcec4;
+    padding-top: 15px;
+}
+
+    .precio-membresia strong {
+        color: #c49a4f;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+
+/* ==========================================
+   ERROR
+   ========================================== */
+
+.error-pago-membresia {
+    background: #f9e9e5;
+    border: 1px solid #d9a69a;
+    border-radius: 8px;
+    color: #8a4035;
+    padding: 12px 15px;
+    margin-bottom: 22px;
+    font-size: 14px;
+}
+
+
+/* ==========================================
+   CAMPOS DEL FORMULARIO
+   ========================================== */
+
+.campo-pago-membresia {
+    margin-bottom: 20px;
+}
+
+    .campo-pago-membresia label {
+        display: block;
+        margin-bottom: 8px;
+        color: #5f4035;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .campo-pago-membresia input,
+    .campo-pago-membresia select {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        box-sizing: border-box;
+        border: 1px solid #d9c7bd;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #3f332e;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .campo-pago-membresia input:focus,
+        .campo-pago-membresia select:focus {
+            border-color: #cda556;
+            box-shadow: 0 0 0 2px rgba(205, 165, 86, 0.15);
+        }
+
+
+/* ==========================================
+   DATOS DE TARJETA
+   ========================================== */
+
+.datos-tarjeta-membresia {
+    display: none;
+    background: #fcfaf8;
+    border: 1px solid #eadbd2;
+    border-radius: 10px;
+    padding: 22px;
+    margin: 10px 0 25px;
+}
+
+.campos-tarjeta-membresia {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+
+/* ==========================================
+   CHECKBOXES
+   ========================================== */
+
+.check-pago-membresia {
+    margin: 15px 0;
+}
+
+    .check-pago-membresia label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: #5d514b;
+        font-size: 13px;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    .check-pago-membresia input[type="checkbox"] {
+        width: 17px;
+        height: 17px;
+        margin: 1px 0 0;
+        accent-color: #7b5142;
+        flex-shrink: 0;
+    }
+
+
+/* ==========================================
+   ACCIONES
+   ========================================== */
+
+.acciones-pago-membresia {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #eadbd2;
+}
+
+.btn-pagar-membresia {
+    border: none;
+    border-radius: 7px;
+    padding: 13px 25px;
+    background: #6b4a3d;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+    .btn-pagar-membresia:hover {
+        background: #54382e;
+        transform: translateY(-1px);
+    }
+
+.btn-cancelar-pago-membresia {
+    display: inline-block;
+    padding: 12px 20px;
+    color: #8a5144;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 7px;
+    transition: background 0.2s;
+}
+
+    .btn-cancelar-pago-membresia:hover {
+        background: #f7eeea;
+        color: #6b4036;
+    }
+
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 700px) {
+
+    .pago-membresia-page {
+        padding: 25px 15px 40px;
+    }
+
+    .pago-membresia-card {
+        padding: 25px 20px;
+    }
+
+        .pago-membresia-card h1 {
+            font-size: 27px;
+        }
+
+    .campos-tarjeta-membresia {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .acciones-pago-membresia {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-pagar-membresia,
+    .btn-cancelar-pago-membresia {
+        text-align: center;
+    }
+}
+
+/* ==========================================
+   CERRAR SESIÓN
+   ========================================== */
+
+.sidebar .cerrar-sesion {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 12px;
+    box-sizing: border-box;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+    .sidebar .cerrar-sesion::before {
+        content: "□";
+        color: #cda556;
+        font-size: 12px;
+    }
+
+    .sidebar .cerrar-sesion:hover {
+        background: #3a2d27;
+        color: #cda556;
+    }
+
+        .sidebar .cerrar-sesion:hover::before {
+            color: #cda556;
+        }
+
+.sidebar .cerrar-sesion {
+    margin-top: 25px;
+    padding-top: 22px;
+    border-top: 1px solid #332f2d;
+}

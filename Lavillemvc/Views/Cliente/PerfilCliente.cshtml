@@ -20,18 +20,7 @@
 
     <div class="perfil-presentacion">
 
-        <div class="perfil-foto">
-
-            <img src="@(string.IsNullOrEmpty(Model.FotoPerfilUrl)
-                        ? "/Images/avatar.jpeg"
-                        : Model.FotoPerfilUrl)"
-                 alt="Foto de perfil" />
-
-            <span>
-                Foto de perfil
-            </span>
-
-        </div>
+        
 
 
         <div class="perfil-datos">
@@ -57,7 +46,7 @@
 
             <p>
                 Miembro desde
-                @(Model.MiembroDesde?.ToString("MMMM yyyy") ?? "No registrado")
+                @(Model.InicioMembresia?.ToString("MMMM yyyy") ?? "")
                 ·
                 @Model.PuntosFidelidad.ToString("N0") puntos acumulados
             </p>
@@ -71,7 +60,8 @@
 
     <form asp-controller="Cliente"
           asp-action="GuardarPerfil"
-          method="post">
+          method="post"
+          enctype="multipart/form-data">
 
         @Html.AntiForgeryToken()
 
@@ -82,7 +72,7 @@
                asp-for="IdEspecialistaPreferido" />
 
         <input type="hidden"
-               asp-for="IdSucursalFavorita" />
+       
 
 
         <div class="perfil-columnas">

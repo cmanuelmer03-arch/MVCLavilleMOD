@@ -9,6 +9,7 @@ namespace Lavillemvc.Models
         // DATOS DE LA RESERVA
         // =====================================
 
+        public int IdCita { get; set; }
         public int IdCliente { get; set; }
         public int PuntosFidelidad { get; set; }
         public int? IdServicio { get; set; }

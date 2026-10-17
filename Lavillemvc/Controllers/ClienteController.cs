@@ -4,6 +4,9 @@ using Lavillemvc.Models;
 using Npgsql;
 using System.Text.Json;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 
 namespace Lavillemvc.Controllers
 {
@@ -14,6 +17,14 @@ namespace Lavillemvc.Controllers
         public ClienteController(IConfiguration configuration)
         {
             _conexion = new Conexion(configuration);
+        }
+
+        public async Task<IActionResult> CerrarSesion()
+        {
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToAction("Index", "Login");
         }
 
         private int ObtenerIdClienteActual()
@@ -65,7 +76,12 @@ namespace Lavillemvc.Controllers
             c.telefono,
             c.fecha_nacimiento,
             c.direccion,
-            c.foto_perfil_url,
+
+            COALESCE(c.puntos_fidelidad, 0) AS puntos_fidelidad,
+
+            m.nombre AS membresia,
+            im.fecha_inicio AS inicio_membresia,
+            im.fecha_fin AS fin_membresia,
 
             p.tipo_cabello,
             p.id_especialista_preferido,
@@ -79,10 +95,30 @@ namespace Lavillemvc.Controllers
 
         FROM public.cliente c
 
+        LEFT JOIN LATERAL (
+            SELECT
+                i.id_membresia,
+                i.fecha_inicio,
+                i.fecha_fin
+            FROM public.identificador i
+            WHERE i.id_cliente = c.id_cliente
+              AND LOWER(i.estado::text) = 'activo'
+              AND i.fecha_fin >=
+                    (NOW() AT TIME ZONE 'America/Caracas')
+            ORDER BY
+                i.fecha_fin DESC,
+                i.id_identificador DESC
+            LIMIT 1
+        ) im ON true
+
+        LEFT JOIN public.membresia m
+            ON im.id_membresia = m.id_membresia
+
         LEFT JOIN public.preferencias_cliente p
             ON p.id_cliente = c.id_cliente
 
         WHERE c.id_cliente = @idCliente
+
         LIMIT 1;
     ";
 
@@ -105,24 +141,46 @@ namespace Lavillemvc.Controllers
                 IdCliente = Convert.ToInt32(
                     reader["id_cliente"]),
 
-                Nombre = reader["nombre"]?.ToString() ?? "",
+                Nombre =
+                    reader["nombre"]?.ToString() ?? "",
 
-                Apellido = reader["apellido"]?.ToString() ?? "",
+                Apellido =
+                    reader["apellido"]?.ToString() ?? "",
 
-                Correo = reader["correo"]?.ToString(),
+                Correo =
+                    reader["correo"]?.ToString(),
 
-                Telefono = reader["telefono"]?.ToString(),
+                Telefono =
+                    reader["telefono"]?.ToString(),
 
                 FechaNacimiento =
-    reader["fecha_nacimiento"] == DBNull.Value
-        ? null
-        : ((DateOnly)reader["fecha_nacimiento"])
-            .ToDateTime(TimeOnly.MinValue),
+                    reader["fecha_nacimiento"] == DBNull.Value
+                        ? null
+                        : ((DateOnly)reader["fecha_nacimiento"])
+                            .ToDateTime(TimeOnly.MinValue),
 
-                Direccion = reader["direccion"]?.ToString(),
+                Direccion =
+                    reader["direccion"]?.ToString(),
 
-                FotoPerfilUrl =
-                    reader["foto_perfil_url"]?.ToString(),
+                PuntosFidelidad =
+                    Convert.ToInt32(reader["puntos_fidelidad"]),
+
+                Membresia =
+                    reader["membresia"] == DBNull.Value
+                        ? null
+                        : reader["membresia"]?.ToString(),
+
+                InicioMembresia =
+                    reader["inicio_membresia"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(
+                            reader["inicio_membresia"]),
+
+                FinMembresia =
+                    reader["fin_membresia"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(
+                            reader["fin_membresia"]),
 
                 TipoCabello =
                     reader["tipo_cabello"]?.ToString(),
@@ -637,6 +695,7 @@ namespace Lavillemvc.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> GuardarPerfil(PerfilCliente modelo)
         {
             await using var conn = _conexion.GetConnection();
@@ -646,7 +705,10 @@ namespace Lavillemvc.Controllers
 
             try
             {
-                // Actualizar datos personales
+                // ==========================================
+                // ACTUALIZAR DATOS PERSONALES
+                // ==========================================
+
                 string sqlCliente = @"
             UPDATE public.cliente
             SET
@@ -655,31 +717,56 @@ namespace Lavillemvc.Controllers
                 correo = @Correo,
                 telefono = @Telefono,
                 fecha_nacimiento = @FechaNacimiento,
-                direccion = @Direccion,
-                foto_perfil_url = @FotoPerfilUrl
+                direccion = @Direccion
             WHERE id_cliente = @IdCliente;
         ";
 
-                await using (var cmd = new NpgsqlCommand(sqlCliente, conn, transaction))
+                await using (var cmd =
+                    new NpgsqlCommand(
+                        sqlCliente,
+                        conn,
+                        transaction))
                 {
-                    cmd.Parameters.AddWithValue("@IdCliente", modelo.IdCliente);
-                    cmd.Parameters.AddWithValue("@Nombre", modelo.Nombre ?? "");
-                    cmd.Parameters.AddWithValue("@Apellido", modelo.Apellido ?? "");
-                    cmd.Parameters.AddWithValue("@Correo",
-                        (object?)modelo.Correo ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Telefono",
-                        (object?)modelo.Telefono ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@FechaNacimiento",
-                        (object?)modelo.FechaNacimiento ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Direccion",
-                        (object?)modelo.Direccion ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@FotoPerfilUrl",
-                        (object?)modelo.FotoPerfilUrl ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue(
+                        "@IdCliente",
+                        modelo.IdCliente);
+
+                    cmd.Parameters.AddWithValue(
+                        "@Nombre",
+                        modelo.Nombre ?? "");
+
+                    cmd.Parameters.AddWithValue(
+                        "@Apellido",
+                        modelo.Apellido ?? "");
+
+                    cmd.Parameters.AddWithValue(
+                        "@Correo",
+                        (object?)modelo.Correo
+                        ?? DBNull.Value);
+
+                    cmd.Parameters.AddWithValue(
+                        "@Telefono",
+                        (object?)modelo.Telefono
+                        ?? DBNull.Value);
+
+                    cmd.Parameters.AddWithValue(
+                        "@FechaNacimiento",
+                        (object?)modelo.FechaNacimiento
+                        ?? DBNull.Value);
+
+                    cmd.Parameters.AddWithValue(
+                        "@Direccion",
+                        (object?)modelo.Direccion
+                        ?? DBNull.Value);
 
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-                // Actualizar preferencias
+
+                // ==========================================
+                // ACTUALIZAR PREFERENCIAS
+                // ==========================================
+
                 string sqlPreferencias = @"
             INSERT INTO public.preferencias_cliente
             (
@@ -710,32 +797,53 @@ namespace Lavillemvc.Controllers
             ON CONFLICT (id_cliente)
             DO UPDATE SET
                 tipo_cabello = EXCLUDED.tipo_cabello,
-                id_especialista_preferido = EXCLUDED.id_especialista_preferido,
-                id_sucursal_favorita = EXCLUDED.id_sucursal_favorita,
-                alergias_condiciones = EXCLUDED.alergias_condiciones,
-                notificaciones_correo = EXCLUDED.notificaciones_correo,
-                recordatorios_sms = EXCLUDED.recordatorios_sms,
-                promociones_especiales = EXCLUDED.promociones_especiales,
-                boletin_mensual = EXCLUDED.boletin_mensual,
-                idioma = EXCLUDED.idioma;
+                id_especialista_preferido =
+                    EXCLUDED.id_especialista_preferido,
+                id_sucursal_favorita =
+                    EXCLUDED.id_sucursal_favorita,
+                alergias_condiciones =
+                    EXCLUDED.alergias_condiciones,
+                notificaciones_correo =
+                    EXCLUDED.notificaciones_correo,
+                recordatorios_sms =
+                    EXCLUDED.recordatorios_sms,
+                promociones_especiales =
+                    EXCLUDED.promociones_especiales,
+                boletin_mensual =
+                    EXCLUDED.boletin_mensual,
+                idioma =
+                    EXCLUDED.idioma;
         ";
 
-                await using (var cmd = new NpgsqlCommand(
-                    sqlPreferencias, conn, transaction))
+                await using (var cmd =
+                    new NpgsqlCommand(
+                        sqlPreferencias,
+                        conn,
+                        transaction))
                 {
-                    cmd.Parameters.AddWithValue("@IdCliente", modelo.IdCliente);
+                    cmd.Parameters.AddWithValue(
+                        "@IdCliente",
+                        modelo.IdCliente);
 
-                    cmd.Parameters.AddWithValue("@TipoCabello",
-                        (object?)modelo.TipoCabello ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue(
+                        "@TipoCabello",
+                        (object?)modelo.TipoCabello
+                        ?? DBNull.Value);
 
-                    cmd.Parameters.AddWithValue("@IdEspecialistaPreferido",
-                        (object?)modelo.IdEspecialistaPreferido ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue(
+                        "@IdEspecialistaPreferido",
+                        (object?)modelo.IdEspecialistaPreferido
+                        ?? DBNull.Value);
 
-                    cmd.Parameters.AddWithValue("@IdSucursalFavorita",
-                        (object?)modelo.IdSucursalFavorita ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue(
+                        "@IdSucursalFavorita",
+                        (object?)modelo.IdSucursalFavorita
+                        ?? DBNull.Value);
 
-                    cmd.Parameters.AddWithValue("@AlergiasCondiciones",
-                        (object?)modelo.AlergiasCondiciones ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue(
+                        "@AlergiasCondiciones",
+                        (object?)modelo.AlergiasCondiciones
+                        ?? DBNull.Value);
 
                     cmd.Parameters.AddWithValue(
                         "@NotificacionesCorreo",
@@ -760,6 +868,11 @@ namespace Lavillemvc.Controllers
                     await cmd.ExecuteNonQueryAsync();
                 }
 
+
+                // ==========================================
+                // CONFIRMAR CAMBIOS
+                // ==========================================
+
                 await transaction.CommitAsync();
 
                 return RedirectToAction(nameof(PerfilCliente));
@@ -774,7 +887,6 @@ namespace Lavillemvc.Controllers
                 );
             }
         }
-
         public async Task<IActionResult> Promociones()
         {
             int idCliente = ObtenerIdClienteActual();
@@ -991,8 +1103,6 @@ namespace Lavillemvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ContratarMembresia(int idMembresia)
         {
-            int idCliente = ObtenerIdClienteActual();
-
             if (idMembresia <= 0)
             {
                 return BadRequest();
@@ -1001,12 +1111,303 @@ namespace Lavillemvc.Controllers
             await using var conn = _conexion.GetConnection();
             await conn.OpenAsync();
 
-            // Verificar que la membresía exista y esté activa
+            string sql = @"
+        SELECT
+            id_membresia,
+            nombre,
+            beneficios,
+            duracion,
+            precio_mensual
+        FROM public.membresia
+        WHERE id_membresia = @idMembresia
+          AND activo = true
+        LIMIT 1;
+    ";
+
+            int idMembresiaReal;
+            string nombre;
+            string? beneficios;
+            string? duracion;
+            decimal? precio;
+
+            await using (var cmd = new NpgsqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue(
+                    "@idMembresia",
+                    idMembresia);
+
+                await using var reader =
+                    await cmd.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                {
+                    return NotFound("La membresía no existe.");
+                }
+
+                idMembresiaReal =
+                    Convert.ToInt32(
+                        reader["id_membresia"]);
+
+                nombre =
+                    reader["nombre"]?.ToString()
+                    ?? "";
+
+                beneficios =
+                    reader["beneficios"] == DBNull.Value
+                        ? null
+                        : reader["beneficios"]?.ToString();
+
+                duracion =
+                    reader["duracion"] == DBNull.Value
+                        ? null
+                        : reader["duracion"]?.ToString();
+
+                precio =
+                    reader["precio_mensual"] == DBNull.Value
+                        ? null
+                        : Convert.ToDecimal(
+                            reader["precio_mensual"]);
+            }
+
+            if (!precio.HasValue || precio.Value <= 0)
+            {
+                return BadRequest(
+                    "El plan no tiene un precio válido.");
+            }
+
+            var plan = new ClientePromosMembresias.PlanMembresia
+            {
+                IdMembresia = idMembresiaReal,
+                Nombre = nombre,
+                Beneficios = beneficios,
+                Duracion = duracion,
+                Precio = precio
+            };
+
+            return View("PagoMembresia", plan);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PagoMembresia(int idMembresia)
+        {
+            if (idMembresia <= 0)
+            {
+                return BadRequest();
+            }
+
+            await using var conn = _conexion.GetConnection();
+            await conn.OpenAsync();
+
+            string sql = @"
+        SELECT
+            id_membresia,
+            nombre,
+            beneficios,
+            duracion,
+            precio_mensual
+        FROM public.membresia
+        WHERE id_membresia = @idMembresia
+          AND activo = true
+        LIMIT 1;
+    ";
+
+            await using var cmd =
+                new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue(
+                "@idMembresia",
+                idMembresia);
+
+            await using var reader =
+                await cmd.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+            {
+                return NotFound("La membresía no existe.");
+            }
+
+            var plan =
+                new ClientePromosMembresias.PlanMembresia
+                {
+                    IdMembresia =
+                        Convert.ToInt32(
+                            reader["id_membresia"]),
+
+                    Nombre =
+                        reader["nombre"]?.ToString()
+                        ?? "",
+
+                    Beneficios =
+                        reader["beneficios"] == DBNull.Value
+                            ? null
+                            : reader["beneficios"]?.ToString(),
+
+                    Duracion =
+                        reader["duracion"] == DBNull.Value
+                            ? null
+                            : reader["duracion"]?.ToString(),
+
+                    Precio =
+                        reader["precio_mensual"] == DBNull.Value
+                            ? null
+                            : Convert.ToDecimal(
+                                reader["precio_mensual"])
+                };
+
+            return View(plan);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcesarPagoMembresia(
+    int idMembresia,
+    string metodoPago,
+    bool AceptaTerminos,
+    bool AutorizaCobro,
+    string? numeroTarjeta = null,
+    string? nombreTitular = null,
+    string? vencimiento = null,
+    string? cvv = null)
+        {
+            int idCliente = ObtenerIdClienteActual();
+
+            if (idMembresia <= 0)
+            {
+                return BadRequest();
+            }
+
+            // ==========================================
+            // VALIDAR TÉRMINOS
+            // ==========================================
+
+            if (!AceptaTerminos)
+            {
+                TempData["ErrorPagoMembresia"] =
+                    "Debes aceptar los términos y condiciones.";
+
+                return RedirectToAction(
+                    nameof(PagoMembresia),
+                    new { idMembresia });
+            }
+
+
+            // ==========================================
+            // VALIDAR AUTORIZACIÓN
+            // ==========================================
+
+            if (!AutorizaCobro)
+            {
+                TempData["ErrorPagoMembresia"] =
+                    "Debes autorizar el cobro.";
+
+                return RedirectToAction(
+                    nameof(PagoMembresia),
+                    new { idMembresia });
+            }
+
+
+            // ==========================================
+            // MÉTODO DE PAGO
+            // ==========================================
+
+            string[] metodosPermitidos =
+            {
+        "Tarjeta",
+        "Pago Móvil",
+        "Transferencia Bancaria"
+    };
+
+            if (string.IsNullOrWhiteSpace(metodoPago) ||
+                !metodosPermitidos.Contains(metodoPago))
+            {
+                TempData["ErrorPagoMembresia"] =
+                    "Selecciona un método de pago válido.";
+
+                return RedirectToAction(
+                    nameof(PagoMembresia),
+                    new { idMembresia });
+            }
+
+
+            // ==========================================
+            // VALIDAR TARJETA
+            // ==========================================
+
+            if (metodoPago == "Tarjeta")
+            {
+                string numeroLimpio =
+                    (numeroTarjeta ?? "")
+                        .Replace(" ", "")
+                        .Trim();
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(
+                        numeroLimpio,
+                        @"^\d{13,19}$"))
+                {
+                    TempData["ErrorPagoMembresia"] =
+                        "El número de tarjeta no es válido.";
+
+                    return RedirectToAction(
+                        nameof(PagoMembresia),
+                        new { idMembresia });
+                }
+
+
+                if (string.IsNullOrWhiteSpace(nombreTitular) ||
+                    nombreTitular.Trim().Length < 3)
+                {
+                    TempData["ErrorPagoMembresia"] =
+                        "Ingresa el nombre del titular.";
+
+                    return RedirectToAction(
+                        nameof(PagoMembresia),
+                        new { idMembresia });
+                }
+
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(
+                        vencimiento ?? "",
+                        @"^(0[1-9]|1[0-2])\/\d{2}$"))
+                {
+                    TempData["ErrorPagoMembresia"] =
+                        "La fecha debe tener el formato MM/AA.";
+
+                    return RedirectToAction(
+                        nameof(PagoMembresia),
+                        new { idMembresia });
+                }
+
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(
+                        cvv ?? "",
+                        @"^\d{3,4}$"))
+                {
+                    TempData["ErrorPagoMembresia"] =
+                        "El CVV debe tener 3 o 4 dígitos.";
+
+                    return RedirectToAction(
+                        nameof(PagoMembresia),
+                        new { idMembresia });
+                }
+            }
+
+
+            await using var conn =
+                _conexion.GetConnection();
+
+            await conn.OpenAsync();
+
+
+            // ==========================================
+            // OBTENER PLAN Y PRECIO REAL
+            // ==========================================
+
             string sqlMembresia = @"
         SELECT
             id_membresia,
             nombre,
-            duracion
+            duracion,
+            precio_mensual
         FROM public.membresia
         WHERE id_membresia = @idMembresia
           AND activo = true
@@ -1015,55 +1416,143 @@ namespace Lavillemvc.Controllers
 
             int idMembresiaReal;
             string duracion;
+            decimal precio;
 
-            await using (var cmdMembresia =
-                new NpgsqlCommand(sqlMembresia, conn))
+            await using (var cmd =
+                new NpgsqlCommand(
+                    sqlMembresia,
+                    conn))
             {
-                cmdMembresia.Parameters.AddWithValue(
+                cmd.Parameters.AddWithValue(
                     "@idMembresia",
                     idMembresia);
 
                 await using var reader =
-                    await cmdMembresia.ExecuteReaderAsync();
+                    await cmd.ExecuteReaderAsync();
 
                 if (!await reader.ReadAsync())
                 {
-                    return NotFound();
+                    return NotFound(
+                        "La membresía no existe.");
                 }
 
                 idMembresiaReal =
-                    Convert.ToInt32(reader["id_membresia"]);
+                    Convert.ToInt32(
+                        reader["id_membresia"]);
 
                 duracion =
                     reader["duracion"]?.ToString()
                     ?? "1 mes";
+
+                precio =
+                    Convert.ToDecimal(
+                        reader["precio_mensual"]);
             }
 
-            // Determinar duración
+
+            if (precio <= 0)
+            {
+                return BadRequest(
+                    "El precio de la membresía no es válido.");
+            }
+
+
+            // ==========================================
+            // CALCULAR DURACIÓN
+            // ==========================================
+
             int meses = 1;
 
-            if (duracion.ToLower().Contains("3"))
-            {
-                meses = 3;
-            }
-            else if (duracion.ToLower().Contains("6"))
-            {
-                meses = 6;
-            }
-            else if (duracion.ToLower().Contains("12"))
+            string duracionMinuscula =
+                duracion.ToLowerInvariant();
+
+            if (duracionMinuscula.Contains("12"))
             {
                 meses = 12;
             }
+            else if (duracionMinuscula.Contains("6"))
+            {
+                meses = 6;
+            }
+            else if (duracionMinuscula.Contains("3"))
+            {
+                meses = 3;
+            }
 
-            DateTime fechaInicio = DateTime.Now;
-            DateTime fechaFin = fechaInicio.AddMonths(meses);
+
+            DateTime fechaInicio =
+    DateTime.UtcNow;
+
+            DateTime fechaFin =
+                fechaInicio.AddMonths(meses);
+
+
+            // ==========================================
+            // TRANSACCIÓN
+            // ==========================================
 
             await using var transaction =
                 await conn.BeginTransactionAsync();
 
             try
             {
-                // Desactivar membresías anteriores
+                // ==========================================
+                // REGISTRAR PAGO
+                // ==========================================
+
+                string sqlPago = @"
+            INSERT INTO public.pago_membresia
+            (
+                id_cliente,
+                id_membresia,
+                monto,
+                moneda,
+                metodo_pago,
+                estado_pago,
+                fecha_pago
+            )
+            VALUES
+            (
+                @idCliente,
+                @idMembresia,
+                @monto,
+                'USD',
+                @metodoPago,
+                'Pagado',
+                CURRENT_TIMESTAMP
+            );
+        ";
+
+                await using (var cmdPago =
+                    new NpgsqlCommand(
+                        sqlPago,
+                        conn,
+                        transaction))
+                {
+                    cmdPago.Parameters.AddWithValue(
+                        "@idCliente",
+                        idCliente);
+
+                    cmdPago.Parameters.AddWithValue(
+                        "@idMembresia",
+                        idMembresiaReal);
+
+                    cmdPago.Parameters.AddWithValue(
+                        "@monto",
+                        precio);
+
+                    cmdPago.Parameters.AddWithValue(
+                        "@metodoPago",
+                        metodoPago);
+
+                    await cmdPago.ExecuteNonQueryAsync();
+                }
+
+
+                // ==========================================
+                // DESACTIVAR MEMBRESÍA ANTERIOR
+                // ==========================================
+
                 string sqlDesactivar = @"
             UPDATE public.identificador
             SET estado = 'Inactivo'
@@ -1084,7 +1573,11 @@ namespace Lavillemvc.Controllers
                     await cmdDesactivar.ExecuteNonQueryAsync();
                 }
 
-                // Registrar nueva membresía
+
+                // ==========================================
+                // ACTIVAR NUEVA MEMBRESÍA
+                // ==========================================
+
                 string sqlInsertar = @"
             INSERT INTO public.identificador
             (
@@ -1129,15 +1622,27 @@ namespace Lavillemvc.Controllers
                     await cmdInsertar.ExecuteNonQueryAsync();
                 }
 
+
+                // ==========================================
+                // CONFIRMAR TODO
+                // ==========================================
+
                 await transaction.CommitAsync();
 
-                return RedirectToAction(nameof(Promociones));
+                return RedirectToAction(
+                    nameof(Promociones));
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
 
-                return RedirectToAction(nameof(Promociones));
+                TempData["ErrorPagoMembresia"] =
+                    "No se pudo procesar el pago: "
+                    + ex.Message;
+
+                return RedirectToAction(
+                    nameof(PagoMembresia),
+                    new { idMembresia });
             }
         }
 
@@ -1782,6 +2287,364 @@ namespace Lavillemvc.Controllers
 
                 return await RecargarReserva(modelo);
             }
+        }
+
+        // ==========================================
+        // MODIFICAR CITA - POST
+        // ==========================================
+        [HttpGet]
+        public async Task<IActionResult> ModificarCita(int idCita)
+        {
+            if (idCita <= 0)
+            {
+                return BadRequest();
+            }
+
+            int idCliente = ObtenerIdClienteActual();
+
+            await using var conn = _conexion.GetConnection();
+            await conn.OpenAsync();
+
+            string sql = @"
+        SELECT
+            id_cita,
+            id_cliente,
+            id_servicio,
+            id_sucursal,
+            fecha_cita,
+            hora_cita
+        FROM public.cita
+        WHERE id_cita = @idCita
+          AND id_cliente = @idCliente
+        LIMIT 1;
+    ";
+
+            await using var cmd =
+                new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue(
+                "@idCita",
+                idCita);
+
+            cmd.Parameters.AddWithValue(
+                "@idCliente",
+                idCliente);
+
+            await using var reader =
+                await cmd.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+            {
+                return NotFound("No se encontró la cita.");
+            }
+
+            DateTime? fecha = null;
+
+            if (reader["fecha_cita"] != DBNull.Value)
+            {
+                if (reader["fecha_cita"] is DateOnly fechaDateOnly)
+                {
+                    fecha = fechaDateOnly.ToDateTime(
+                        TimeOnly.MinValue);
+                }
+                else
+                {
+                    fecha = Convert.ToDateTime(
+                        reader["fecha_cita"]);
+                }
+            }
+
+            TimeSpan? hora = null;
+
+            if (reader["hora_cita"] != DBNull.Value)
+            {
+                if (reader["hora_cita"] is TimeOnly horaTimeOnly)
+                {
+                    hora = horaTimeOnly.ToTimeSpan();
+                }
+                else if (reader["hora_cita"] is TimeSpan horaTimeSpan)
+                {
+                    hora = horaTimeSpan;
+                }
+                else
+                {
+                    hora = TimeSpan.Parse(
+                        reader["hora_cita"].ToString()!);
+                }
+            }
+
+            var modelo = new ReservarCita
+            {
+                IdCita = Convert.ToInt32(
+                    reader["id_cita"]),
+
+                IdCliente = Convert.ToInt32(
+                    reader["id_cliente"]),
+
+                IdServicio =
+                    reader["id_servicio"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(
+                            reader["id_servicio"]),
+
+                IdSucursal =
+                    reader["id_sucursal"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(
+                            reader["id_sucursal"]),
+
+                FechaCita = fecha,
+                HoraCita = hora
+            };
+
+            return View(modelo);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ModificarCita(
+            ReservarCita modelo)
+        {
+            if (modelo.IdCita <= 0)
+            {
+                return BadRequest();
+            }
+
+            int idCliente = ObtenerIdClienteActual();
+
+            if (!modelo.FechaCita.HasValue ||
+                !modelo.HoraCita.HasValue)
+            {
+                ViewBag.Mensaje =
+                    "Debes seleccionar una fecha y una hora.";
+
+                return View(modelo);
+            }
+
+            DateTime fecha =
+                modelo.FechaCita.Value.Date;
+
+            TimeSpan hora =
+                modelo.HoraCita.Value;
+
+            if (fecha < DateTime.Today)
+            {
+                ViewBag.Mensaje =
+                    "No puedes seleccionar una fecha pasada.";
+
+                return View(modelo);
+            }
+
+            await using var conn =
+                _conexion.GetConnection();
+
+            await conn.OpenAsync();
+
+            // ==========================================
+            // OBTENER ESPECIALISTA DE LA CITA
+            // ==========================================
+
+            string sqlCita = @"
+        SELECT
+            c.id_sucursal,
+            ec.id_especialista
+        FROM public.cita c
+        INNER JOIN public.especialistas_en_cita ec
+            ON ec.id_cita = c.id_cita
+        WHERE c.id_cita = @idCita
+          AND c.id_cliente = @idCliente
+        LIMIT 1;
+    ";
+
+            int idEspecialista;
+            int idSucursal;
+
+            await using (var cmdCita =
+                new NpgsqlCommand(sqlCita, conn))
+            {
+                cmdCita.Parameters.AddWithValue(
+                    "@idCita",
+                    modelo.IdCita);
+
+                cmdCita.Parameters.AddWithValue(
+                    "@idCliente",
+                    idCliente);
+
+                await using var reader =
+                    await cmdCita.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                {
+                    return NotFound(
+                        "La cita no pertenece al cliente actual.");
+                }
+
+                idSucursal =
+                    Convert.ToInt32(
+                        reader["id_sucursal"]);
+
+                idEspecialista =
+                    Convert.ToInt32(
+                        reader["id_especialista"]);
+            }
+
+            // ==========================================
+            // OBTENER HORARIO DEL ESPECIALISTA
+            // ==========================================
+
+            string sqlHorario = @"
+        SELECT
+            ""HorarioEspecialista""
+        FROM public.vw_reservar_cita
+        WHERE ""IdEspecialista"" = @idEspecialista
+          AND ""IdSucursal"" = @idSucursal
+        LIMIT 1;
+    ";
+
+            string horarioEspecialista = "";
+
+            await using (var cmdHorario =
+                new NpgsqlCommand(sqlHorario, conn))
+            {
+                cmdHorario.Parameters.AddWithValue(
+                    "@idEspecialista",
+                    idEspecialista);
+
+                cmdHorario.Parameters.AddWithValue(
+                    "@idSucursal",
+                    idSucursal);
+
+                object? resultado =
+                    await cmdHorario.ExecuteScalarAsync();
+
+                horarioEspecialista =
+                    resultado?.ToString() ?? "";
+            }
+
+            // ==========================================
+            // COMPROBAR DÍA DE TRABAJO
+            // ==========================================
+
+            if (!EspecialistaTrabajaEseDia(
+                horarioEspecialista,
+                fecha.DayOfWeek))
+            {
+                ViewBag.Mensaje =
+                    "El especialista no trabaja ese día.";
+
+                return View(modelo);
+            }
+
+            // ==========================================
+            // COMPROBAR RANGO DE HORARIO
+            // ==========================================
+
+            if (!ObtenerRangoHorario(
+                horarioEspecialista,
+                out TimeSpan inicio,
+                out TimeSpan fin))
+            {
+                ViewBag.Mensaje =
+                    "No se pudo determinar el horario del especialista.";
+
+                return View(modelo);
+            }
+
+            if (hora < inicio || hora >= fin)
+            {
+                ViewBag.Mensaje =
+                    "La hora seleccionada está fuera del horario del especialista.";
+
+                return View(modelo);
+            }
+
+            // ==========================================
+            // COMPROBAR SI LA HORA ESTÁ OCUPADA
+            // ==========================================
+
+            string sqlOcupada = @"
+        SELECT COUNT(*)
+        FROM public.cita c
+        INNER JOIN public.especialistas_en_cita ec
+            ON ec.id_cita = c.id_cita
+        WHERE ec.id_especialista = @idEspecialista
+          AND c.fecha_cita = @fecha
+          AND c.hora_cita = @hora
+          AND c.id_cita <> @idCita
+          AND LOWER(COALESCE(c.estado, '')) NOT IN
+              ('cancelada', 'cancelado');
+    ";
+
+            await using (var cmdOcupada =
+                new NpgsqlCommand(sqlOcupada, conn))
+            {
+                cmdOcupada.Parameters.AddWithValue(
+                    "@idEspecialista",
+                    idEspecialista);
+
+                cmdOcupada.Parameters.AddWithValue(
+                    "@fecha",
+                    fecha);
+
+                cmdOcupada.Parameters.AddWithValue(
+                    "@hora",
+                    hora);
+
+                cmdOcupada.Parameters.AddWithValue(
+                    "@idCita",
+                    modelo.IdCita);
+
+                int ocupada =
+                    Convert.ToInt32(
+                        await cmdOcupada.ExecuteScalarAsync());
+
+                if (ocupada > 0)
+                {
+                    ViewBag.Mensaje =
+                        "Esa hora ya está ocupada. Selecciona otra.";
+
+                    return View(modelo);
+                }
+            }
+
+            // ==========================================
+            // ACTUALIZAR CITA
+            // ==========================================
+
+            string sqlActualizar = @"
+        UPDATE public.cita
+        SET
+            fecha_cita = @fecha,
+            hora_cita = @hora
+        WHERE id_cita = @idCita
+          AND id_cliente = @idCliente;
+    ";
+
+            await using (var cmdActualizar =
+                new NpgsqlCommand(
+                    sqlActualizar,
+                    conn))
+            {
+                cmdActualizar.Parameters.AddWithValue(
+                    "@fecha",
+                    fecha);
+
+                cmdActualizar.Parameters.AddWithValue(
+                    "@hora",
+                    hora);
+
+                cmdActualizar.Parameters.AddWithValue(
+                    "@idCita",
+                    modelo.IdCita);
+
+                cmdActualizar.Parameters.AddWithValue(
+                    "@idCliente",
+                    idCliente);
+
+                await cmdActualizar.ExecuteNonQueryAsync();
+            }
+
+            return RedirectToAction(
+                nameof(MisReservas));
         }
 
 
@@ -2504,6 +3367,9 @@ ReservarCita modelo)
                 await cmdActualizarPuntos.ExecuteNonQueryAsync();
 
 
+
+
+
                 // =====================================
                 // CONFIRMAR CITA
                 // =====================================
@@ -2543,4 +3409,7 @@ ReservarCita modelo)
             }
         }
     }
+
+
 }
+

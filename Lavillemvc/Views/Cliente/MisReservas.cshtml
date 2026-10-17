@@ -9,6 +9,10 @@
 
 <div class="reservas-page">
 
+    <!-- ================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================= -->
+
     <div class="reservas-header">
 
         <div>
@@ -54,106 +58,146 @@
 
             @foreach (var reserva in Model)
             {
-    <div class="reserva-card">
+                bool esProxima =
+                    reserva.FechaCita >= hoy &&
+                    reserva.EstadoReserva != null &&
+                    (
+                        reserva.EstadoReserva.Equals(
+                            "Confirmada",
+                            StringComparison.OrdinalIgnoreCase)
 
-        <div class="reserva-card-header">
+                        ||
 
-            <div class="reserva-servicio">
+                        reserva.EstadoReserva.Equals(
+                            "Pendiente",
+                            StringComparison.OrdinalIgnoreCase)
+                    );
 
-                <span class="reserva-icono">
-                    ✂
-                </span>
+                if (esProxima)
+                {
+                    <div class="reserva-card">
 
-                <div>
+                        <!-- CABECERA DE LA RESERVA -->
 
-                    <h3>
-                        @reserva.ServicioPrincipal
-                    </h3>
+                        <div class="reserva-card-header">
 
-                    <p>
-                        Con
-                        @(reserva.NombreEspecialista
-                            ?? "Especialista no especificado")
-                    </p>
+                            <div class="reserva-servicio">
 
-                </div>
+                                <span class="reserva-icono">
+                                    ✂
+                                </span>
 
-            </div>
+                                <div>
 
-            @if (reserva.EstadoReserva.Equals(
-                "Confirmada",
-                StringComparison.OrdinalIgnoreCase))
-            {
-                <span class="estado confirmado">
-                    Confirmada
-                </span>
+                                    <h3>
+                                        @reserva.ServicioPrincipal
+                                    </h3>
+
+                                    <p>
+                                        Con
+                                        @(reserva.NombreEspecialista
+                                            ?? "Especialista no especificado")
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ESTADO -->
+                            @if (string.Equals(
+                                                            reserva.EstadoReserva,
+                                                            "Confirmada",
+                                                            StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="estado confirmado">
+                                    Confirmada
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="estado pendiente">
+                                    Pendiente
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <!-- INFORMACIÓN -->
+
+                        <div class="reserva-info">
+
+                            <div>
+
+                                <small>
+                                    FECHA Y HORA
+                                </small>
+
+                                <strong>
+                                    @reserva.FechaCita.ToString("dd/MM/yyyy"),
+                                    @reserva.HoraCita.ToString("HH:mm")
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <small>
+                                    SUCURSAL
+                                </small>
+
+                                <strong>
+                                    @(reserva.NombreSucursal
+                                        ?? "Sucursal no especificada")
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- ACCIONES -->
+                        <!-- ================================= -->
+
+                        <div class="reserva-acciones">
+
+                            <!-- MODIFICAR -->
+
+                            <a asp-controller="Cliente"
+                               asp-action="ModificarCita"
+                               asp-route-idCita="@reserva.IdCita"
+                               class="btn-modificar">
+                                Modificar Cita
+                            </a>
+
+
+                            <!-- CANCELAR -->
+
+                            <form asp-controller="Cliente"
+                                  asp-action="CancelarReserva"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="idCita"
+                                       value="@reserva.IdCita" />
+
+                                <button type="submit"
+                                        class="btn-cancelar"
+                                        onclick="return confirm('¿Seguro que deseas cancelar esta cita?');">
+                                    Cancelar
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+                }
+
             }
-            else
-            {
-                <span class="estado pendiente">
-                    Pendiente
-                </span>
-            }
-
-        </div>
-
-
-        <div class="reserva-info">
-
-            <div>
-
-                <small>
-                    FECHA Y HORA
-                </small>
-
-                <strong>
-                    @reserva.FechaCita.ToString("dd/MM/yyyy"),
-                    @reserva.HoraCita.ToString("HH:mm")
-                </strong>
-
-            </div>
-
-
-            <div>
-
-                <small>
-                    SUCURSAL
-                </small>
-
-                <strong>
-                    @(reserva.NombreSucursal
-                        ?? "Sucursal no especificada")
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="reserva-acciones">
-
-            <form asp-controller="Cliente"
-                  asp-action="CancelarReserva"
-                  method="post">
-
-                <input type="hidden"
-                       name="idCita"
-                       value="@reserva.IdCita" />
-
-                <button type="submit"
-                        class="btn-cancelar"
-                        onclick="return confirm('¿Seguro que deseas cancelar esta cita?');">
-
-                    Cancelar
-
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-}
 
         </div>
 
@@ -174,16 +218,23 @@
             {
                 bool esHistorial =
                     reserva.FechaCita < hoy
+
                     ||
+
                     reserva.EstadoReserva == null
+
                     ||
+
                     reserva.EstadoReserva.Equals(
                         "Cancelada",
                         StringComparison.OrdinalIgnoreCase)
+
                     ||
+
                     reserva.EstadoReserva.Equals(
                         "Completada",
                         StringComparison.OrdinalIgnoreCase);
+
 
                 if (esHistorial)
                 {
@@ -234,6 +285,7 @@
 
                     </div>
                 }
+
             }
 
         </div>

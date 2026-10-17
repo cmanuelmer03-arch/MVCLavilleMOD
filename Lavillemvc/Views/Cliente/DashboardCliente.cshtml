@@ -110,75 +110,10 @@
 
                     </div>
 
-
-                    <hr />
-
-
-                    <div class="botones-cita">
-
-                        <a asp-controller="Cliente"
-                           asp-action="ReservarCita"
-                           asp-route-especialista="@Model.EspecialistaProximaCita"
-                           asp-route-servicio="@Model.ProximoServicio"
-                           asp-route-sucursal="@Model.SucursalProximaCita">
-
-                            Modificar Cita
-
-                        </a>
-
-                        <button type="button" class="btn-light">
-                            Cancelar Cita
-                        </button>
-
-                    </div>
-
                 </div>
             }
 
 
-            <div class="card historial-card">
-
-                <h2>
-                    Historial Reciente
-                </h2>
-
-
-                <div class="historial-lista">
-
-                    @foreach (var cita in Model.HistorialReciente)
-                    {
-                        <div class="historial-item">
-
-                            <div class="historial-servicio">
-
-                                <strong>
-                                    @cita.Servicio
-                                </strong>
-
-                                <span>
-                                    Con @cita.Especialista
-                                </span>
-
-                            </div>
-
-                            <span class="historial-fecha">
-
-                                @cita.FechaCita.ToString("d 'de' MMMM 'de' yyyy")
-
-                            </span>
-
-                            <strong class="historial-precio">
-
-                                $@cita.PrecioServicio.ToString("0.00")
-
-                            </strong>
-
-                        </div>
-                    }
-
-                </div>
-
-            </div>
 
 
             <h2 class="titulo-promociones">
@@ -188,41 +123,42 @@
 
             <div class="promociones">
 
-    @for (int i = 0; i < Model.Promociones.Count; i++)
-    {
-        var promocion = Model.Promociones[i];
-
-        <div class="promo @(i % 2 == 0 ? "promo-1" : "promo-2")">
-
-            <div class="promo-contenido">
-
-                @if (promocion.Descuento.HasValue)
+                @for (int i = 0; i < Model.Promociones.Count; i++)
                 {
-                    <span class="promo-descuento">
-                        @promocion.Descuento.Value% OFF
-                    </span>
+                    var promocion = Model.Promociones[i];
+
+                    <div class="promo @(i % 2 == 0 ? "promo-1" : "promo-2")">
+
+                        <div class="promo-contenido">
+
+                            @if (promocion.Descuento.HasValue)
+                            {
+                                <span class="promo-descuento">
+                                    @promocion.Descuento.Value% OFF
+                                </span>
+                            }
+
+                            <h3>
+                                @promocion.NombrePromocion
+                            </h3>
+
+                            <p>
+                                @promocion.Descripcion
+                            </p>
+
+                            <button type="button" class="btn-promo">
+                                APROVECHAR →
+                            </button>
+
+                        </div>
+
+                    </div>
                 }
 
-                <h3>
-                    @promocion.NombrePromocion
-                </h3>
-
-                <p>
-                    @promocion.Descripcion
-                </p>
-
-                <button type="button" class="btn-promo">
-                    APROVECHAR →
-                </button>
-
             </div>
 
         </div>
-    }
 
-            </div>
-
-        </div>
 
         <div class="columna-derecha">
 
